@@ -6,23 +6,21 @@ import SharedSensorData.*;
 
 public class EmotionEngine implements SensorObserver,SensorFactory {
 	private ArrayList<SensorListener> sensorListeners;
-	
-	public EmotionEngine(){
-		
-	}
-	
+	private ArrayList<>
 	
 	public static EmotionEngine sharedInstance(){
 		return null;
 	}
 	
 	
-	
-	
-	//SENSOR 
-	public void dataArrived(SensorListener listener){
-		
+
+
+	@Override
+	public void createSensorListener(int portNumber, 
+			Class<SensorListener> sensorType) {
 	}
+	
+	
 	
 	
 	
