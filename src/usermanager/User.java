@@ -19,14 +19,6 @@ public class User implements Serializable {
 		this.password = password;
 		enabledSensors = new HashMap<String, Boolean>();
 	}
-	
-	/**
-	 * Alternative constructor that construct from a serialized User object
-	 * @param serial
-	 */
-	public User(byte[] serial) {
-		
-	}
 
 	/**
 	 * Checks if the given sensor exists
@@ -38,6 +30,10 @@ public class User implements Serializable {
 		if (!enabledSensors.containsKey(sensorID))
 			return false;
 		return enabledSensors.get(sensorID);
+	}
+	
+	public String getName() {
+		return this.userName;
 	}
 
 	/**
@@ -69,6 +65,21 @@ public class User implements Serializable {
 	public boolean checkPassword(String password) {
 		return this.password.equals(password);
 	}
-
+	
+	/**
+	 * Changes the password
+	 * @param oldPassword
+	 * @param newPassword
+	 * @return
+	 */
+	public boolean changePassword(String oldPassword, String newPassword){
+		if(checkPassword(oldPassword)){
+			this.password = newPassword;
+			return true;
+		}
+		
+		return false;
+	}
+	
 
 }
