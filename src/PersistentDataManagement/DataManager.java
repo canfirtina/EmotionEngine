@@ -15,7 +15,7 @@ public class DataManager {
     private DataManager() {
     }
 
-    public void saveSample(String username, int gameId, Sample sample) {
+    public void saveSample(int gameId, Sample sample) {
 
     }
 
@@ -31,4 +31,14 @@ public class DataManager {
     public Object[] loadUsersData() {
         return null;
     }
+    
+    public void setCurrentUser(String userName){
+    	
+    }
+    
+    public String getCurrentUser(){
+    	throw new RuntimeException("get current user from file and return");
+    	//return "asd";
+    }
+    
 }
