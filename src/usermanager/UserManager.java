@@ -24,6 +24,15 @@ public class UserManager implements Serializable {
 		users = new ArrayList<User>(Arrays.asList((User[]) DataManager.getInstance().loadUsersData()));
 		currentUser = DataManager.getInstance().getCurrentUser();
 	}
+	
+	
+	public boolean login(String userName, String password){
+		return true;
+	}
+	
+	public void logout(){
+		currentUser = null;
+	}
 
 	/**
 	 * Returns a list of users
