@@ -1,14 +1,17 @@
 package EmotionLearner;
 import java.util.ArrayList;
 
+import PersistentDataManagement.DataManager;
+import PersistentDataManagement.DataManagerObserver;
 import SensorManager.*;
 import SharedSensorData.*;
 
-public class EmotionEngine implements SensorObserver,SensorFactory {
+public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerObserver {
 	private ArrayList<SensorListener> sensorListeners;
 	private ArrayList<FeatureExtractor> featureExtractors;
+	private DataManager persistentDataManager;
 	
-	public static EmotionEngine sharedInstance(){
+	public static EmotionEngine sharedInstance(DataManager persistentDataManager){
 		return null;
 	}
 	
@@ -41,6 +44,11 @@ public class EmotionEngine implements SensorObserver,SensorFactory {
 
 	@Override
 	public void connectionEstablished(SensorListener sensor) {
+		
+	}
+
+	@Override
+	public void notify(DataManager manager) {
 		
 	}
 	
