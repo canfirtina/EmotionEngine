@@ -6,18 +6,43 @@ import SharedSensorData.*;
 
 public class EmotionEngine implements SensorObserver,SensorFactory {
 	private ArrayList<SensorListener> sensorListeners;
-	private ArrayList<>
+	private ArrayList<FeatureExtractor> featureExtractors;
 	
 	public static EmotionEngine sharedInstance(){
 		return null;
 	}
 	
+	public boolean openSession(){
+		return true;
+	}
 	
-
-
+	public boolean closeSession(){
+		return true;
+	}
+	
+	//SENSOR FACTORY
 	@Override
 	public void createSensorListener(int portNumber, 
 			Class<SensorListener> sensorType) {
+	}
+	
+	//SENSOR OBSERVER
+	@Override
+	public void dataArrived(SensorListener sensor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void connectionError(SensorListener sensor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void connectionEstablished(SensorListener sensor) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	
