@@ -2,6 +2,11 @@ package PersistentDataManagement;
 
 import SharedSensorData.Sample;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+
 /**
  * Created by Mustafa on 13.2.2015.
  */
@@ -12,14 +17,17 @@ public class DataManager {
         return ourInstance;
     }
 
+    private String currentUser;
+    private int gameId;
+
     private DataManager() {
     }
 
-    public void saveSample(int gameId, Sample sample) {
+    public void saveSample( Sample sample) {
 
     }
 
-    public Sample[] getSamples(String username, int gameId) {
+    public Sample[] getGameData( int gameId) {
 
         return new Sample[0];
     }
@@ -40,5 +48,13 @@ public class DataManager {
     	throw new RuntimeException("get current user from file and return");
     	//return "asd";
     }
-    
+
+    public void setCurrentGame(int gameId){
+
+    }
+
+    public String getCurrentGame(){
+        throw new RuntimeException("get current game from file and return");
+        //return "asd";
+    }
 }

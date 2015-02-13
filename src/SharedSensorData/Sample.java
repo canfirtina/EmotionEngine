@@ -1,9 +1,11 @@
 package SharedSensorData;
 
+import java.io.Serializable;
+
 /**
  * Created by Mustafa on 13.2.2015.
  */
-public class Sample {
+public class Sample implements Serializable {
     private Label label;
     private FeatureWindow[] sensorData;
 
