@@ -1,13 +1,9 @@
 package usermanager;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class UserManager {
+public class UserManager implements Serializable{
 	private static UserManager instance = null;
 
 	private ArrayList<User> users;
@@ -19,8 +15,9 @@ public class UserManager {
 
 	public static UserManager getInstance() {
 		if (instance == null) {
-			throw new RuntimeException("Get byte [] of the userManager and put it in instance");
+			throw new RuntimeException("Persistent data manager'dan al objeyi. eger ordan gelmiyorsa yeni yarat");
 		}
+		
 		return instance;
 	}
 
@@ -29,28 +26,33 @@ public class UserManager {
 	 * 
 	 * @return
 	 */
-	public ArrayList<User> getUsers() {
+	public ArrayList<User> getAllUsers() {
 		return users;
+	}
+	
+	public User getUser(String userName){
+		for(User usr : users){
+			if(usr.getName().equals(userName))
+				return usr;
+		}
+		
+		return null;
 	}
 
 	/**
-	 * Called after a change is made to any user. Sends user
+	 * Called after a change is made to any user. Saves the 
 	 */
 	public void saveChanges() {
-
+		throw new RuntimeException("Persistent data manager'a söyle kaydetsin");
 	}
-
-	public static byte[] serialize(Object obj) throws IOException {
-		ByteArrayOutputStream b = new ByteArrayOutputStream();
-		ObjectOutputStream o = new ObjectOutputStream(b);
-		o.writeObject(obj);
-		return b.toByteArray();
-	}
-
-	public static Object deserialize(byte[] bytes) throws IOException,
-			ClassNotFoundException {
-		ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-		ObjectInputStream o = new ObjectInputStream(b);
-		return o.readObject();
+	
+	/**
+	 * Changes the current user
+	 * @param userName
+	 * @param password
+	 */
+	public void changeUser(String userName, String password) {
+		if(getUser(userName).checkPassword(password))
+			currentUser=getUser(userName);
 	}
 }
