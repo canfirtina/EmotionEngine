@@ -21,6 +21,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory {
 		return true;
 	}
 	
+	
 	//SENSOR FACTORY
 	@Override
 	public void createSensorListener(int portNumber, 
@@ -42,9 +43,5 @@ public class EmotionEngine implements SensorObserver,SensorFactory {
 	public void connectionEstablished(SensorListener sensor) {
 		
 	}
-	
-	
-	
-	
 	
 }
