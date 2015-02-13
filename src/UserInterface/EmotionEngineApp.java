@@ -1,5 +1,6 @@
+package UserInterface;
 
-public class App {
+public class EmotionEngineApp {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
