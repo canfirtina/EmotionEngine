@@ -10,4 +10,6 @@ public class UserData {
     private String name;
     private File storagePath;
 
+    private GameData games[];
+
 }
