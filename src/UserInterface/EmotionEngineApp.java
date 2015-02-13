@@ -9,15 +9,34 @@ import javax.swing.JPanel;
 
 
 public class EmotionEngineApp {
-
+	
+	/**
+	 * Frame of Emotion Engine. All UI is built upon it.
+	 */
 	public static JFrame mainFrame;
+	
+	/**
+	 * This panel is modified as the screen changes.
+	 * Shows currently what is on the screen.
+	 */
 	private static JPanel mainPanel;
+	
+	/**
+	 * View Controller that handles the connection between model (Emotion Engine) and UI
+	 */
 	public static ViewController initialViewController;
 	
+	/**
+	 * Initializes the initialViewController.
+	 * @param viewController is used as initialViewController
+	 */
 	public static void setInitialViewController( ViewController viewController){		
 		initialViewController = viewController;
 	}
 	
+	/**
+	 * Initializes the current screen and shows it
+	 */
 	public static void loadWindow() {
 
 		// Initialize frame
@@ -43,6 +62,9 @@ public class EmotionEngineApp {
 		frame.repaint();
 	}
 	
+	/**
+	 * Runs Emotion Engine
+	 */
 	public static void main(String[] args) {
 		
 		loadWindow();

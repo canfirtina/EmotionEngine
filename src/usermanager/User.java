@@ -1,4 +1,4 @@
-package usermanager;
+package userManager;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -11,7 +11,7 @@ public class User implements Serializable {
 	/**
 	 * Constructor for User class that takes userName and password
 	 * 
-	 * @param userName
+	 * @param userName 
 	 * @param password
 	 */
 	public User(String userName, String password) {
@@ -38,7 +38,7 @@ public class User implements Serializable {
 
 	/**
 	 * Enables the given sensor. In the case that sensor does not exist, adds it
-	 * to
+	 * to enabled sensors
 	 * 
 	 * @param sensorID
 	 */
@@ -80,6 +80,4 @@ public class User implements Serializable {
 		
 		return false;
 	}
-	
-
 }
