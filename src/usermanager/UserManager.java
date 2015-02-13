@@ -1,27 +1,28 @@
-package usermanager;
+package userManager;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-public class UserManager {
+import PersistentDataManagement.DataManager;
+
+public class UserManager implements Serializable {
 	private static UserManager instance = null;
-
-	private ArrayList<User> users;
-	private User currentUser;
-
-	protected UserManager() {
-		users = new ArrayList<User>();
-	}
 
 	public static UserManager getInstance() {
 		if (instance == null) {
-			throw new RuntimeException("Get byte [] of the userManager and put it in instance");
+			instance = new UserManager();
 		}
+		
 		return instance;
+	}
+	
+	private ArrayList<User> users;
+	private String currentUser;
+
+	protected UserManager() {
+		users = new ArrayList<User>(Arrays.asList((User[]) DataManager.getInstance().loadUsersData()));
+		currentUser = DataManager.getInstance().getCurrentUser();
 	}
 
 	/**
@@ -29,28 +30,78 @@ public class UserManager {
 	 * 
 	 * @return
 	 */
-	public ArrayList<User> getUsers() {
+	public ArrayList<User> getAllUsers() {
 		return users;
+	}
+	
+	/**
+	 * Returns the user object with the given name
+	 * @param userName
+	 * @return
+	 */
+	public User getUser(String userName) {
+		for (User usr : users)
+			if (usr.getName().equals(userName))
+				return usr;
+
+		return null;
+	}
+	
+	/**
+	 * Returns the current user
+	 * @return
+	 */
+	public User getCurrentUser(){
+		return getUser(currentUser);
+	}
+	
+	/**
+	 * Creates a new user
+	 * @param userName
+	 * @param password
+	 */
+	public void newUser(String userName, String password){
+		DataManager.getInstance().saveUser(userName, new User(userName,password));
 	}
 
 	/**
-	 * Called after a change is made to any user. Sends user
+	 * Changes the current user
+	 * 
+	 * @param userName
+	 * @param password
 	 */
-	public void saveChanges() {
-
+	public void changeUser(String userName, String password) {
+		if (getUser(userName).checkPassword(password))
+			currentUser = userName;
+		
+		DataManager.getInstance().setCurrentUser(userName);
 	}
-
-	public static byte[] serialize(Object obj) throws IOException {
-		ByteArrayOutputStream b = new ByteArrayOutputStream();
-		ObjectOutputStream o = new ObjectOutputStream(b);
-		o.writeObject(obj);
-		return b.toByteArray();
+	
+	/**
+	 * Checks if the given sensor exists in the current user
+	 * 
+	 * @param sensorID
+	 * @return if sensor is in use
+	 */
+	public boolean checkSensor(String sensorID) {
+		return getCurrentUser().checkSensor(sensorID);
 	}
-
-	public static Object deserialize(byte[] bytes) throws IOException,
-			ClassNotFoundException {
-		ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-		ObjectInputStream o = new ObjectInputStream(b);
-		return o.readObject();
+	
+	/**
+	 * Enables the given sensor for the current user. In the case that sensor does not exist, adds it
+	 * to enabled sensors
+	 * 
+	 * @param sensorID
+	 */
+	public void enableSensor(String sensorID) {
+		getCurrentUser().enableSensor(sensorID);
+	}
+	
+	/**
+	 * Disables the given sensor for the current user.
+	 * @param sensorID
+	 */
+	public void disableSensor(String sensorID) {
+		getCurrentUser().disableSensor(sensorID);
 	}
 }

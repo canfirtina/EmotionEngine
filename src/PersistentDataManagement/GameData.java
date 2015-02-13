@@ -1,10 +1,10 @@
 package PersistentDataManagement;
 
-import SharedSensorData.FeatureWindow;
+import SharedSensorData.Sample;
 
 /**
  * Created by Mustafa on 13.2.2015.
  */
 public class GameData {
-    private FeatureWindow[] samples;
+    private Sample[] samples;
 }

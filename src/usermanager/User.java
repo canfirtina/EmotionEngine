@@ -1,4 +1,4 @@
-package usermanager;
+package userManager;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -11,21 +11,13 @@ public class User implements Serializable {
 	/**
 	 * Constructor for User class that takes userName and password
 	 * 
-	 * @param userName
+	 * @param userName 
 	 * @param password
 	 */
 	public User(String userName, String password) {
 		this.userName = userName;
 		this.password = password;
 		enabledSensors = new HashMap<String, Boolean>();
-	}
-	
-	/**
-	 * Alternative constructor that construct from a serialized User object
-	 * @param serial
-	 */
-	public User(byte[] serial) {
-		
 	}
 
 	/**
@@ -39,10 +31,14 @@ public class User implements Serializable {
 			return false;
 		return enabledSensors.get(sensorID);
 	}
+	
+	public String getName() {
+		return this.userName;
+	}
 
 	/**
 	 * Enables the given sensor. In the case that sensor does not exist, adds it
-	 * to
+	 * to enabled sensors
 	 * 
 	 * @param sensorID
 	 */
@@ -69,6 +65,21 @@ public class User implements Serializable {
 	public boolean checkPassword(String password) {
 		return this.password.equals(password);
 	}
-
+	
+	/**
+	 * Changes the password
+	 * @param oldPassword
+	 * @param newPassword
+	 * @return
+	 */
+	public boolean changePassword(String oldPassword, String newPassword){
+		if(checkPassword(oldPassword)){
+			this.password = newPassword;
+			return true;
+		}
+		
+		return false;
+	}
+	
 
 }
