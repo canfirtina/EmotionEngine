@@ -14,4 +14,6 @@ public class GSRData implements SensorData {
         return new byte[0];
     }
 
+
+
 }
