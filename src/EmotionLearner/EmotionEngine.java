@@ -12,6 +12,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory {
 		return null;
 	}
 	
+	//SESSION
 	public boolean openSession(){
 		return true;
 	}
@@ -29,19 +30,16 @@ public class EmotionEngine implements SensorObserver,SensorFactory {
 	//SENSOR OBSERVER
 	@Override
 	public void dataArrived(SensorListener sensor) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void connectionError(SensorListener sensor) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void connectionEstablished(SensorListener sensor) {
-		// TODO Auto-generated method stub
 		
 	}
 	
