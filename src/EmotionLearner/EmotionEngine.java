@@ -16,14 +16,25 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	}
 	
 	//SESSION
-	public boolean openSession(){
+	public boolean openTrainingSession(Label label){
 		return true;
 	}
 	
-	public boolean closeSession(){
+	public boolean closeTrainingSession(){
 		return true;
 	}
 	
+	public boolean openClassifySession(){
+		return true;
+	}
+	
+	public boolean stopClassifySession(){
+		return true;
+	}
+	
+	public Label currentEmotion(){
+		return null;
+	}
 	
 	//SENSOR FACTORY
 	@Override
