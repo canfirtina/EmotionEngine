@@ -9,19 +9,20 @@ import PersistentDataManagement.DataManager;
 public class UserManager implements Serializable {
 	private static UserManager instance = null;
 
-	private ArrayList<User> users;
-	private String currentUser;
-
-	protected UserManager() {
-		users = new ArrayList<User>(Arrays.asList((User[]) DataManager.getInstance().loadUsersData()));
-	}
-
 	public static UserManager getInstance() {
 		if (instance == null) {
 			instance = new UserManager();
 		}
 		
 		return instance;
+	}
+	
+	private ArrayList<User> users;
+	private String currentUser;
+
+	protected UserManager() {
+		users = new ArrayList<User>(Arrays.asList((User[]) DataManager.getInstance().loadUsersData()));
+		currentUser = DataManager.getInstance().getCurrentUser();
 	}
 
 	/**
@@ -74,5 +75,33 @@ public class UserManager implements Serializable {
 			currentUser = userName;
 		
 		DataManager.getInstance().setCurrentUser(userName);
+	}
+	
+	/**
+	 * Checks if the given sensor exists in the current user
+	 * 
+	 * @param sensorID
+	 * @return if sensor is in use
+	 */
+	public boolean checkSensor(String sensorID) {
+		return getCurrentUser().checkSensor(sensorID);
+	}
+	
+	/**
+	 * Enables the given sensor for the current user. In the case that sensor does not exist, adds it
+	 * to enabled sensors
+	 * 
+	 * @param sensorID
+	 */
+	public void enableSensor(String sensorID) {
+		getCurrentUser().enableSensor(sensorID);
+	}
+	
+	/**
+	 * Disables the given sensor for the current user.
+	 * @param sensorID
+	 */
+	public void disableSensor(String sensorID) {
+		getCurrentUser().disableSensor(sensorID);
 	}
 }
