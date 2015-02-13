@@ -1,21 +1,24 @@
-package usermanager;
+package userManager;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-public class UserManager implements Serializable{
+import PersistentDataManagement.DataManager;
+
+public class UserManager implements Serializable {
 	private static UserManager instance = null;
 
 	private ArrayList<User> users;
-	private User currentUser;
+	private String currentUser;
 
 	protected UserManager() {
-		users = new ArrayList<User>();
+		users = new ArrayList<User>(Arrays.asList((User[]) DataManager.getInstance().loadUsersData()));
 	}
 
 	public static UserManager getInstance() {
 		if (instance == null) {
-			throw new RuntimeException("Persistent data manager'dan al objeyi. eger ordan gelmiyorsa yeni yarat");
+			instance = new UserManager();
 		}
 		
 		return instance;
@@ -30,29 +33,46 @@ public class UserManager implements Serializable{
 		return users;
 	}
 	
-	public User getUser(String userName){
-		for(User usr : users){
-			if(usr.getName().equals(userName))
-				return usr;
-		}
-		
-		return null;
-	}
-
 	/**
-	 * Called after a change is made to any user. Saves the 
+	 * Returns the user object with the given name
+	 * @param userName
+	 * @return
 	 */
-	public void saveChanges() {
-		throw new RuntimeException("Persistent data manager'a söyle kaydetsin");
+	public User getUser(String userName) {
+		for (User usr : users)
+			if (usr.getName().equals(userName))
+				return usr;
+
+		return null;
 	}
 	
 	/**
+	 * Returns the current user
+	 * @return
+	 */
+	public User getCurrentUser(){
+		return getUser(currentUser);
+	}
+	
+	/**
+	 * Creates a new user
+	 * @param userName
+	 * @param password
+	 */
+	public void newUser(String userName, String password){
+		DataManager.getInstance().saveUser(userName, new User(userName,password));
+	}
+
+	/**
 	 * Changes the current user
+	 * 
 	 * @param userName
 	 * @param password
 	 */
 	public void changeUser(String userName, String password) {
-		if(getUser(userName).checkPassword(password))
-			currentUser=getUser(userName);
+		if (getUser(userName).checkPassword(password))
+			currentUser = userName;
+		
+		DataManager.getInstance().setCurrentUser(userName);
 	}
 }
