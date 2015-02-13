@@ -1,5 +1,5 @@
 package SensorManager;
 
-public class SensorObserver {
+public interface SensorObserver {
 
 }
