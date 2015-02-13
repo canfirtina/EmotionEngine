@@ -3,8 +3,13 @@ package communicator;
 import java.io.*;
 import java.net.*;
 
+import EmotionLearner.EmotionEngine;
+
 public class Communicator {
 	public static final int port = 9999;
+	
+	// grafikte çýksýn diye
+	EmotionEngine ee = new EmotionEngine();
 	
 	public static EmotionalState getState(){
 		return new EmotionalState();
