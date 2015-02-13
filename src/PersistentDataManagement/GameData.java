@@ -7,4 +7,12 @@ import SharedSensorData.Sample;
  */
 public class GameData {
     private Sample[] samples;
+
+    public GameData(Sample[] samples) {
+        this.samples = samples;
+    }
+
+    public void addSample(Sample sample) {
+
+    }
 }

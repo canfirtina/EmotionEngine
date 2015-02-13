@@ -13,4 +13,9 @@ public class Sample implements Serializable {
         this.label = label;
         this.sensorData = sensorData;
     }
+
+    public void addFeatureWindow(FeatureWindow featureWindow) {
+
+    }
+
 }
