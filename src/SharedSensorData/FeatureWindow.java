@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * Created by Mustafa on 13.2.2015.
  */
-public class FeatureSample {
+public class FeatureWindow {
     private ArrayList<FeatureList> instances;
 
     public void addFeatureList(FeatureList newList) {
