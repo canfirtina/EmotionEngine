@@ -3,15 +3,18 @@ package EmotionLearner;
 import SharedSensorData.FeatureList;
 
 public class FeatureExtractorEEG extends FeatureExtractor{
+	/**
+	 * Sets raw EEG data to be extracted feature from
+	 * @param data
+	 */
 	@Override
-	public FeatureExtractor instance() {
-		return null;
-	}
-	
-	@Override
-	public void setRawData(byte[] data) {
+	public void appendRawData(byte[] data) {
 	}
 
+	/**
+	 * Returns Features of the raw EEG data 
+	 * @return
+	 */
 	@Override
 	public FeatureList getFeatures() {
 		return null;
