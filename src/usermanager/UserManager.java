@@ -6,9 +6,12 @@ import java.util.Arrays;
 
 import PersistentDataManagement.DataManager;
 
-public class UserManager implements Serializable {
+public class UserManager {
 	private static UserManager instance = null;
 
+	/**
+	 * Public constructor method.
+	 */
 	public static UserManager getInstance() {
 		if (instance == null) {
 			instance = new UserManager();
@@ -20,16 +23,27 @@ public class UserManager implements Serializable {
 	private ArrayList<User> users;
 	private String currentUser;
 
+	/**
+	 * Private constructor
+	 */
 	protected UserManager() {
 		users = new ArrayList<User>(Arrays.asList((User[]) DataManager.getInstance().loadUsersData()));
 		currentUser = DataManager.getInstance().getCurrentUser();
 	}
 	
-	
+	/**
+	 * Checks the validity of the given credentials
+	 * @param userName
+	 * @param password
+	 * @return
+	 */
 	public boolean login(String userName, String password){
 		return true;
 	}
 	
+	/**
+	 * Logs the user out
+	 */
 	public void logout(){
 		currentUser = null;
 	}

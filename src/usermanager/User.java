@@ -32,6 +32,10 @@ public class User implements Serializable {
 		return enabledSensors.get(sensorID);
 	}
 	
+	/**
+	 * Returns the name of the user
+	 * @return
+	 */
 	public String getName() {
 		return this.userName;
 	}
