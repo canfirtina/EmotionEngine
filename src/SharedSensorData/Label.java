@@ -16,7 +16,11 @@ public class Label {
         this.dominance = dominance;
     }
 
-    public int calculateEmotion() {
-        return 0;
+    /**
+     * calculates emotion label from valence, arousal, dominance and liking value
+     * @return Emotion
+     */
+    public Emotion calculateEmotion() {
+        return null;
     }
 }

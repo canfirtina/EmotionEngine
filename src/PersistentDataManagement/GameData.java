@@ -12,6 +12,10 @@ public class GameData {
         this.samples = samples;
     }
 
+    /**
+     * adds a training sample to active game under active user
+     * @param sample
+     */
     public void addSample(Sample sample) {
 
     }
