@@ -2,7 +2,7 @@ package EmotionLearner;
 
 import java.util.ArrayList;
 
-import SharedSensorData.FeatureList;
+import shared.FeatureList;
 
 abstract class FeatureExtractor {
 	/**

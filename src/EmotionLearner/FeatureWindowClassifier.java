@@ -2,8 +2,8 @@ package EmotionLearner;
 
 import java.util.ArrayList;
 
-import SharedSensorData.FeatureWindow;
-import SharedSensorData.Label;
+import shared.FeatureWindow;
+import shared.Label;
 
 abstract class FeatureWindowClassifier {
 	/**

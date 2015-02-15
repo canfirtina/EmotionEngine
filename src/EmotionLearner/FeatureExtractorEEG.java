@@ -1,6 +1,6 @@
 package EmotionLearner;
 
-import SharedSensorData.FeatureList;
+import shared.FeatureList;
 
 public class FeatureExtractorEEG extends FeatureExtractor{
 	/**

@@ -1,4 +1,4 @@
-package SharedSensorData;
+package shared;
 
 import java.io.Serializable;
 

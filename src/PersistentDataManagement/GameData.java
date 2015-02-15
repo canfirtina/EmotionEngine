@@ -1,6 +1,6 @@
 package PersistentDataManagement;
 
-import SharedSensorData.Sample;
+import shared.Sample;
 
 /**
  * Created by Mustafa on 13.2.2015.

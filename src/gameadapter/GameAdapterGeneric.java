@@ -3,7 +3,7 @@
  */
 package gameadapter;
 
-import SharedSensorData.Label;
+import shared.Label;
 
 import java.net.ServerSocket;
 import java.net.Socket;

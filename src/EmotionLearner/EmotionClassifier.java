@@ -2,8 +2,8 @@ package EmotionLearner;
 
 import java.util.ArrayList;
 
-import SharedSensorData.Label;
-import SharedSensorData.Sample;
+import shared.Label;
+import shared.Sample;
 
 public class EmotionClassifier {
 	/**

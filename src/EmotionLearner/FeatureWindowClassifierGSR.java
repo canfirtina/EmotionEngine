@@ -1,7 +1,7 @@
 package EmotionLearner;
 
-import SharedSensorData.FeatureWindow;
-import SharedSensorData.Label;
+import shared.FeatureWindow;
+import shared.Label;
 
 public class FeatureWindowClassifierGSR extends FeatureWindowClassifier{
 

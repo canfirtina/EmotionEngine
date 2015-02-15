@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import PersistentDataManagement.DataManager;
 import PersistentDataManagement.DataManagerObserver;
 import SensorManager.*;
-import SharedSensorData.*;
+import shared.*;
 
 public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerObserver {
 	/**

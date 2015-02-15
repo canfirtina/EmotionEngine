@@ -4,18 +4,18 @@ import java.io.*;
 import java.net.*;
 
 import EmotionLearner.EmotionEngine;
-import SharedSensorData.Label;
+import shared.Label;
 
 public class Communicator {
 	public static final int port = 9999;
 
-	// grafikte çýksýn diye
+	// grafikte ï¿½ï¿½ksï¿½n diye
 	EmotionEngine ee = new EmotionEngine();
 
 
 	public static void startServer() {
 		/*
-		 * Buralar internetten. düzelt.
+		 * Buralar internetten. dï¿½zelt.
 		 */
 
 		// declaration section:

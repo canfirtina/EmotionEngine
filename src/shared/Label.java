@@ -1,4 +1,4 @@
-package SharedSensorData;
+package shared;
 
 /**
  * Created by Mustafa on 13.2.2015.
