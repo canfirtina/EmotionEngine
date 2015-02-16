@@ -1,4 +1,4 @@
-package SensorManager;
+package sensormanager;
 
 public class SensorListenerEEG extends SensorListener{
 
