@@ -3,15 +3,15 @@ package shared;
 import java.util.ArrayList;
 
 /**
- * Created by Mustafa on 13.2.2015.
+ * Keeps features extracted from a series of samples of a single sensor.
  */
 public class FeatureWindow {
     /**
-     * Label of this window for training
+     * Label of this window for training.
      */
     private Label label;
     /**
-     * FeatureLists that are included in this window
+     * FeatureLists that are included in this window.
      */
     private ArrayList<FeatureList> instances;
 
@@ -21,7 +21,7 @@ public class FeatureWindow {
     }
 
     /**
-     * adds a new feature list to window
+     * Adds a new feature list to window.
      * @param newList
      */
     public void addFeatureList(FeatureList newList) {
@@ -29,7 +29,7 @@ public class FeatureWindow {
     }
 
     /**
-     * converts this window into binary representation
+     * Converts this window into binary representation.
      * @return
      */
     public byte[] asByteArray() {
@@ -37,7 +37,7 @@ public class FeatureWindow {
     }
 
     /**
-     *  a method to convert binary data to meaningful class variables
+     * Convert binary data to meaningful class variables.
      * @param bytes
      */
     public void fromByteArray(byte[] bytes) {

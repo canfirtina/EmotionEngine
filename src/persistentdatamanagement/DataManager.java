@@ -3,7 +3,7 @@ package persistentdatamanagement;
 import shared.Sample;
 
 /**
- * Created by Mustafa on 13.2.2015.
+ * Responsible for providing other packages with file input output operations.
  */
 public class DataManager {
     private static DataManager ourInstance = new DataManager();
@@ -13,7 +13,7 @@ public class DataManager {
     }
 
     /**
-     * keeps the locations of directories of user-games records
+     * Keeps the locations of directories of user-games records.
      */
     private UsersGamesDirectory usersGamesDirectory;
     private String currentUser;
@@ -24,14 +24,14 @@ public class DataManager {
     }
 
     /**
-     * reads the diary of locations of records from a hardcoded location
+     * Reads the diary of locations of records from a hardcoded location.
      */
     private void loadUsersDirectory() {
         usersGamesDirectory = new UsersGamesDirectory("dir");
     }
 
     /**
-     * Saves given sample to current game
+     * Saves given sample to current game.
      * @param sample
      */
     public void saveSample( Sample sample) {
@@ -39,7 +39,7 @@ public class DataManager {
     }
 
     /**
-     * gets all samples for current user and game
+     * Gets all samples for current user and game.
      * @return Sample array
      */
     public Sample[] getGameData() {
@@ -48,7 +48,7 @@ public class DataManager {
     }
 
     /**
-     * updates user information
+     * Updates user information.
      * @param username name of the user
      * @param userData serializable user data
      */
@@ -57,7 +57,7 @@ public class DataManager {
     }
 
     /**
-     * gets data of all users
+     * Gets data of all users.
      * @return array of objects
      */
     public Object[] loadUsersData() {
@@ -65,7 +65,7 @@ public class DataManager {
     }
 
     /**
-     * changes active user to userName
+     * Changes active user to userName.
      * @param userName
      */
     public void setCurrentUser(String userName){
@@ -73,7 +73,7 @@ public class DataManager {
     }
 
     /**
-     * gets active user
+     * Gets active user.
      * @return usrname
      */
     public String getCurrentUser(){
@@ -82,7 +82,7 @@ public class DataManager {
     }
 
     /**
-     * changes active game
+     * Changes active game.
      * @param gameId unique identifier of game
      */
     public void setCurrentGame(String gameId){
@@ -90,7 +90,7 @@ public class DataManager {
     }
 
     /**
-     * gets active game
+     * Gets active game.
      * @return unique identifier of game
      */
     public String getCurrentGame(){

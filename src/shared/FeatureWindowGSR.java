@@ -2,8 +2,9 @@ package shared;
 
 import java.util.ArrayList;
 
+
 /**
- * Created by Mustafa on 15.2.2015.
+ * GSR Wrapper for FeatureWindow
  */
 public class FeatureWindowGSR extends FeatureWindow {
     public FeatureWindowGSR(Label label, ArrayList<FeatureList> instances) {

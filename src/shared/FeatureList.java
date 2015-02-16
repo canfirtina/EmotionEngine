@@ -1,7 +1,8 @@
-/**
- * Created by Mustafa on 13.2.2015.
- */
 package shared;
+
+/**
+ * Keeps features extracted from a single sensor for one sample.
+ */
 public class FeatureList {
 
     private double[] features;

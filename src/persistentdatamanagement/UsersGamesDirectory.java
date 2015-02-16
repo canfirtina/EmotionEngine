@@ -3,13 +3,13 @@ package persistentdatamanagement;
 import java.util.Map;
 
 /**
- * Created by Mustafa on 13.2.2015.
+ * Keeps where sensor and learning recordings of each game for each user is located.
  */
 public class UsersGamesDirectory {
     private Map<String, String> directory;
 
     /**
-     * Reads location of records for each user-game group
+     * Reads location of records for each user-game group.
      * @param dbFile the loacation of database file
      */
     public UsersGamesDirectory(String dbFile) {
@@ -17,7 +17,7 @@ public class UsersGamesDirectory {
     }
 
     /**
-     * gets the location of records for given user and game
+     * Gets the location of records for given user and game.
      * @param username
      * @param gameid
      * @return
@@ -27,7 +27,7 @@ public class UsersGamesDirectory {
     }
 
     /**
-     * creates an entry for location of username-game records
+     * Creates an entry for location of username-game records.
      * @param username
      * @param gameid
      * @param directory

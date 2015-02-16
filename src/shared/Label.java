@@ -1,7 +1,7 @@
 package shared;
 
 /**
- * Created by Mustafa on 13.2.2015.
+ * Keeps label of a sample to be provided to machin learning algorithm.
  */
 public class Label {
     private int valence;
@@ -17,7 +17,7 @@ public class Label {
     }
 
     /**
-     * calculates emotion label from valence, arousal, dominance and liking value
+     * Calculates emotion label from valence, arousal, dominance and liking value.
      * @return Emotion
      */
     public Emotion calculateEmotion() {

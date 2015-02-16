@@ -1,7 +1,7 @@
 package shared;
 
 /**
- * Created by Mustafa on 15.2.2015.
+ * Data structure to keep predetermined emotional state labels.
  */
 public enum Emotion {
     HAPPY, SAD, STRESSED, RELIEVED;

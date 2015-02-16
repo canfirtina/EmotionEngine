@@ -3,7 +3,7 @@ package shared;
 import java.io.Serializable;
 
 /**
- * Created by Mustafa on 13.2.2015.
+ * Keeps FeatureWindows of multiple sensors together.
  */
 public class Sample implements Serializable {
     private Label label;
@@ -15,7 +15,7 @@ public class Sample implements Serializable {
     }
 
     /**
-     * adds a window from sensor to this sample
+     * Adds a window from sensor to this sample.
      * @param featureWindow
      */
     public void addFeatureWindow(FeatureWindow featureWindow) {

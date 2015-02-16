@@ -3,7 +3,7 @@ package shared;
 import java.util.ArrayList;
 
 /**
- * Created by Mustafa on 13.2.2015.
+ * EEG Wrapper for FeatureWindow
  */
 public class FeatureWindowEEG extends FeatureWindow {
     public FeatureWindowEEG(Label label, ArrayList<FeatureList> instances) {

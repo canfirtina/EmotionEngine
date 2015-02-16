@@ -3,7 +3,7 @@ package persistentdatamanagement;
 import shared.Sample;
 
 /**
- * Created by Mustafa on 13.2.2015.
+ * Data structure to keep information about all the sessions of one player in one game.
  */
 public class GameData {
     private Sample[] samples;
@@ -13,7 +13,7 @@ public class GameData {
     }
 
     /**
-     * adds a training sample to active game under active user
+     * Adds a training sample to active game under active user.
      * @param sample
      */
     public void addSample(Sample sample) {
