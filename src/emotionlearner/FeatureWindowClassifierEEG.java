@@ -3,6 +3,10 @@ package emotionlearner;
 import shared.FeatureWindow;
 import shared.Label;
 
+/**
+ * Trains windows of EEG features and classifies feature windows
+ *
+ */
 public class FeatureWindowClassifierEEG extends FeatureWindowClassifier{
 
 	/**

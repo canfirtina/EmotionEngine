@@ -1,5 +1,9 @@
 package sensormanager;
 
+/**
+ * Sensor Observer interface provides the communication between sensor listener and its observers 
+ *
+ */
 public interface SensorObserver {
 	
 	/**

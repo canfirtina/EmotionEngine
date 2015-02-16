@@ -6,6 +6,11 @@ import persistentdatamanagement.DataManagerObserver;
 import sensormanager.*;
 import shared.*;
 
+/**
+ * Backbone of the emotion recognition system. Communicates with sensor listeners and data manager,
+ * uses feature extractors and emotion classifiers
+ *
+ */
 public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerObserver {
 	/**
 	 * Sensor listeners attached to emotion engine

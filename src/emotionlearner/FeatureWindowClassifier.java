@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import shared.FeatureWindow;
 import shared.Label;
 
+/**
+ * Blue print of classifiers. Trains windows of features and classifies feature windows  
+ *
+ */
 abstract class FeatureWindowClassifier {
 	/**
 	 * Feature windows that are used for training

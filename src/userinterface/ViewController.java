@@ -3,6 +3,10 @@ package userinterface;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+/**
+ * Blue print of each controller. It catches the user interactions and takes appropriate actions. 
+ *
+ */
 public abstract class ViewController {
 	
 	

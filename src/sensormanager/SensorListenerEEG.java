@@ -1,5 +1,9 @@
 package sensormanager;
-
+/**
+ * Connects to a EEG sensor on a specific port, 
+ * gets raw EEG data from the sensor and notifies its observers periodically
+ *
+ */
 public class SensorListenerEEG extends SensorListener{
 
 	public SensorListenerEEG(int portNumber) {

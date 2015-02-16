@@ -1,7 +1,10 @@
 package emotionlearner;
 
 import shared.FeatureList;
-
+/**
+ * Extracts features from Heart Rate data
+ *
+ */
 public class FeatureExtractorHR extends FeatureExtractor {
 
 	/**

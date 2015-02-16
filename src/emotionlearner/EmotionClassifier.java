@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import shared.Label;
 import shared.Sample;
 
+/**
+ * Trains and classifies samples in order to predict emotional status of the user
+ *
+ */
 public class EmotionClassifier {
 	/**
 	 * All window classifiers used for learning

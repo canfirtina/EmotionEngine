@@ -2,8 +2,16 @@ package userinterface;
 
 import javax.swing.JPanel;
 
+/**
+ * Emotion Engine's main screen view. 
+ *
+ */
 public class EmotionEngineUI extends JPanel{
 	
+	/**
+	 * Ensures the communication between emotion engine view and its controller which is EmotionEngineController.
+	 *
+	 */
 	public interface EmotionEngineUIDelegate {
 		
 		/**

@@ -2,6 +2,11 @@ package sensormanager;
 
 import java.util.ArrayList;
 
+/**
+ * Blue print of listeners of the sensors. Connects to a sensor on a specific port, 
+ * gets raw data from the sensor and notifies its observers periodically
+ *
+ */
 public abstract class SensorListener {
 	
 	/**

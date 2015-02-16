@@ -1,7 +1,10 @@
 package emotionlearner;
 
 import shared.FeatureList;
-
+/**
+ * Extract features from GSR signals
+ *
+ */
 public class FeatureExtractorGSR extends FeatureExtractor {
 
 	/**

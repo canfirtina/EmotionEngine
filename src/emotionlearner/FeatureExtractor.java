@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 import shared.FeatureList;
 
+/**
+ * Blueprint of feature extracting classes. Extracts features from rawData
+ *
+ */
 abstract class FeatureExtractor {
 	/**
 	 * Raw data window that keeps last N byte[] data

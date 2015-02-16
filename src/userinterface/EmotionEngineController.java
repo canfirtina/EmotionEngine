@@ -4,6 +4,10 @@ import javax.swing.JPanel;
 
 import userinterface.EmotionEngineUI.EmotionEngineUIDelegate;
 
+/**
+ * Catches the user interactions made to EmotionEngineUI View. User's emotion engine actions are controlled by this controller
+ *
+ */
 public class EmotionEngineController extends ViewController implements EmotionEngineUIDelegate{
 	
 	/**

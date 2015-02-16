@@ -1,5 +1,10 @@
 package sensormanager;
 
+/**
+ * Connects to a GSR sensor on a specific port, 
+ * gets raw GSR data from the sensor and notifies its observers periodically
+ *
+ */
 public class SensorListenerHR extends SensorListener{
 
 	public SensorListenerHR(int portNumber) {

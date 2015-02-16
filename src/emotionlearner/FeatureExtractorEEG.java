@@ -1,7 +1,10 @@
 package emotionlearner;
 
 import shared.FeatureList;
-
+/**
+ * Extracts features from EEG signals
+ *
+ */
 public class FeatureExtractorEEG extends FeatureExtractor{
 	/**
 	 * Sets raw EEG data to be extracted feature from

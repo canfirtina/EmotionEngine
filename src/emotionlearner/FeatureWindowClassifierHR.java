@@ -3,6 +3,10 @@ package emotionlearner;
 import shared.FeatureWindow;
 import shared.Label;
 
+/**
+ * Trains windows of HR features and classifies feature windows
+ *
+ */
 public class FeatureWindowClassifierHR extends FeatureWindowClassifier {
 	
 	/**
