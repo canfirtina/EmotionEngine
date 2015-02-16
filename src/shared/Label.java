@@ -8,19 +8,14 @@ public class Label {
     private int arousal;
     private int dominance;
     private int liking;
+    private Emotion emotion;
 
-    public Label(int liking, int valence, int arousal, int dominance) {
+    public Label(int liking, int valence, int arousal, int dominance, Emotion emotion) {
         this.liking = liking;
         this.valence = valence;
         this.arousal = arousal;
         this.dominance = dominance;
+        this.emotion = emotion;
     }
 
-    /**
-     * Calculates emotion label from valence, arousal, dominance and liking value.
-     * @return Emotion
-     */
-    public Emotion calculateEmotion() {
-        return null;
-    }
 }
