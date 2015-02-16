@@ -9,14 +9,15 @@ import shared.Label;
 public class Communicator {
 	public static final int port = 9999;
 
-	// grafikte ��ks�n diye
-	EmotionEngine ee = new EmotionEngine();
+	// grafikte ciksin diye
+	static EmotionEngine ee;
 
 
 	public static void startServer() {
 		/*
-		 * Buralar internetten. d�zelt.
+		 * Buralar internetten. duzelt.
 		 */
+		ee= new EmotionEngine();
 
 		// declaration section:
 		// declare a server socket and a client socket for the server
@@ -53,7 +54,10 @@ public class Communicator {
 		}
 	}
 
-	public void checkForRequest() {
+	/**
+	 * Listens to the port for new requests
+	 */
+	public static void checkForRequest() {
 		int request = 1;
 
 		switch (request) {
@@ -63,7 +67,11 @@ public class Communicator {
 		}
 	}
 	
-	public void provideEmotionalState(Label label){
+	/**
+	 * Serializes and sends the given label to the client
+	 * @param label the label containing the information about the user
+	 */
+	public static void provideEmotionalState(Label label){
 		//serialize and send the label to the client.
 	}
 }
