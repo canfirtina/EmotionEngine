@@ -1,4 +1,4 @@
-package UserInterface;
+package userinterface;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
