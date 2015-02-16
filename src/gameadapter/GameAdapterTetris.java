@@ -1,10 +1,7 @@
 package gameadapter;
 
-import java.net.ServerSocket;
-import java.net.Socket;
-
 /**
- * Created by Mustafa on 15.2.2015.
+ * Part of EmotionEngine that is implemented in client game Tetris. It provides in game decisions such as speed change, background music.
  */
 public class GameAdapterTetris extends GameAdapterGeneric {
 
@@ -13,7 +10,7 @@ public class GameAdapterTetris extends GameAdapterGeneric {
     }
 
     /**
-     * calculates appropriate game speed
+     * Calculates appropriate game speed.
      * @return game speed
      */
     public int getSpeed() {
@@ -22,7 +19,7 @@ public class GameAdapterTetris extends GameAdapterGeneric {
     }
 
     /**
-     * determines type of background music
+     * Determines type of background music.
      * @return id of background music to be played
      */
     public int getMusicType() {
@@ -31,7 +28,7 @@ public class GameAdapterTetris extends GameAdapterGeneric {
     }
 
     /**
-     * calculates how hard it should be to move blocks
+     * Calculates how hard it should be to move blocks.
      * @return responsiveness of blocks to keyboard commands
      */
     public int getResponsiveness() {
@@ -40,7 +37,7 @@ public class GameAdapterTetris extends GameAdapterGeneric {
     }
 
     /**
-     * determines if reverse move mode should be activated
+     * Determines if reverse move mode should be activated.
      * @return true if reverse mode should be activated, false if not
      */
     public boolean isReverse() {
