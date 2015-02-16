@@ -1,4 +1,4 @@
-package sensormanager;
+package SensorManager;
 
 public class SensorListenerHR extends SensorListener{
 

@@ -1,4 +1,4 @@
-package userinterface;
+package UserInterface;
 
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;

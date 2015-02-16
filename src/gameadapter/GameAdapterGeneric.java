@@ -3,18 +3,21 @@
  */
 package gameadapter;
 
+import communicator.Communicator;
 import shared.Label;
 
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class GameAdapterGeneric {
+
     private ServerSocket serverSocket;
     private Socket socket;
     private Label activeEmotionalLabel;
 
     public GameAdapterGeneric() {
         //initialize serversocket and socket
+        Communicator.startServer();
     }
 
     /**

@@ -1,4 +1,4 @@
-package sensormanager;
+package SensorManager;
 
 import java.util.ArrayList;
 

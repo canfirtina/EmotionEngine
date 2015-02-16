@@ -1,8 +1,8 @@
-package userinterface;
+package UserInterface;
 
 import javax.swing.JPanel;
 
-import userinterface.EmotionEngineUI.EmotionEngineUIDelegate;
+import UserInterface.EmotionEngineUI.EmotionEngineUIDelegate;
 
 public class EmotionEngineController extends ViewController implements EmotionEngineUIDelegate{
 	

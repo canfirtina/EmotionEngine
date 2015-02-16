@@ -54,19 +54,12 @@ public class Communicator {
 	}
 
 	public void checkForRequest() {
-		String request = "gelen request";
+		int request = 1;
 
 		switch (request) {
-		case "start training":
+		case 1:
 			ee.openTrainingSession(null); break;
-		case "stop training":
-			ee.closeTrainingSession();
-		case "start classifying":
-			ee.openClassifySession();
-		case "stop classifying":
-			ee.stopClassifySession();
-		case "get emotional status":
-			provideEmotionalState(ee.currentEmotion());
+		default: break;
 		}
 	}
 	
