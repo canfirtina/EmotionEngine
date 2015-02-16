@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import PersistentDataManagement.DataManager;
+import persistentdatamanagement.DataManager;
 
 public class UserManager {
 	private static UserManager instance = null;

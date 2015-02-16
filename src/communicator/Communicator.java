@@ -3,7 +3,7 @@ package communicator;
 import java.io.*;
 import java.net.*;
 
-import EmotionLearner.EmotionEngine;
+import emotionlearner.EmotionEngine;
 import shared.Label;
 
 public class Communicator {
