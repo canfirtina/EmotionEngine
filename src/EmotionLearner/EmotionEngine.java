@@ -1,9 +1,9 @@
-package EmotionLearner;
+package emotionlearner;
 import java.util.ArrayList;
 
-import PersistentDataManagement.DataManager;
-import PersistentDataManagement.DataManagerObserver;
-import SensorManager.*;
+import persistentdatamanagement.DataManager;
+import persistentdatamanagement.DataManagerObserver;
+import sensormanager.*;
 import shared.*;
 
 public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerObserver {
@@ -28,7 +28,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	private EmotionClassifier emotionClassifier;
 	
 	/**
-	 * 
+	 * Return a single shared instance of EmotionEngine
 	 * @param persistentDataManager
 	 * @return
 	 */

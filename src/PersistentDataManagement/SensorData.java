@@ -1,4 +1,4 @@
-package PersistentDataManagement;
+package persistentdatamanagement;
 
 /**
  * Created by Mustafa on 13.2.2015.

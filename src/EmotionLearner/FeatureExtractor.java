@@ -1,4 +1,4 @@
-package EmotionLearner;
+package emotionlearner;
 
 import java.util.ArrayList;
 

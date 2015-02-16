@@ -1,4 +1,4 @@
-package EmotionLearner;
+package emotionlearner;
 
 import shared.FeatureList;
 

@@ -1,4 +1,4 @@
-package PersistentDataManagement;
+package persistentdatamanagement;
 
 import shared.Sample;
 

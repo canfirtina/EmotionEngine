@@ -1,6 +1,6 @@
-package EmotionLearner;
+package emotionlearner;
 
-import SensorManager.SensorListener;
+import sensormanager.SensorListener;
 
 public interface SensorFactory {
 	/**
