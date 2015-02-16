@@ -1,14 +1,17 @@
 package usermanager;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import persistentdatamanagement.DataManager;
 
+/**
+ * Manages users and user related like logging in, creating or changing users, keeping track of which sensors are used by which users. 
+ */
 public class UserManager {
 	private static UserManager instance = null;
-
+	private ArrayList<User> users;
+	private String currentUser;
 	/**
 	 * Public constructor method.
 	 */
@@ -19,12 +22,9 @@ public class UserManager {
 		
 		return instance;
 	}
-	
-	private ArrayList<User> users;
-	private String currentUser;
 
 	/**
-	 * Private constructor
+	 * Private constructor.
 	 */
 	protected UserManager() {
 		users = new ArrayList<User>(Arrays.asList((User[]) DataManager.getInstance().loadUsersData()));
@@ -32,7 +32,7 @@ public class UserManager {
 	}
 	
 	/**
-	 * Checks the validity of the given credentials
+	 * Checks the validity of the given credentials.
 	 * @param userName
 	 * @param password
 	 * @return
@@ -42,14 +42,14 @@ public class UserManager {
 	}
 	
 	/**
-	 * Logs the user out
+	 * Logs the user out.
 	 */
 	public void logout(){
 		currentUser = null;
 	}
 
 	/**
-	 * Returns a list of users
+	 * Returns a list of users.
 	 * 
 	 * @return
 	 */
@@ -58,7 +58,7 @@ public class UserManager {
 	}
 	
 	/**
-	 * Returns the user object with the given name
+	 * Returns the user object with the given name.
 	 * @param userName
 	 * @return
 	 */
@@ -71,7 +71,7 @@ public class UserManager {
 	}
 	
 	/**
-	 * Returns the current user
+	 * Returns the current user.
 	 * @return
 	 */
 	public User getCurrentUser(){
@@ -79,7 +79,7 @@ public class UserManager {
 	}
 	
 	/**
-	 * Creates a new user
+	 * Creates a new user.
 	 * @param userName
 	 * @param password
 	 */
@@ -88,7 +88,7 @@ public class UserManager {
 	}
 
 	/**
-	 * Changes the current user
+	 * Changes the current user.
 	 * 
 	 * @param userName
 	 * @param password
@@ -101,7 +101,7 @@ public class UserManager {
 	}
 	
 	/**
-	 * Checks if the given sensor exists in the current user
+	 * Checks if the given sensor exists in the current user.
 	 * 
 	 * @param sensorID
 	 * @return if sensor is in use
@@ -112,7 +112,7 @@ public class UserManager {
 	
 	/**
 	 * Enables the given sensor for the current user. In the case that sensor does not exist, adds it
-	 * to enabled sensors
+	 * to enabled sensors.
 	 * 
 	 * @param sensorID
 	 */

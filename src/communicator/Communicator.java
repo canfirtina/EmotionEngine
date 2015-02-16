@@ -6,13 +6,18 @@ import java.net.*;
 import emotionlearner.EmotionEngine;
 import shared.Label;
 
+/**
+ * Handles communication between client and server processes
+ */
 public class Communicator {
 	public static final int port = 9999;
 
 	// grafikte ciksin diye
-	static EmotionEngine ee;
+	private static EmotionEngine ee;
 
-
+	/**
+	 * Starts a server that constantly listens for requests coming from clients
+	 */
 	public static void startServer() {
 		/*
 		 * Buralar internetten. duzelt.
@@ -69,7 +74,7 @@ public class Communicator {
 	
 	/**
 	 * Serializes and sends the given label to the client
-	 * @param label the label containing the information about the user
+	 * @param label The label containing the information about the user
 	 */
 	public static void provideEmotionalState(Label label){
 		//serialize and send the label to the client.

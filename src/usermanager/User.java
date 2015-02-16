@@ -3,13 +3,16 @@ package usermanager;
 import java.io.Serializable;
 import java.util.HashMap;
 
+/**
+ * Class that is used for storing User related data. Implements "Serializable" in order to be able to save the object to a file.
+ */
 public class User implements Serializable {
 	private String userName;
 	private String password;
 	private HashMap<String, Boolean> enabledSensors;
 
 	/**
-	 * Constructor for User class that takes userName and password
+	 * Constructor for User class that takes userName and password.
 	 * 
 	 * @param userName 
 	 * @param password
@@ -21,7 +24,7 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Checks if the given sensor exists
+	 * Checks if the given sensor exists.
 	 * 
 	 * @param sensorID
 	 * @return
@@ -33,7 +36,7 @@ public class User implements Serializable {
 	}
 	
 	/**
-	 * Returns the name of the user
+	 * Returns the name of the user.
 	 * @return
 	 */
 	public String getName() {
@@ -42,7 +45,7 @@ public class User implements Serializable {
 
 	/**
 	 * Enables the given sensor. In the case that sensor does not exist, adds it
-	 * to enabled sensors
+	 * to enabled sensors.
 	 * 
 	 * @param sensorID
 	 */
@@ -62,7 +65,7 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Checks if the given password is correct
+	 * Checks if the given password is correct.
 	 * 
 	 * @param password
 	 */
@@ -71,8 +74,8 @@ public class User implements Serializable {
 	}
 	
 	/**
-	 * Changes the password
-	 * @param oldPassword
+	 * Changes the password.
+	 * @param oldPassword 
 	 * @param newPassword
 	 * @return
 	 */
