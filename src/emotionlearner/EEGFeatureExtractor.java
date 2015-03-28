@@ -6,26 +6,26 @@ package emotionlearner;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import emotionlearner.eegFrame.features.linear.frequency.SpectralAnalysis;
-import emotionlearner.eegFrame.features.linear.timeDomain.AutocorrelationCoefficient;
-import emotionlearner.eegFrame.features.linear.timeDomain.FanoFactor;
-import emotionlearner.eegFrame.features.linear.timeDomain.Mean;
-import emotionlearner.eegFrame.features.linear.timeDomain.MeanOfAbsoluteValuesOfFirstDiffNormalized;
-import emotionlearner.eegFrame.features.linear.timeDomain.MeanOfAbsoluteValuesOfSecondDiffNormalized;
-import emotionlearner.eegFrame.features.linear.timeDomain.MeanOfAbsoluteValuesOfTheFirstDifferences;
-import emotionlearner.eegFrame.features.linear.timeDomain.MeanOfAbsoluteValuesOfTheSecondDifferences;
-import emotionlearner.eegFrame.features.linear.timeDomain.StandardDeviation;
-import emotionlearner.eegFrame.features.nonlinear.entropy.CorrectedConditionalShannonEntropy;
-import emotionlearner.eegFrame.features.nonlinear.entropy.RenyiEntropy;
-import emotionlearner.eegFrame.features.nonlinear.fractal.DFA;
-import emotionlearner.eegFrame.features.nonlinear.fractal.HiguchiDimension;
-import emotionlearner.eegFrame.features.nonlinear.fractal.HurstExponent;
-import emotionlearner.eegFrame.features.nonlinear.other.AllanFactor;
-import emotionlearner.eegFrame.features.nonlinear.other.CTMSecondOrderDifferencePlot;
-import emotionlearner.eegFrame.features.nonlinear.other.LempelZivComplexity;
-import emotionlearner.eegFrame.features.nonlinear.phaseSpace.LyapunovExponent;
-import emotionlearner.eegFrame.features.nonlinear.phaseSpace.StandardDeviationRatio;
-import emotionlearner.eegFrame.features.timeFrequency.HaarWaveletStandardDeviation;
+import features.linear.frequency.SpectralAnalysis;
+import features.linear.timeDomain.AutocorrelationCoefficient;
+import features.linear.timeDomain.FanoFactor;
+import features.linear.timeDomain.Mean;
+import features.linear.timeDomain.MeanOfAbsoluteValuesOfFirstDiffNormalized;
+import features.linear.timeDomain.MeanOfAbsoluteValuesOfSecondDiffNormalized;
+import features.linear.timeDomain.MeanOfAbsoluteValuesOfTheFirstDifferences;
+import features.linear.timeDomain.MeanOfAbsoluteValuesOfTheSecondDifferences;
+import features.linear.timeDomain.StandardDeviation;
+import features.nonlinear.entropy.CorrectedConditionalShannonEntropy;
+import features.nonlinear.entropy.RenyiEntropy;
+import features.nonlinear.fractal.DFA;
+import features.nonlinear.fractal.HiguchiDimension;
+import features.nonlinear.fractal.HurstExponent;
+import features.nonlinear.other.AllanFactor;
+import features.nonlinear.other.CTMSecondOrderDifferencePlot;
+import features.nonlinear.other.LempelZivComplexity;
+import features.nonlinear.phaseSpace.LyapunovExponent;
+import features.nonlinear.phaseSpace.StandardDeviationRatio;
+import features.timeFrequency.HaarWaveletStandardDeviation;
 
 /**
  * @author ayhun, can

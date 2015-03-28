@@ -20,7 +20,6 @@ public class FeatureExtractorEEG extends FeatureExtractor{
 	 */
 	@Override
 	public FeatureList getFeatures() {
-		return null;
+			return null;
 	}
-
 }
