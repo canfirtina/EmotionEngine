@@ -4,5 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/weka.jar"/>
 	<classpathentry kind="lib" path="lib/EEGFrame.jar"/>
+	<classpathentry kind="lib" path="/Users/aliyesilyaprak/Downloads/libsvm.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

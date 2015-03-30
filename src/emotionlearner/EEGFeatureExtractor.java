@@ -34,7 +34,7 @@ import features.timeFrequency.HaarWaveletStandardDeviation;
 public class EEGFeatureExtractor {
 	final static int epochLength = 1024;
 	static boolean first = true;
-
+	
 	public static ArrayList<double[]> extractFeatures(double[][] matrix) throws Exception {
 		int numEpoch = (int) Math.floor(matrix[0].length / epochLength);
 		int numChannel = matrix.length;
