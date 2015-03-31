@@ -53,9 +53,9 @@ public class EEGClassifier {
 	}
 	
 	public Classifier loadModel(String name, File path) throws Exception {
-
+		
 		Classifier classifier;
-
+		
 	    FileInputStream fis = new FileInputStream(name + ".model");
 	    ObjectInputStream ois = new ObjectInputStream(fis);
 
@@ -66,7 +66,6 @@ public class EEGClassifier {
 	}
 	
 	public void train( String traininDataLocation, String classifier, String[] options) throws Exception{
-		
 		DataSource trainSource = new DataSource( traininDataLocation);
 		trainInstance = trainSource.getDataSet();
 	    

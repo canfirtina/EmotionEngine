@@ -11,7 +11,7 @@ public class FeatureExtractorEEG extends FeatureExtractor{
 	 * @param data
 	 */
 	@Override
-	public void appendRawData(byte[] data) {
+	public void appendRawData(double[] data) {
 	}
 
 	/**

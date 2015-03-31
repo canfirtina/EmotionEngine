@@ -72,7 +72,8 @@ public class EmotionEngineApp {
 		
 		//loadWindow();
 		try {
-			new test.CaseEEG().runtest1();
+			new test.CaseEEG().runtest2();
+			//new test.CaseEEG().runtest1();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

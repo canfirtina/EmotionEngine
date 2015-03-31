@@ -12,7 +12,7 @@ public class FeatureExtractorGSR extends FeatureExtractor {
 	 * @param data
 	 */
 	@Override
-	public void appendRawData(byte[] data) {
+	public void appendRawData(double[] data) {
 		// TODO Auto-generated method stub
 
 	}
