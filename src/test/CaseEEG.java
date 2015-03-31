@@ -1,7 +1,52 @@
 package test;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.converters.ArffLoader;
+import weka.core.converters.ArffLoader.ArffReader;
 import emotionlearner.EEGClassifier;
 
 public class CaseEEG {
+	String testFolderPath = "test/Test/";
+	String trainFolderPath = "test/Training/";
+	
+	/**
+	 * Training a dataset and test instances one by one
+	 * @throws Exception
+	 */
+	public void runtest2() throws Exception{
+		System.out.println("TEST");
+		ArffLoader trainLoader= new ArffLoader();
+		trainLoader.setFile(new File(trainFolderPath + "cantrainingFrustrated2Out.arff"));
+		ArffLoader testLoader = new ArffLoader();
+		testLoader.setFile(new File(testFolderPath  + "fcan - frustrated2 - cat mario 2.arff"));
+		
+		Instances trainInstances = trainLoader.getDataSet();
+		trainInstances.setClassIndex(trainInstances.numAttributes()-1);
+		
+		String[] options = {"-K", "1"};
+		Classifier svmClassifier = (Classifier)Classifier.forName("weka.classifiers.functions.LibSVM", options);
+		svmClassifier.buildClassifier(trainInstances);
+		
+		Instances testInstances = testLoader.getStructure();
+		testInstances.setClassIndex(testInstances.numAttributes()-1);
+		
+		Instance instance = null;
+		while((instance = testLoader.getNextInstance(testInstances))!=null){
+			double prediction = svmClassifier.classifyInstance(instance);
+			System.out.println("Prediction:" + prediction + " Actual:" + instance.classValue());
+		}
+	}
+	
+	/**
+	 * Training a dataset and test instances as a whole and getting accuracy
+	 * @throws Exception
+	 */
 	public void runtest1() throws Exception {
 //		String fileName = "can - frustrated2 - cat mario 2.csv";
 //		CSVParser.write( "f" + fileName, EEGFeatureExtractor.extractFeatures(CSVParser.read(fileName)));
@@ -10,8 +55,7 @@ public class CaseEEG {
 		EEGClassifier svmClassifier = new EEGClassifier();
 		String[] options = {"-K", "1"};
 		
-		String testFolderPath = "test/Test/";
-		String trainFolderPath = "test/Training/";
+		
 		
 //		svmClassifier.train( "cantrainingDisgusting1Out.arff", "weka.classifiers.functions.LibSVM", options);
 //		svmClassifier.test( "fcan - disgusting1 - 10.arff");

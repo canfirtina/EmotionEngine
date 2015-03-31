@@ -12,13 +12,12 @@ abstract class FeatureExtractor {
 	/**
 	 * Raw data window that keeps last N byte[] data
 	 */
-	private ArrayList<byte[]> rawData;
-	
+	private ArrayList<double[]> rawData;
 	/**
 	 * Sets raw data to be extracted feature from
 	 * @param data
 	 */
-	public abstract void appendRawData(byte[] data); 
+	public abstract void appendRawData(double[] data); 
 	
 	/**
 	 * Returns Features of the raw data 
