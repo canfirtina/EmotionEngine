@@ -5,5 +5,4 @@ package shared;
  */
 public enum Emotion {
     JOY, DISGUST, PEACEFUL, FRUSTRATED;
-
 }
