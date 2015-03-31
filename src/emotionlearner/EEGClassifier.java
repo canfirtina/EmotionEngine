@@ -81,7 +81,6 @@ public class EEGClassifier {
 	}
 	
 	public void trainWithCrossValidation( String traininDataLocation, String classifier, String[] options, int folds) throws Exception{
-		
 		DataSource trainSource = new DataSource( traininDataLocation);
 		trainInstance = trainSource.getDataSet();
 	    

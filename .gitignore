@@ -1,4 +1,9 @@
 *.class
+*.aird
+*.uml
+.project
+
+.DS_Store
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -11,3 +16,5 @@
 hs_err_pid*
 /bin/
 /doc/
+/test/
+/.settings/
