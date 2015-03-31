@@ -32,13 +32,11 @@ public class CSVParser {
             currentLine++;
         }
         scanner.close();
-        
-        double[][] matrix = new double[matrixList.get(matrixList.size()-1).size()][matrixList.size()];
-        
+
+        double[][] matrix = new double[matrixList.size()][matrixList.get(0).size()];
         for( int i = 0 ; i < matrixList.size(); i++)
         	for( int j = 0; j < matrixList.get(i).size(); j++)
-        		matrix[j][i] = matrixList.get(i).get(j);
-        
+        		matrix[i][j] = matrixList.get(i).get(j);
         return matrix;
 	}
 	

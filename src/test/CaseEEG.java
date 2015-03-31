@@ -1,26 +1,92 @@
 package test;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 
+import shared.FeatureList;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffLoader.ArffReader;
+import emotionlearner.CSVParser;
+import emotionlearner.DataEpocher;
 import emotionlearner.EEGClassifier;
+import emotionlearner.FeatureExtractor;
+import emotionlearner.FeatureExtractorEEG;
 
 public class CaseEEG {
-	String testFolderPath = "test/Test/";
-	String trainFolderPath = "test/Training/";
+	private String testFolderPath = "test/Test/";
+	private String trainFolderPath = "test/Training/";
+	private String csvPath = "test/CSV/";
+	private String projectCSVPath = "test/ProjectCSV/";
+	private String[] csvFileNamesWithoutExtension; 
+	
+	public CaseEEG(){
+		csvFileNamesWithoutExtension = new String[]{"can - disgusting1 - 10",
+				"can - disgusting2 - 10",
+				"can - disgusting3 - 8",
+				"can - disgusting4 - 9",
+				"can - disgusting5 - 10",
+				"can - frustrated1 - cat mario",
+				"can - frustrated2 - cat mario 2",
+				"can - peaceful1 - 9",
+				"can - peaceful2 - 9",
+				"can - peaceful3 - 7",
+				"can - peaceful4 - 8",
+				"can - sexy1 - 7",
+				"can - sexy2 - sonlari 10",
+				"can - sexy3 - sonlari 9",
+				"can - sexy4 - 8"};
+	}
+	
+	/**
+	 * reads csv file, epochs, extracts features, writes to csv file (without feature selection)
+	 * @throws Exception
+	 */
+	public void runtest3() throws Exception {
+		String fullPath = csvPath+csvFileNamesWithoutExtension[0]+".csv";
+		File outFile = new File(projectCSVPath+csvFileNamesWithoutExtension[0]+".csv");
+		System.out.println(outFile.getAbsolutePath());
+		outFile.createNewFile();
+		PrintWriter pw = new PrintWriter(outFile.getAbsolutePath());
+		
+		
+		double [][]M = CSVParser.read(fullPath);
+		DataEpocher epocher = new DataEpocher(1024);
+		FeatureExtractor extractor = new FeatureExtractorEEG();
+		
+		for(int i=0;i<M.length;++i){
+			epocher.addData(M[i]);
+			
+			if(epocher.readyForEpoch()){
+				ArrayList<double []>epoch = epocher.getEpoch();
+				extractor.appendRawData(epoch);
+				
+				FeatureList list = extractor.getFeatures();
+				pw.print(list.get(0));
+				for(int j=1;j<list.size();++j)
+					pw.print(","+list.get(j));
+				pw.println();
+
+				extractor.reset();
+				epocher.reset();
+			}
+			
+		}
+		pw.close();
+	}
 	
 	/**
 	 * Training a dataset and test instances one by one
 	 * @throws Exception
 	 */
 	public void runtest2() throws Exception{
-		System.out.println("TEST");
 		ArffLoader trainLoader= new ArffLoader();
 		trainLoader.setFile(new File(trainFolderPath + "cantrainingFrustrated2Out.arff"));
 		ArffLoader testLoader = new ArffLoader();
