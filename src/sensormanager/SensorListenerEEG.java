@@ -8,7 +8,10 @@ import gnu.io.SerialPort;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Connects to a EEG sensor on a specific port, 
@@ -17,13 +20,22 @@ import java.util.concurrent.ThreadFactory;
  */
 public class SensorListenerEEG extends SensorListener{
 
-	private static final int BYTE_BUFFER_SIZE = 1024;
 	private static final int COMM_PORT_TIMEOUT = 2000;
 	private static final int COMM_PORT_BAUD_RATE = 115200;
 	private static final int COMM_PORT_DATABITS = SerialPort.DATABITS_8;
 	private static final int COMM_PORT_STOPBITS = SerialPort.STOPBITS_1;
 	private static final int COMM_PORT_PARITY = SerialPort.PARITY_NONE;
+	private static final int EEG_GAIN = 24;
+	private static final byte CODE_RESET = 'v';
+	private static final byte CODE_START_STREAMING = 'b';
+	private static final int QUEUE_CAPACITY = 1024;
+	private static final int CHANNEL_LENGTH = 8;
+	private static final int MESSAGE_LENGTH = 33;
+	private static final long CONTINUOUS_COMMAND_DELAY = 500;
+	private static final byte DATA_HEADER = (byte) 0xA0;
+	private static final byte DATA_FOOT = (byte) 0xC0;
 
+	private DataInterpreter dataInterpreter;
 	private SerialReader serialReader;
 	private SerialWriter serialWriter;
 	private CommPortIdentifier commPortIdentifier;
@@ -33,6 +45,12 @@ public class SensorListenerEEG extends SensorListener{
 	private InputStream inputStream;
 	private OutputStream outputStream;
 	private Thread readerThread;
+	private Thread interpreterThread;
+	private boolean streaming;
+
+	private BlockingQueue<Byte> readQueue;
+	private String identificationString;
+
 
 	public SensorListenerEEG(int portNumber) {
 		
@@ -42,6 +60,7 @@ public class SensorListenerEEG extends SensorListener{
 	public SensorListenerEEG(String comPort) {
 		try {
 			this.commPortIdentifier = CommPortIdentifier.getPortIdentifier(comPort);
+			this.readQueue = new ArrayBlockingQueue<Byte>(QUEUE_CAPACITY);
 		} catch (NoSuchPortException e) {
 			e.printStackTrace();
 		}
@@ -50,6 +69,8 @@ public class SensorListenerEEG extends SensorListener{
 
 	@Override
 	public boolean connect() {
+		System.out.println(Integer.toBinaryString(DATA_HEADER));
+		System.out.println(Integer.toBinaryString(DATA_FOOT));
 		try {
 
 			if(commPortIdentifier.isCurrentlyOwned()) {
@@ -71,7 +92,16 @@ public class SensorListenerEEG extends SensorListener{
 			serialReader = new SerialReader(inputStream);
 
 			readerThread = new Thread(serialReader);
+			System.out.println("thread baslangic");
 			readerThread.start();
+
+			dataInterpreter = new DataInterpreter();
+			System.out.println("interpreter started");
+			interpreterThread = new Thread(dataInterpreter);
+			interpreterThread.start();
+
+			serialWriter = new SerialWriter(outputStream);
+			serialWriter.writeByte(CODE_RESET);
 
 
 		} catch (NoSuchPortException e) {
@@ -83,6 +113,10 @@ public class SensorListenerEEG extends SensorListener{
 		return false;
 	}
 
+	public void startStreaming() {
+		serialWriter.writeByte(CODE_START_STREAMING);
+	}
+
 	@Override
 	public boolean disconnect() {
 		// TODO Auto-generated method stub
@@ -92,6 +126,10 @@ public class SensorListenerEEG extends SensorListener{
 	@Override
 	public byte[] getSensorData() {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public float[] getNextSample() {
 		return null;
 	}
 
@@ -131,24 +169,126 @@ public class SensorListenerEEG extends SensorListener{
 		return false;
 	}
 
+	private class DataInterpreter implements Runnable {
+
+		@Override
+		public void run() {
+			try {
+
+				byte[] data = new byte[MESSAGE_LENGTH-2];
+				Byte b;
+				while( (b = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS)) != null ) {
+
+					if (b.compareTo(DATA_HEADER) == 0 ) {
+
+						for(int i = 0;i<MESSAGE_LENGTH-2;i++) {
+							data[i] = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
+						}
+						if(readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS).compareTo( DATA_FOOT) == 0) {
+							float[] retfloat = convertData(data, MESSAGE_LENGTH - 2);
+							for (int i = 0; i < CHANNEL_LENGTH; i++) {
+								System.out.print(retfloat[i] + " ");
+							}
+							System.out.println();
+						}
+					}
+
+
+                }
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		private float[] convertData(byte[] bytes,int len) {
+			int sampleNumber = ((int)bytes[0]) & 0x00FF;
+
+			int[] integerData = new int[CHANNEL_LENGTH];
+			System.out.print(sampleNumber + "\t");
+			for (int i=0;i<CHANNEL_LENGTH;i++) {
+				byte triple[] = {bytes[1+i*3],bytes[1+i*3+1],bytes[1+i*3+2]};
+				integerData[i] = interpret24bitAsInt32(triple);
+			}
+			float[] floatData = new float[CHANNEL_LENGTH];
+			for(int i=0;i<CHANNEL_LENGTH;i++) {
+				floatData[i] = (float) ((float)integerData[i]*(4.5/EEG_GAIN/(2<<23-1)));
+			}
+			return floatData;
+		}
+
+		private int interpret24bitAsInt32(byte[] byteArray) {
+			int newInt = (
+					((0xFF & byteArray[0]) << 16) |
+							((0xFF & byteArray[1]) << 8) |
+							(0xFF & byteArray[2])
+			);
+			if ((newInt & 0x00800000) > 0) {
+				newInt |= 0xFF000000;
+			} else {
+				newInt &= 0x00FFFFFF;
+			}
+			return newInt;
+		}
+
+		int interpret16bitAsInt32(byte[] byteArray) {
+			int newInt = (
+					((0xFF & byteArray[0]) << 8) |
+							(0xFF & byteArray[1])
+			);
+			if ((newInt & 0x00008000) > 0) {
+				newInt |= 0xFFFF0000;
+			} else {
+				newInt &= 0x0000FFFF;
+			}
+			return newInt;
+		}
+	}
 
 	private class SerialReader implements Runnable {
 		private InputStream inputStream;
 
-		public SerialReader(InputStream inputStream) {
+		public SerialReader(InputStream inputStream) throws Exception {
+
 			this.inputStream = inputStream;
+
+			byte[] buffer = new byte[QUEUE_CAPACITY];
+			int len = 0;
+			byte lastByte = (byte)'a';
+			identificationString = "";
+			while( identificationString.endsWith("$$$") == false ) {
+				try {
+					len = inputStream.read(buffer);
+					for(int i=0;i<len;i++)
+						identificationString += String.valueOf((char)buffer[i]);
+				} catch (IOException e) {
+					e.printStackTrace();
+					break;
+				}
+			}
+
+			if(identificationString.endsWith("$$$")) {
+				System.out.println(identificationString);
+				//send reset signal
+			} else {
+				throw new Exception("Identification does not match with expected ->" + identificationString);
+			}
+
 		}
 
 		@Override
 		public void run() {
-			byte[] buffer = new byte[BYTE_BUFFER_SIZE];
+			byte[] buffer = new byte[QUEUE_CAPACITY];
 			int len = -1;
-
+			System.out.println("runnnnn");
 			try {
-				while( (len = inputStream.read(buffer)) > -1) {
-					//do something
+				while( ( len = inputStream.read(buffer) ) > -1) {
+					for(int i=0;i<len;i++) {
+						readQueue.put(buffer[i]);
+					}
 				}
 			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
@@ -156,15 +296,22 @@ public class SensorListenerEEG extends SensorListener{
 
 	private class SerialWriter  {
 		private OutputStream outputStream;
+		private long lastSentTime;
 
 		public SerialWriter(OutputStream outputStream) {
 			this.outputStream = outputStream;
 		}
 
-		public void writeBytes(byte[] bytes) {
+		public void writeByte(byte bytes) {
 			try {
+				if(System.currentTimeMillis() - lastSentTime - CONTINUOUS_COMMAND_DELAY < 0)
+					Thread.sleep(Math.max(CONTINUOUS_COMMAND_DELAY - System.currentTimeMillis() + lastSentTime,0));
+				lastSentTime = System.currentTimeMillis();
 				outputStream.write(bytes);
+
 			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
