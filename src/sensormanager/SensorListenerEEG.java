@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -28,8 +27,11 @@ public class SensorListenerEEG extends SensorListener{
 	private static final int EEG_GAIN = 24;
 	private static final byte CODE_RESET = 'v';
 	private static final byte CODE_START_STREAMING = 'b';
+	private static final byte CODE_CHANNEL_ON[] = {'!', '@', '#', '$', '%', '^', '&', '*','Q','W','E','R','T','Y','U','I'};
+	private static final byte CODE_CHANNEL_OFF[] = {'1','2','3','4','5','6','7','8','q','w','e','r','t','y','u','i'};
+	private static final byte CODE_STOP_STREAMING = 's';
 	private static final int QUEUE_CAPACITY = 1024;
-	private static final int CHANNEL_LENGTH = 8;
+	private static final int CHANNEL_LENGTH = 8; //8 or 16
 	private static final int MESSAGE_LENGTH = 33;
 	private static final long CONTINUOUS_COMMAND_DELAY = 500;
 	private static final byte DATA_HEADER = (byte) 0xA0;
@@ -115,6 +117,18 @@ public class SensorListenerEEG extends SensorListener{
 
 	public void startStreaming() {
 		serialWriter.writeByte(CODE_START_STREAMING);
+	}
+
+	public void stopStreaming() {
+		serialWriter.writeByte(CODE_STOP_STREAMING);
+	}
+
+	public void setChannelState(int channel, boolean state) {
+		if(state) {
+			serialWriter.writeByte(CODE_CHANNEL_ON[channel]);
+		} else {
+			serialWriter.writeByte(CODE_CHANNEL_OFF[channel]);
+		}
 	}
 
 	@Override
