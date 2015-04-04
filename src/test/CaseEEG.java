@@ -6,6 +6,12 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import shared.FeatureList;
 import shared.TimestampedRawData;
@@ -47,6 +53,30 @@ public class CaseEEG {
 				"can - sexy3 - sonlari 9",
 				"can - sexy4 - 8"};
 	}
+	
+	/**
+	 * concurrency test
+	 */
+	public void runtest5() {
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		Callable<Integer> callable = new Callable<Integer>(){
+				public Integer call(){
+					System.out.print(csvPath);
+					return 5;
+				}
+		};
+		Future<Integer> future = executor.submit(callable);
+		try {
+			System.out.println(future.get());
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * same with runtest3 but demonstrates time based epocher
 	 * @throws Exception

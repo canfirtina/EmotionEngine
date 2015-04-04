@@ -72,7 +72,7 @@ public class EmotionEngineApp {
 		
 		//loadWindow();
 		try {
-			new test.CaseEEG().runtest4();
+			new test.CaseEEG().runtest5();
 			//new test.CaseEEG().runtest3();
 			//new test.CaseEEG().runtest2();
 			//new test.CaseEEG().runtest1();
