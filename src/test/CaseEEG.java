@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import shared.FeatureList;
+import shared.TimestampedRawData;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instance;
@@ -19,6 +20,8 @@ import emotionlearner.DataEpocher;
 import emotionlearner.EEGClassifier;
 import emotionlearner.FeatureExtractor;
 import emotionlearner.FeatureExtractorEEG;
+import emotionlearner.LengthBasedDataEpocher;
+import emotionlearner.TimeBasedDataEpocher;
 
 public class CaseEEG {
 	private String testFolderPath = "Can Labeled ARFF/Test/";
@@ -44,9 +47,53 @@ public class CaseEEG {
 				"can - sexy3 - sonlari 9",
 				"can - sexy4 - 8"};
 	}
+	/**
+	 * same with runtest3 but demonstrates time based epocher
+	 * @throws Exception
+	 */
+	public void runtest4() throws Exception{
+		String fullPath = csvPath+csvFileNamesWithoutExtension[0]+".csv";
+		File outFile = new File(projectCSVPath+"time"+csvFileNamesWithoutExtension[0]+".csv");
+		System.out.println(outFile.getAbsolutePath());
+		outFile.createNewFile();
+		PrintWriter pw = new PrintWriter(outFile.getAbsolutePath());
+		
+		int frequency = 256;
+		double [][]M = CSVParser.read(fullPath);
+		//Time based epocher with 4 seconds
+		TimeBasedDataEpocher epocher = new TimeBasedDataEpocher(4000);
+		FeatureExtractor extractor = new FeatureExtractorEEG();
+		
+		for(int i=0;i<M.length;++i){
+			TimestampedRawData data = new TimestampedRawData(M[i], (long)(i*((double)1000/frequency)) ) ;
+			//System.out.println(i + " " + data.getTimestamp().getTime());
+			
+			//new data is not in the right time interval or last data
+			if(!epocher.isNewDataSuitable(data) || i==M.length-1){
+				//System.out.println(i + " " + data.getTimestamp().getTime());
+				if(i==M.length-1)
+					epocher.addData(data);
+				ArrayList<TimestampedRawData> epoch = epocher.getEpoch();
+				extractor.appendRawData(epoch);
+				
+				FeatureList list = extractor.getFeatures();
+				pw.print(list.get(0));
+				for(int j=1;j<list.size();++j)
+					pw.print(","+list.get(j));
+				pw.println();
+				
+				extractor.reset();
+				epocher.reset();
+			}
+			
+			if(i!=M.length-1)
+				epocher.addData(data);
+		}
+		pw.close();
+	}
 	
 	/**
-	 * reads csv file, epochs, extracts features, writes to csv file (without feature selection)
+	 * reads csv file, epochs, extracts features, writes to csv file (without feature selection) (length based epoc)
 	 * @throws Exception
 	 */
 	public void runtest3() throws Exception {
@@ -58,14 +105,14 @@ public class CaseEEG {
 		
 		
 		double [][]M = CSVParser.read(fullPath);
-		DataEpocher epocher = new DataEpocher(1024);
+		DataEpocher epocher = new LengthBasedDataEpocher(1024);
 		FeatureExtractor extractor = new FeatureExtractorEEG();
 		
 		for(int i=0;i<M.length;++i){
-			epocher.addData(M[i]);
+			epocher.addData(new TimestampedRawData(M[i]));
 			
 			if(epocher.readyForEpoch()){
-				ArrayList<double []>epoch = epocher.getEpoch();
+				ArrayList<TimestampedRawData>epoch = epocher.getEpoch();
 				extractor.appendRawData(epoch);
 				
 				FeatureList list = extractor.getFeatures();

@@ -1,6 +1,8 @@
 package emotionlearner;
 
+
 import shared.FeatureList;
+import shared.TimestampedRawData;
 /**
  * Extract features from GSR signals
  *
@@ -12,7 +14,7 @@ public class FeatureExtractorGSR extends FeatureExtractor {
 	 * @param data
 	 */
 	@Override
-	public void appendRawData(double[] data) {
+	public void appendRawData(TimestampedRawData data) {
 		// TODO Auto-generated method stub
 
 	}
@@ -23,6 +25,12 @@ public class FeatureExtractorGSR extends FeatureExtractor {
 	 */
 	@Override
 	public FeatureList getFeatures() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected double[] selectFeatures(double[] features) {
 		// TODO Auto-generated method stub
 		return null;
 	}

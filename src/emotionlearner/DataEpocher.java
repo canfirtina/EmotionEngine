@@ -2,59 +2,50 @@ package emotionlearner;
 
 import java.util.ArrayList;
 
+import shared.TimestampedRawData;
+
 /**
- * epoches raw data when enough time is passed 
+ * epoches raw data when enough X is passed 
  * @author aliyesilyaprak
  *
  */
-public class DataEpocher {
+public abstract class DataEpocher {
 	/**
-	 * window size of raw data
+	 * constraint that is used to epoch
 	 */
-	private int epochLength;
+	protected long constraint;
 	
 	/**
 	 * raw data 
 	 */
-	private ArrayList<double[]> allData;
+	protected ArrayList<TimestampedRawData> allData;
 	
 	/**
-	 * Creates Epocher with raw data window size as length
+	 * Creates Epocher with raw data window with constraint
 	 * @param epochLength
 	 */
-	public DataEpocher(int length){
-		this.epochLength = length;
-		allData = new ArrayList<double[]>();
+	public DataEpocher(long constraint){
+		this.constraint = constraint;
+		allData = new ArrayList<TimestampedRawData>();
 	}
 	
 	/**
-	 * returns if enough data is available
-	 * @return
+	 * Creates Epocher with raw data window w
+	 * @param epochLength
 	 */
-	public boolean readyForEpoch(){
-		if(allData.size() >= epochLength)
-			return true;
-		return false;
-	}
+	public abstract boolean addData(TimestampedRawData rawData);
 	
 	/**
-	 * adds another row
-	 * @param data
+	 * returns if it is ready to epoch
 	 * @return
 	 */
-	public boolean addData(double[] data){
-		if(allData.size() >= epochLength)
-			return false;
-		
-		allData.add(data);
-		return true;
-	}
+	public abstract boolean readyForEpoch();
 	
 	/**
 	 * get current epoch data
 	 * @return
 	 */
-	public ArrayList<double[]> getEpoch(){
+	public ArrayList<TimestampedRawData> getEpoch(){
 		return allData;
 	}
 	
@@ -62,7 +53,7 @@ public class DataEpocher {
 	 * reset data for reuse
 	 */
 	public void reset(){
-		allData = new ArrayList<double[]>();
+		allData = new ArrayList<TimestampedRawData>();
 	}
 	
 }

@@ -3,6 +3,7 @@ package emotionlearner;
 import java.util.ArrayList;
 
 import shared.FeatureList;
+import shared.TimestampedRawData;
 
 /**
  * Blueprint of feature extracting classes. Extracts features from rawData
@@ -12,12 +13,12 @@ public abstract class FeatureExtractor {
 	/**
 	 * Raw data window that keeps last N byte[] data
 	 */
-	protected ArrayList<double[]> rawData;
+	protected ArrayList<TimestampedRawData> rawData;
 	/**
 	 * Sets raw data to be extracted feature from
 	 * @param data
 	 */
-	public void appendRawData(double[] data){
+	public void appendRawData(TimestampedRawData data){
 		rawData.add(data);
 	}
 	
@@ -25,9 +26,9 @@ public abstract class FeatureExtractor {
 	 * Appends raw data to be extracted feature from 
 	 * @param data
 	 */
-	public void appendRawData(ArrayList<double[]> data){
+	public void appendRawData(ArrayList<TimestampedRawData> data){
 		for(int i=0;i<data.size();++i)
-			rawData.add(data.get(i));
+			appendRawData(data.get(i));
 	}
 	
 	/**
@@ -37,10 +38,17 @@ public abstract class FeatureExtractor {
 	public abstract FeatureList getFeatures();
 	
 	/**
+	 * Selects the best features
+	 * @param features
+	 * @return
+	 */
+	protected abstract double[] selectFeatures(double[] features);
+	
+	/**
 	 * Clears raw data for reusage
 	 */
 	public void reset(){
-		rawData = new ArrayList<double[]>();
+		rawData = new ArrayList<TimestampedRawData>();
 	}
 	
 	//public abstract ();

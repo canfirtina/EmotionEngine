@@ -35,10 +35,10 @@ public class FeatureExtractorEEG extends FeatureExtractor{
 	public FeatureList getFeatures() {
 		final int numFeatures = 20;
 		
-		double[][] rawDataTransposed = new double[rawData.get(0).length][rawData.size()];
+		double[][] rawDataTransposed = new double[rawData.get(0).getData().length][rawData.size()];
 		for(int i=0;i<rawDataTransposed.length;++i)
 			for(int j=0;j<rawDataTransposed[i].length;++j)
-				rawDataTransposed[i][j] = rawData.get(j)[i];
+				rawDataTransposed[i][j] = rawData.get(j).getData()[i];
 		
 		double[] res = new double[rawDataTransposed.length * numFeatures];
 		double[] currentFeatures = null;
@@ -87,7 +87,18 @@ public class FeatureExtractorEEG extends FeatureExtractor{
 				res[i * numFeatures + j] = currentFeatures[j];
 		}
 		
-		return new FeatureList(res);
+		return new FeatureList(selectFeatures(res));
 	}
+
+
+	/**
+	 * To be continued
+	 */
+	@Override
+	protected double[] selectFeatures(double[] features) {
+		return features;
+	}
+	
+	
 	
 }

@@ -1,6 +1,7 @@
 package emotionlearner;
 
 import shared.FeatureList;
+import shared.TimestampedRawData;
 /**
  * Extracts features from Heart Rate data
  *
@@ -12,7 +13,7 @@ public class FeatureExtractorHR extends FeatureExtractor {
 	 * @param data
 	 */
 	@Override
-	public void appendRawData(double[] data) {
+	public void appendRawData(TimestampedRawData data) {
 		// TODO Auto-generated method stub
 
 	}
@@ -23,6 +24,12 @@ public class FeatureExtractorHR extends FeatureExtractor {
 	 */
 	@Override
 	public FeatureList getFeatures() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected double[] selectFeatures(double[] features) {
 		// TODO Auto-generated method stub
 		return null;
 	}
