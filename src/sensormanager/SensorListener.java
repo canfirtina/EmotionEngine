@@ -1,5 +1,6 @@
 package sensormanager;
 
+import emotionlearner.DataEpocher;
 import shared.TimestampedRawData;
 
 import java.util.ArrayList;
@@ -11,12 +12,15 @@ import java.util.ArrayList;
  */
 public abstract class SensorListener {
 
+	/**
+	 * Meant to be passed by observer
+	 */
+	protected DataEpocher dataEpocher;
 
-	private static int windowSize;
 	/**
 	 * Port number of the sensor
 	 */
-	private int portNumber;
+	protected int portNumber;
 	
 	/**
 	 * Tells if the connection is established.
@@ -97,4 +101,8 @@ public abstract class SensorListener {
 	 * @return
 	 */
 	public abstract boolean removeObserver( SensorObserver observer);
+
+	public void setDataEpocher(DataEpocher dataEpocher) {
+		this.dataEpocher = dataEpocher;
+	}
 }

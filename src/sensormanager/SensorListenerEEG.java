@@ -1,5 +1,6 @@
 package sensormanager;
 
+import emotionlearner.DataEpocher;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
@@ -11,6 +12,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -57,8 +60,7 @@ public class SensorListenerEEG extends SensorListener{
 	private BlockingQueue<Byte> readQueue;
 	private String identificationString;
 	private ArrayList<SensorObserver> observers = new ArrayList<>(1);
-	private ArrayBlockingQueue<TimestampedRawData[]> dataStacked = new ArrayBlockingQueue<>(500);
-
+	private List<TimestampedRawData> dataStacked = Collections.synchronizedList(new ArrayList<TimestampedRawData>(500));
 
 	public SensorListenerEEG(int portNumber) {
 		
@@ -190,6 +192,7 @@ public class SensorListenerEEG extends SensorListener{
 		return false;
 	}
 
+
 	private class DataInterpreter implements Runnable {
 
 		@Override
@@ -198,7 +201,7 @@ public class SensorListenerEEG extends SensorListener{
 
 				byte[] data = new byte[MESSAGE_LENGTH-2];
 				Byte b;
-				ArrayList<TimestampedRawData> datas = new ArrayList<>(windowSize);//TODO optimization
+				int countUptoNotification = 0;
 
 				while( (b = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS)) != null ) {
 
@@ -210,12 +213,9 @@ public class SensorListenerEEG extends SensorListener{
 						if(readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS).compareTo( DATA_FOOT) == 0) {
 
 
-							datas.add(new TimestampedRawData(convertData(data, MESSAGE_LENGTH -2)));
-							if (datas.size() == windowSize) {
-								dataStacked.add((TimestampedRawData[]) datas.toArray());
+							dataStacked.add(new TimestampedRawData(convertData(data, MESSAGE_LENGTH -2)));
+							if(countUptoNotification++ == windowSize)
 								notifyObservers();
-								datas = new ArrayList<>(windowSize);
-							}
 
 
 /*
