@@ -33,7 +33,7 @@ public abstract class SensorListener {
 	 * Stores all the observers that registered to
 	 * observe the changes of the status of this sensor
 	 */
-	private ArrayList<SensorObserver> observerCollection;
+	protected ArrayList<SensorObserver> observerCollection;
 	
 	/**
 	 * Raw data of the sensor. As this data changes, observers

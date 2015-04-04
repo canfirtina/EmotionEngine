@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -42,7 +41,6 @@ public class SensorListenerEEG extends SensorListener{
 	private static final long CONTINUOUS_COMMAND_DELAY = 500;
 	private static final byte DATA_HEADER = (byte) 0xA0;
 	private static final byte DATA_FOOT = (byte) 0xC0;
-	private static int windowSize = 50;
 
 	private DataInterpreter dataInterpreter;
 	private SerialReader serialReader;
@@ -59,8 +57,7 @@ public class SensorListenerEEG extends SensorListener{
 
 	private BlockingQueue<Byte> readQueue;
 	private String identificationString;
-	private ArrayList<SensorObserver> observers = new ArrayList<>(1);
-	private List<TimestampedRawData> dataStacked = Collections.synchronizedList(new ArrayList<TimestampedRawData>(500));
+	private List<TimestampedRawData> lastEpoch = new ArrayList<>();
 
 	public SensorListenerEEG(int portNumber) {
 		
@@ -147,7 +144,7 @@ public class SensorListenerEEG extends SensorListener{
 
 	@Override
 	public TimestampedRawData[] getSensorData() {
-		return null;
+		return (TimestampedRawData[]) lastEpoch.toArray();
 	}
 
 	public float[] getNextSample() {
@@ -174,7 +171,7 @@ public class SensorListenerEEG extends SensorListener{
 
 	@Override
 	protected void notifyObservers() {
-		for(SensorObserver observer: observers)
+		for(SensorObserver observer: observerCollection)
 			observer.dataArrived(this);
 		
 	}
@@ -182,7 +179,7 @@ public class SensorListenerEEG extends SensorListener{
 	@Override
 	public boolean registerObserver(SensorObserver observer) {
 
-		observers.add(observer);
+		observerCollection.add(observer);
 		return true; //TODO i do not know how this function can return false
 	}
 
@@ -213,9 +210,13 @@ public class SensorListenerEEG extends SensorListener{
 						if(readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS).compareTo( DATA_FOOT) == 0) {
 
 
-							dataStacked.add(new TimestampedRawData(convertData(data, MESSAGE_LENGTH -2)));
-							if(countUptoNotification++ == windowSize)
+							if (dataEpocher.addData(new TimestampedRawData(convertData(data, MESSAGE_LENGTH - 2))) == false) {
+								lastEpoch = dataEpocher.getEpoch();
+								dataEpocher.reset();
 								notifyObservers();
+
+							}
+
 
 
 /*
