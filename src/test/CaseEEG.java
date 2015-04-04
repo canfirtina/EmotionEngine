@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -17,6 +18,8 @@ import emotionlearner.*;
 import sensormanager.SensorListenerEEG;
 import shared.FeatureList;
 import shared.TimestampedRawData;
+import usermanager.User;
+import usermanager.UserManager;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instance;
@@ -167,10 +170,10 @@ public class CaseEEG {
 		ArffLoader trainLoader= new ArffLoader();
 		trainLoader.setFile(new File(trainFolderPath + trainFolderPath + "cantrainingFrustrated2Out.arff"));
 		ArffLoader testLoader = new ArffLoader();
-		testLoader.setFile(new File(testFolderPath  + testFolderPath + "fcan - frustrated2 - cat mario 2.arff"));
+		testLoader.setFile(new File(testFolderPath + testFolderPath + "fcan - frustrated2 - cat mario 2.arff"));
 		
 		Instances trainInstances = trainLoader.getDataSet();
-		trainInstances.setClassIndex(trainInstances.numAttributes()-1);
+		trainInstances.setClassIndex(trainInstances.numAttributes() - 1);
 		
 		String[] options = {"-K", "1"};
 		Classifier svmClassifier = (Classifier)Classifier.forName("weka.classifiers.mi.CitationKNN", options);
@@ -244,5 +247,21 @@ public class CaseEEG {
 //		svmClassifier.test( testFolderPath + "fcan - sexy4 - 8.arff");
 		
 		svmClassifier.trainWithCrossValidation( trainFolderPath + "cantrainingall.arff", "weka.classifiers.mi.CitationKNN", options, 10);
+	}
+
+	public void testUserManager() {
+		UserManager um = UserManager.getInstance();
+		new Scanner(System.in).nextLine();
+
+		User user = um.getCurrentUser();
+
+		boolean oldumu = um.newUser("ayhun", "babako");
+
+		user = um.getCurrentUser();
+
+		oldumu = um.login("ayhun", "babako");
+
+		user = um.getCurrentUser();
+
 	}
 }

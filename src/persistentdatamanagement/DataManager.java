@@ -38,6 +38,21 @@ public class DataManager {
             // if directory is newly created, create a default user
             saveUser(new User("default", "default"));
         }
+        
+        dir = new File(GAME_RECORDS_DIRECTORY + "/" + CURRENT_USER);
+        // If data directory doesn't exist, create it
+        if (!dir.exists()) {
+        	FileOutputStream fout;
+            try {
+                fout = new FileOutputStream(GAME_RECORDS_DIRECTORY + "/" + CURRENT_USER);
+                ObjectOutputStream oos = new ObjectOutputStream(fout);
+                oos.writeObject(new User("default", "default"));
+                oos.flush();
+                oos.close();                
+            } catch (IOException e) {
+                e.printStackTrace();
+            };
+        }
 
         currentUser = getCurrentUser().getName();
     }
@@ -59,6 +74,7 @@ public class DataManager {
      */
     public void addUserDirectory(String username) {
         File dir = new File(GAME_RECORDS_DIRECTORY + "/" + username);
+
         // If user directory doesn't exist, create it
         if (!dir.exists()) {
             dir.mkdir();
@@ -87,6 +103,7 @@ public class DataManager {
      * @param userData serializable user object
      */
     public boolean saveUser(User userData) {
+        addUserDirectory(userData.getName());
         FileOutputStream fout;
         try {
             fout = new FileOutputStream(getUserDirectory(userData.getName()) + "/" + USER_OBJECT_NAME);
