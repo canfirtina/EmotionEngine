@@ -1,5 +1,7 @@
 package sensormanager;
 
+import shared.TimestampedRawData;
+
 /**
  * Connects to a GSR sensor on a specific port, 
  * gets raw GSR data from the sensor and notifies its observers periodically
@@ -25,7 +27,7 @@ public class SensorListenerHR extends SensorListener{
 	}
 
 	@Override
-	public byte[] getSensorData() {
+	public TimestampedRawData[] getSensorData() {
 		// TODO Auto-generated method stub
 		return null;
 	}

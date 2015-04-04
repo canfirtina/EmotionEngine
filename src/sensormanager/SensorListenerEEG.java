@@ -4,10 +4,13 @@ import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
 import gnu.io.SerialPort;
+import shared.TimestampedRawData;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +39,7 @@ public class SensorListenerEEG extends SensorListener{
 	private static final long CONTINUOUS_COMMAND_DELAY = 500;
 	private static final byte DATA_HEADER = (byte) 0xA0;
 	private static final byte DATA_FOOT = (byte) 0xC0;
+	private static int windowSize = 50;
 
 	private DataInterpreter dataInterpreter;
 	private SerialReader serialReader;
@@ -52,6 +56,8 @@ public class SensorListenerEEG extends SensorListener{
 
 	private BlockingQueue<Byte> readQueue;
 	private String identificationString;
+	private ArrayList<SensorObserver> observers = new ArrayList<>(1);
+	private ArrayBlockingQueue<TimestampedRawData[]> dataStacked = new ArrayBlockingQueue<>(500);
 
 
 	public SensorListenerEEG(int portNumber) {
@@ -111,8 +117,8 @@ public class SensorListenerEEG extends SensorListener{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		return false;
+
+		return true;
 	}
 
 	public void startStreaming() {
@@ -138,8 +144,7 @@ public class SensorListenerEEG extends SensorListener{
 	}
 
 	@Override
-	public byte[] getSensorData() {
-		// TODO Auto-generated method stub
+	public TimestampedRawData[] getSensorData() {
 		return null;
 	}
 
@@ -167,14 +172,16 @@ public class SensorListenerEEG extends SensorListener{
 
 	@Override
 	protected void notifyObservers() {
-		// TODO Auto-generated method stub
+		for(SensorObserver observer: observers)
+			observer.dataArrived(this);
 		
 	}
 
 	@Override
 	public boolean registerObserver(SensorObserver observer) {
-		// TODO Auto-generated method stub
-		return false;
+
+		observers.add(observer);
+		return true; //TODO i do not know how this function can return false
 	}
 
 	@Override
@@ -191,6 +198,8 @@ public class SensorListenerEEG extends SensorListener{
 
 				byte[] data = new byte[MESSAGE_LENGTH-2];
 				Byte b;
+				ArrayList<TimestampedRawData> datas = new ArrayList<>(windowSize);//TODO optimization
+
 				while( (b = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS)) != null ) {
 
 					if (b.compareTo(DATA_HEADER) == 0 ) {
@@ -199,11 +208,22 @@ public class SensorListenerEEG extends SensorListener{
 							data[i] = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
 						}
 						if(readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS).compareTo( DATA_FOOT) == 0) {
-							float[] retfloat = convertData(data, MESSAGE_LENGTH - 2);
+
+
+							datas.add(new TimestampedRawData(convertData(data, MESSAGE_LENGTH -2)));
+							if (datas.size() == windowSize) {
+								dataStacked.add((TimestampedRawData[]) datas.toArray());
+								notifyObservers();
+								datas = new ArrayList<>(windowSize);
+							}
+
+
+/*
 							for (int i = 0; i < CHANNEL_LENGTH; i++) {
 								System.out.print(retfloat[i] + " ");
 							}
 							System.out.println();
+*/
 						}
 					}
 
@@ -214,7 +234,7 @@ public class SensorListenerEEG extends SensorListener{
 			}
 		}
 
-		private float[] convertData(byte[] bytes,int len) {
+		private double[] convertData(byte[] bytes,int len) {
 			int sampleNumber = ((int)bytes[0]) & 0x00FF;
 
 			int[] integerData = new int[CHANNEL_LENGTH];
@@ -223,11 +243,11 @@ public class SensorListenerEEG extends SensorListener{
 				byte triple[] = {bytes[1+i*3],bytes[1+i*3+1],bytes[1+i*3+2]};
 				integerData[i] = interpret24bitAsInt32(triple);
 			}
-			float[] floatData = new float[CHANNEL_LENGTH];
+			double[] doubleData = new double[CHANNEL_LENGTH];
 			for(int i=0;i<CHANNEL_LENGTH;i++) {
-				floatData[i] = (float) ((float)integerData[i]*(4.5/EEG_GAIN/(2<<23-1)));
+				doubleData[i] = ((double)integerData[i]*(4.5/EEG_GAIN/(2<<23-1)));
 			}
-			return floatData;
+			return doubleData;
 		}
 
 		private int interpret24bitAsInt32(byte[] byteArray) {

@@ -1,5 +1,7 @@
 package sensormanager;
 
+import shared.TimestampedRawData;
+
 import java.util.ArrayList;
 
 /**
@@ -8,7 +10,9 @@ import java.util.ArrayList;
  *
  */
 public abstract class SensorListener {
-	
+
+
+	private static int windowSize;
 	/**
 	 * Port number of the sensor
 	 */
@@ -54,7 +58,7 @@ public abstract class SensorListener {
 	 * Gives the current sensor data as bytes
 	 * @return the raw data of the sensor
 	 */
-	public abstract byte[] getSensorData();
+	public abstract TimestampedRawData[] getSensorData();
 	
 	/**
 	 * Frequency of the sensors in Hz.
