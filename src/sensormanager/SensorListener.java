@@ -86,6 +86,17 @@ public abstract class SensorListener {
 	 * When a data arrives, a connection is established, or the sensor
 	 * is disconnected, observers are notified.
 	 */
+
+	/**
+	 * starts data stream and packaging
+	 */
+	public abstract void startStreaming();
+
+	/**
+	 * stops data stream
+	 */
+	public abstract void stopStreaming();
+
 	protected abstract void notifyObservers();
 	
 	/**
