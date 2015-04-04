@@ -27,25 +27,36 @@ public class UserManager {
 	 * Private constructor.
 	 */
 	protected UserManager() {
-		users = new ArrayList<User>(Arrays.asList((User[]) DataManager.getInstance().loadUsersData()));
-		currentUser = DataManager.getInstance().getCurrentUser();
+		users = DataManager.getInstance().getAllUsers();
+		currentUser = DataManager.getInstance().getCurrentUser().getName();
 	}
 	
 	/**
-	 * Checks the validity of the given credentials.
+	 * Checks the validity of the given credentials and logs the user in (changes the current user).
 	 * @param userName
 	 * @param password
 	 * @return
 	 */
-	public boolean login(String userName, String password){
-		return true;
+	public boolean login(String userName, String password) {
+		User user = DataManager.getInstance().getUser(userName);
+
+		boolean res = (user != null) && user.checkPassword(password) && DataManager.getInstance().setCurrentUser(user.getName()) ;
+
+		if(res)
+			currentUser = user.getName();
+
+		return res;
 	}
 	
 	/**
 	 * Logs the user out.
 	 */
-	public void logout(){
-		currentUser = null;
+	public boolean logout(){
+		if(DataManager.getInstance().setCurrentUser("default")){
+			currentUser = "default";
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -77,28 +88,27 @@ public class UserManager {
 	public User getCurrentUser(){
 		return getUser(currentUser);
 	}
-	
-	/**
-	 * Creates a new user.
-	 * @param userName
-	 * @param password
-	 */
-	public void newUser(String userName, String password){
-		DataManager.getInstance().saveUser(userName, new User(userName,password));
-	}
 
 	/**
-	 * Changes the current user.
-	 * 
+	 * Creates a new user
 	 * @param userName
 	 * @param password
+	 * @return
 	 */
-	public void changeUser(String userName, String password) {
-		if (getUser(userName).checkPassword(password))
-			currentUser = userName;
-		
-		DataManager.getInstance().setCurrentUser(userName);
+	public boolean newUser(String userName, String password){
+		// if user already exists
+		if(getUser(userName) != null)
+			return false;
+
+		User user = new User(userName,password);
+		if( DataManager.getInstance().saveUser(user)) {
+			users.add(user);
+			return true;
+		}
+
+		return false;
 	}
+
 	
 	/**
 	 * Checks if the given sensor exists in the current user.
