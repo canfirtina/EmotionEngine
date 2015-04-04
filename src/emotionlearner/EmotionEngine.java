@@ -108,20 +108,22 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	
 	/**
 	 * Creates a sensor listener of a type which uses a certain port number
-	 * @param portNumber
+	 * @param comPort
 	 * @param sensorType
 	 */
 	@Override
 	public void createSensorListener(String comPort, 
-			Class<SensorListener> sensorType) {
+			Class sensorType) {
 		SensorListener listener = null;
 		
 		if(sensorType.equals(SensorListenerEEG.class))
 			listener = new SensorListenerEEG("COM4");
 		
 		listener.registerObserver(this);
-		if(listener.connect())
+		if(listener.connect()) {
 			pendingSensorListeners.add(listener);
+			connectionEstablished(listener);
+		}
 	}
 	
 	/**
@@ -134,9 +136,9 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		
 		//new epoch
 		extractor.reset();
-		TimestampedRawData[] rawDataArray = sensor.getSensorData();
-		for(int i=0;i<rawDataArray.length;++i)
-			extractor.appendRawData(rawDataArray[i]);
+		ArrayList<TimestampedRawData> rawDataArray = sensor.getSensorData();
+
+		extractor.appendRawData(rawDataArray);
 		
 		FeatureList list = extractor.getFeatures();
 		System.out.println("New Feature List");

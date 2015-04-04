@@ -13,6 +13,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import emotionlearner.*;
+import sensormanager.SensorListenerEEG;
 import shared.FeatureList;
 import shared.TimestampedRawData;
 import weka.classifiers.Classifier;
@@ -21,13 +23,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffLoader.ArffReader;
-import emotionlearner.CSVParser;
-import emotionlearner.DataEpocher;
-import emotionlearner.EEGClassifier;
-import emotionlearner.FeatureExtractor;
-import emotionlearner.FeatureExtractorEEG;
-import emotionlearner.LengthBasedDataEpocher;
-import emotionlearner.TimeBasedDataEpocher;
 
 public class CaseEEG {
 	private String testFolderPath = "Can Labeled ARFF/Test/";
@@ -53,7 +48,12 @@ public class CaseEEG {
 				"can - sexy3 - sonlari 9",
 				"can - sexy4 - 8"};
 	}
-	
+
+	public void runtest6(){
+		EmotionEngine engine = new EmotionEngine();
+		engine.createSensorListener("COM4", SensorListenerEEG.class);
+	}
+
 	/**
 	 * concurrency test
 	 */

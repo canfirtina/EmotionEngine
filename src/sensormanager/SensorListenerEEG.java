@@ -1,6 +1,5 @@
 package sensormanager;
 
-import emotionlearner.DataEpocher;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
@@ -11,8 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +32,7 @@ public class SensorListenerEEG extends SensorListener{
 	private static final byte CODE_CHANNEL_ON[] = {'!', '@', '#', '$', '%', '^', '&', '*','Q','W','E','R','T','Y','U','I'};
 	private static final byte CODE_CHANNEL_OFF[] = {'1','2','3','4','5','6','7','8','q','w','e','r','t','y','u','i'};
 	private static final byte CODE_STOP_STREAMING = 's';
-	private static final int QUEUE_CAPACITY = 1024;
+	private static final int BUFFER_SIZE = 1024;
 	private static final int CHANNEL_LENGTH = 8; //8 or 16
 	private static final int MESSAGE_LENGTH = 33;
 	private static final long CONTINUOUS_COMMAND_DELAY = 500;
@@ -57,7 +54,7 @@ public class SensorListenerEEG extends SensorListener{
 
 	private BlockingQueue<Byte> readQueue;
 	private String identificationString;
-	private List<TimestampedRawData> lastEpoch = new ArrayList<>();
+	private ArrayList<TimestampedRawData> lastEpoch;
 
 	public SensorListenerEEG(int portNumber) {
 		
@@ -67,7 +64,7 @@ public class SensorListenerEEG extends SensorListener{
 	public SensorListenerEEG(String comPort) {
 		try {
 			this.commPortIdentifier = CommPortIdentifier.getPortIdentifier(comPort);
-			this.readQueue = new ArrayBlockingQueue<Byte>(QUEUE_CAPACITY);
+			this.readQueue = new ArrayBlockingQueue<Byte>(BUFFER_SIZE);
 		} catch (NoSuchPortException e) {
 			e.printStackTrace();
 		}
@@ -143,8 +140,8 @@ public class SensorListenerEEG extends SensorListener{
 	}
 
 	@Override
-	public TimestampedRawData[] getSensorData() {
-		return (TimestampedRawData[]) lastEpoch.toArray();
+	public ArrayList<TimestampedRawData> getSensorData() {
+		return lastEpoch;
 	}
 
 	public float[] getNextSample() {
@@ -198,7 +195,6 @@ public class SensorListenerEEG extends SensorListener{
 
 				byte[] data = new byte[MESSAGE_LENGTH-2];
 				Byte b;
-				int countUptoNotification = 0;
 
 				while( (b = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS)) != null ) {
 
@@ -209,10 +205,11 @@ public class SensorListenerEEG extends SensorListener{
 						}
 						if(readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS).compareTo( DATA_FOOT) == 0) {
 
-
-							if (dataEpocher.addData(new TimestampedRawData(convertData(data, MESSAGE_LENGTH - 2))) == false) {
+							TimestampedRawData tsrd = new TimestampedRawData(convertData(data, MESSAGE_LENGTH - 2));
+							if (dataEpocher.addData(tsrd) == false) {
 								lastEpoch = dataEpocher.getEpoch();
 								dataEpocher.reset();
+								dataEpocher.addData(tsrd);
 								notifyObservers();
 
 							}
@@ -239,7 +236,6 @@ public class SensorListenerEEG extends SensorListener{
 			int sampleNumber = ((int)bytes[0]) & 0x00FF;
 
 			int[] integerData = new int[CHANNEL_LENGTH];
-			System.out.print(sampleNumber + "\t");
 			for (int i=0;i<CHANNEL_LENGTH;i++) {
 				byte triple[] = {bytes[1+i*3],bytes[1+i*3+1],bytes[1+i*3+2]};
 				integerData[i] = interpret24bitAsInt32(triple);
@@ -286,7 +282,7 @@ public class SensorListenerEEG extends SensorListener{
 
 			this.inputStream = inputStream;
 
-			byte[] buffer = new byte[QUEUE_CAPACITY];
+			byte[] buffer = new byte[BUFFER_SIZE];
 			int len = 0;
 			byte lastByte = (byte)'a';
 			identificationString = "";
@@ -312,7 +308,7 @@ public class SensorListenerEEG extends SensorListener{
 
 		@Override
 		public void run() {
-			byte[] buffer = new byte[QUEUE_CAPACITY];
+			byte[] buffer = new byte[MESSAGE_LENGTH];
 			int len = -1;
 			System.out.println("runnnnn");
 			try {

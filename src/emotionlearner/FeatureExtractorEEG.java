@@ -77,7 +77,7 @@ public class FeatureExtractorEEG extends FeatureExtractor{
 			// buna da bak
 			currentFeatures[13] = CTMSecondOrderDifferencePlot.calculateCTM(rawDataTransposed[i], 100);
 			currentFeatures[14] = LempelZivComplexity.calculateLempelZivComplexity(rawDataTransposed[i]);
-			currentFeatures[15] = LyapunovExponent.calculateLargestLyapunovExponentStableWolf(rawDataTransposed[i]);
+			currentFeatures[15] = 0;//LyapunovExponent.calculateLargestLyapunovExponentStableWolf(rawDataTransposed[i]); TODO
 			currentFeatures[16] = new StandardDeviationRatio(rawDataTransposed[i]).getCSI();
 			currentFeatures[17] = new StandardDeviationRatio(rawDataTransposed[i]).getCVI();
 			currentFeatures[18] = new StandardDeviationRatio(rawDataTransposed[i]).getSD1SD2Ratio();

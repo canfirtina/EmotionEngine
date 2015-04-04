@@ -2,6 +2,8 @@ package sensormanager;
 
 import shared.TimestampedRawData;
 
+import java.util.ArrayList;
+
 /**
  * Connects to a GSR sensor on a specific port, 
  * gets raw GSR data from the sensor and notifies its observers periodically
@@ -27,7 +29,7 @@ public class SensorListenerGSR extends SensorListener{
 	}
 
 	@Override
-	public TimestampedRawData[] getSensorData() {
+	public ArrayList<TimestampedRawData> getSensorData() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -48,6 +50,16 @@ public class SensorListenerGSR extends SensorListener{
 	public boolean isConnected() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void startStreaming() {
+
+	}
+
+	@Override
+	public void stopStreaming() {
+
 	}
 
 	@Override

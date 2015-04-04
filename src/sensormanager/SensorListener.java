@@ -33,7 +33,7 @@ public abstract class SensorListener {
 	 * Stores all the observers that registered to
 	 * observe the changes of the status of this sensor
 	 */
-	protected ArrayList<SensorObserver> observerCollection;
+	protected ArrayList<SensorObserver> observerCollection = new ArrayList<SensorObserver>();
 	
 	/**
 	 * Raw data of the sensor. As this data changes, observers
@@ -62,7 +62,7 @@ public abstract class SensorListener {
 	 * Gives the current sensor data as bytes
 	 * @return the raw data of the sensor
 	 */
-	public abstract TimestampedRawData[] getSensorData();
+	public abstract ArrayList<TimestampedRawData> getSensorData();
 	
 	/**
 	 * Frequency of the sensors in Hz.
