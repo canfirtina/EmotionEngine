@@ -117,6 +117,8 @@ public class SensorListenerEEG extends SensorListener{
 
 					connectionEstablished = true;
 
+					notifyObserversConnectionEstablished();
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -172,6 +174,11 @@ public class SensorListenerEEG extends SensorListener{
 		for(SensorObserver observer: observerCollection)
 			observer.dataArrived(this);
 		
+	}
+
+	protected void notifyObserversConnectionEstablished() {
+		for(SensorObserver observer : observerCollection)
+			observer.connectionEstablished(this);
 	}
 
 	@Override

@@ -75,6 +75,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		this.pendingSensorListeners = new ArrayList<SensorListener>();
 		this.featureExtractors = new ArrayList<FeatureExtractor>();
 		this.executorService = Executors.newSingleThreadExecutor();
+		this.executorLocker = new Object();
 	}
 	
 	/**
@@ -135,7 +136,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 */
 	@Override
 	public void createSensorListener(String comPort, 
-			Class sensorType) {
+			final Class sensorType) {
 		synchronized (executorLocker) {
 			executorService.submit(new Callable<Void>() {
 				public Void call(){
@@ -166,7 +167,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @param sensor is the sensor that has new data
 	 */
 	@Override
-	public void dataArrived(SensorListener sensor) {
+	public void dataArrived(final SensorListener sensor) {
 		synchronized (executorLocker) {
 			executorService.submit(new Callable<Void>() {
 				public Void call(){
@@ -203,7 +204,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @param sensor is the sensor whose connection is established
 	 */
 	@Override
-	public void connectionEstablished(SensorListener sensor) {
+	public void connectionEstablished(final SensorListener sensor) {
 		synchronized (executorLocker) {
 			executorService.submit(new Callable<Void>() {
 				public Void call(){
