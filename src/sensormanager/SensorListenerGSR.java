@@ -60,8 +60,9 @@ public class SensorListenerGSR extends SensorListener{
 
 			serialPort = (SerialPort) commPort;
 			serialPort.setSerialPortParams(COMM_PORT_BAUD_RATE, COMM_PORT_DATABITS, COMM_PORT_STOPBITS, COMM_PORT_PARITY);
-
+			threadsActive = true;
 			inputStream = serialPort.getInputStream();
+			new Thread(new SerialReader(inputStream)).run();
 		} catch (PortInUseException | UnsupportedCommOperationException e) {
 			e.printStackTrace();
 			return false;
@@ -73,12 +74,6 @@ public class SensorListenerGSR extends SensorListener{
 			return false;
 		}
 
-		new Runnable() {
-			@Override
-			public void run() {
-
-			}
-		}.run();
 
 		return true;
 	}
@@ -148,6 +143,7 @@ public class SensorListenerGSR extends SensorListener{
 			byte[] buffer = new byte[BUFFER_LENGTH];
 			int len = -1;
 			int val = 0;
+			int d=0;
 			System.out.println("runnnnn");
 			try {
 				while( ( len = inputStream.read(buffer) ) > -1) {
@@ -157,15 +153,18 @@ public class SensorListenerGSR extends SensorListener{
 
 
 					for(int i=0;i<len;i++) {
-						if(buffer[i]) {
-
+						val = (val << 8 ) | buffer[i];
+						d++;
+						d=d%2;
+						if(d==0) {
+							System.out.println(val);
+							val = 0;
 						}
+
 
 					}
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
