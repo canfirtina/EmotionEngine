@@ -147,16 +147,9 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 						listener = new SensorListenerEEG("COM4");
 					
 					listener.registerObserver(engine);
-					listener.connect();
-					while(!listener.isConnected()) {
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
 					pendingSensorListeners.add(listener);
-					connectionEstablished(listener);
+					listener.connect();
+
 					return null;
 				}
 			});
