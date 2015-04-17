@@ -1,6 +1,7 @@
 package emotionlearner;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import shared.TimestampedRawData;
 
@@ -18,7 +19,7 @@ public abstract class DataEpocher {
 	/**
 	 * raw data 
 	 */
-	protected ArrayList<TimestampedRawData> allData;
+	protected List<TimestampedRawData> allData;
 	
 	/**
 	 * Creates Epocher with raw data window with constraint
@@ -45,7 +46,7 @@ public abstract class DataEpocher {
 	 * get current epoch data
 	 * @return
 	 */
-	public ArrayList<TimestampedRawData> getEpoch(){
+	public List<TimestampedRawData> getEpoch(){
 		return allData;
 	}
 	

@@ -4,6 +4,7 @@ import emotionlearner.DataEpocher;
 import shared.TimestampedRawData;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Blue print of listeners of the sensors. Connects to a sensor on a specific port, 
@@ -51,7 +52,7 @@ public abstract class SensorListener {
 	 * Gives the current sensor data as bytes
 	 * @return the raw data of the sensor
 	 */
-	public abstract ArrayList<TimestampedRawData> getSensorData();
+	public abstract List<TimestampedRawData> getSensorData();
 	
 	/**
 	 * Frequency of the sensors in Hz.

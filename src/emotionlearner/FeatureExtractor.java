@@ -1,6 +1,7 @@
 package emotionlearner;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import shared.FeatureList;
 import shared.TimestampedRawData;
@@ -13,7 +14,7 @@ public abstract class FeatureExtractor {
 	/**
 	 * Raw data window that keeps last N byte[] data
 	 */
-	protected ArrayList<TimestampedRawData> rawData;
+	protected List<TimestampedRawData> rawData;
 	/**
 	 * Sets raw data to be extracted feature from
 	 * @param data
@@ -26,7 +27,7 @@ public abstract class FeatureExtractor {
 	 * Appends raw data to be extracted feature from 
 	 * @param data
 	 */
-	public void appendRawData(ArrayList<TimestampedRawData> data){
+	public void appendRawData(List<TimestampedRawData> data){
 		for(int i=0;i<data.size();++i)
 			appendRawData(data.get(i));
 	}

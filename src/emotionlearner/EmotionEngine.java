@@ -1,5 +1,6 @@
 package emotionlearner;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -175,7 +176,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					
 					//new epoch
 					extractor.reset();
-					ArrayList<TimestampedRawData> rawDataArray = sensor.getSensorData();
+					List<TimestampedRawData> rawDataArray = sensor.getSensorData();
 
 					extractor.appendRawData(rawDataArray);
 					

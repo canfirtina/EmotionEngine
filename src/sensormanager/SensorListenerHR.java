@@ -2,7 +2,7 @@ package sensormanager;
 
 import shared.TimestampedRawData;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Connects to a GSR sensor on a specific port, 
@@ -29,7 +29,7 @@ public class SensorListenerHR extends SensorListener{
 	}
 
 	@Override
-	public ArrayList<TimestampedRawData> getSensorData() {
+	public List<TimestampedRawData> getSensorData() {
 		// TODO Auto-generated method stub
 		return null;
 	}

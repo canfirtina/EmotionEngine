@@ -107,7 +107,7 @@ public class CaseEEG {
 				//System.out.println(i + " " + data.getTimestamp().getTime());
 				if(i==M.length-1)
 					epocher.addData(data);
-				ArrayList<TimestampedRawData> epoch = epocher.getEpoch();
+				ArrayList<TimestampedRawData> epoch = (ArrayList<TimestampedRawData>)epocher.getEpoch();
 				extractor.appendRawData(epoch);
 				
 				FeatureList list = extractor.getFeatures();
@@ -146,7 +146,7 @@ public class CaseEEG {
 			epocher.addData(new TimestampedRawData(M[i]));
 			
 			if(epocher.readyForEpoch()){
-				ArrayList<TimestampedRawData>epoch = epocher.getEpoch();
+				ArrayList<TimestampedRawData>epoch = (ArrayList<TimestampedRawData>)epocher.getEpoch();
 				extractor.appendRawData(epoch);
 				
 				FeatureList list = extractor.getFeatures();

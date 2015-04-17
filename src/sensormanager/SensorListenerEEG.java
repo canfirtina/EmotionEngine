@@ -6,7 +6,7 @@ import shared.TimestampedRawData;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +50,7 @@ public class SensorListenerEEG extends SensorListener{
 
 	private BlockingQueue<Byte> readQueue;
 	private String identificationString;
-	private ArrayList<TimestampedRawData> lastEpoch;
+	private List<TimestampedRawData> lastEpoch;
 
 
 	private boolean connectionEstablished;
@@ -153,7 +153,7 @@ public class SensorListenerEEG extends SensorListener{
 	}
 
 	@Override
-	public ArrayList<TimestampedRawData> getSensorData() {
+	public List<TimestampedRawData> getSensorData() {
 		return lastEpoch;
 	}
 
