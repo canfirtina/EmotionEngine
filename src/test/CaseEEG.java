@@ -53,7 +53,7 @@ public class CaseEEG {
 	}
 
 	public void runtest6(){
-		EmotionEngine engine = new EmotionEngine();
+		EmotionEngine engine = EmotionEngine.sharedInstance(null);
 		engine.createSensorListener("COM4", SensorListenerEEG.class);
 	}
 
@@ -68,6 +68,7 @@ public class CaseEEG {
 					return 5;
 				}
 		};
+		
 		Future<Integer> future = executor.submit(callable);
 		try {
 			System.out.println(future.get());

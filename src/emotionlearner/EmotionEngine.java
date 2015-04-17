@@ -1,5 +1,8 @@
 package emotionlearner;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import persistentdatamanagement.DataManager;
 import persistentdatamanagement.DataManagerObserver;
@@ -38,21 +41,40 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	private EmotionClassifier emotionClassifier;
 	
 	/**
+	 * Executer service which has a event queue
+	 */
+	private ExecutorService executorService;
+	
+	/**
+	 * Queue locker for synchronization
+	 */
+	private Object executorLocker;
+	
+	/**
+	 * Singleton instance
+	 */
+	private static EmotionEngine engine = null;
+	
+	/**
 	 * Return a single shared instance of EmotionEngine
 	 * @param persistentDataManager
 	 * @return
 	 */
 	public static EmotionEngine sharedInstance(DataManager persistentDataManager){
-		return null;
+		if(engine==null)
+			engine = new EmotionEngine();
+		
+		return engine;
 	}
 	
 	/**
 	 * Constructor
 	 */
-	public EmotionEngine(){
+	private EmotionEngine(){
 		this.sensorListeners = new ArrayList<SensorListener>();
 		this.pendingSensorListeners = new ArrayList<SensorListener>();
 		this.featureExtractors = new ArrayList<FeatureExtractor>();
+		this.executorService = Executors.newSingleThreadExecutor();
 	}
 	
 	/**
@@ -114,22 +136,29 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	@Override
 	public void createSensorListener(String comPort, 
 			Class sensorType) {
-		SensorListener listener = null;
-		
-		if(sensorType.equals(SensorListenerEEG.class))
-			listener = new SensorListenerEEG("COM4");
-		
-		listener.registerObserver(this);
-		listener.connect();
-		while(!listener.isConnected()) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		synchronized (executorLocker) {
+			executorService.submit(new Callable<Void>() {
+				public Void call(){
+					SensorListener listener = null;
+					
+					if(sensorType.equals(SensorListenerEEG.class))
+						listener = new SensorListenerEEG("COM4");
+					
+					listener.registerObserver(engine);
+					listener.connect();
+					while(!listener.isConnected()) {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					pendingSensorListeners.add(listener);
+					connectionEstablished(listener);
+					return null;
+				}
+			});
 		}
-			pendingSensorListeners.add(listener);
-			connectionEstablished(listener);
 	}
 	
 	/**
@@ -138,19 +167,26 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 */
 	@Override
 	public void dataArrived(SensorListener sensor) {
-		FeatureExtractor extractor = featureExtractors.get(sensorListeners.indexOf(sensor));
-		
-		//new epoch
-		extractor.reset();
-		ArrayList<TimestampedRawData> rawDataArray = sensor.getSensorData();
+		synchronized (executorLocker) {
+			executorService.submit(new Callable<Void>() {
+				public Void call(){
+					FeatureExtractor extractor = featureExtractors.get(sensorListeners.indexOf(sensor));
+					
+					//new epoch
+					extractor.reset();
+					ArrayList<TimestampedRawData> rawDataArray = sensor.getSensorData();
 
-		extractor.appendRawData(rawDataArray);
-		
-		FeatureList list = extractor.getFeatures();
-		System.out.println("New Feature List");
-		for(int i=0;i<list.size();++i)
-			System.out.print(list.get(i));
-		System.out.println();
+					extractor.appendRawData(rawDataArray);
+					
+					FeatureList list = extractor.getFeatures();
+					System.out.println("New Feature List");
+					for(int i=0;i<list.size();++i)
+						System.out.print(list.get(i));
+					System.out.println();
+					return null;
+				}
+			});
+		}
 	}
 
 	/**
@@ -168,23 +204,31 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 */
 	@Override
 	public void connectionEstablished(SensorListener sensor) {
-		//if sensor is not in pending sensors
-		if(!this.pendingSensorListeners.contains(sensor))
-			return;
-		
-		FeatureExtractor extractor = null;
-		DataEpocher epocher = null;
-		if(sensor.getClass().equals( SensorListenerEEG.class)){
-			extractor = new FeatureExtractorEEG();
-			epocher = new TimeBasedDataEpocher(4000);
+		synchronized (executorLocker) {
+			executorService.submit(new Callable<Void>() {
+				public Void call(){
+					//if sensor is not in pending sensors
+					if(!pendingSensorListeners.contains(sensor))
+						return null;
+					
+					FeatureExtractor extractor = null;
+					DataEpocher epocher = null;
+					if(sensor.getClass().equals( SensorListenerEEG.class)){
+						extractor = new FeatureExtractorEEG();
+						epocher = new TimeBasedDataEpocher(4000);
+					}
+					
+					sensor.setDataEpocher(epocher);
+					pendingSensorListeners.remove(sensor);
+					sensorListeners.add(sensor);
+					featureExtractors.add(extractor);
+					
+					sensor.startStreaming();
+					return null;
+				}
+			});
 		}
 		
-		sensor.setDataEpocher(epocher);
-		pendingSensorListeners.remove(sensor);
-		sensorListeners.add(sensor);
-		featureExtractors.add(extractor);
-		
-		sensor.startStreaming();
 	}
 
 	/**

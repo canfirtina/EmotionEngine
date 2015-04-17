@@ -22,7 +22,7 @@ public class Communicator {
 		/*
 		 * Buralar internetten. duzelt.
 		 */
-		ee= new EmotionEngine();
+		ee= EmotionEngine.sharedInstance(null);
 
 		// declaration section:
 		// declare a server socket and a client socket for the server
