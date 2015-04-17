@@ -41,12 +41,6 @@ public class SensorListenerHR extends SensorListener{
 	}
 
 	@Override
-	public int getPortNumber() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public boolean isConnected() {
 		// TODO Auto-generated method stub
 		return false;

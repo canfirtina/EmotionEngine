@@ -28,10 +28,10 @@ import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffLoader.ArffReader;
 
 public class CaseEEG {
-	private String testFolderPath = "Can Labeled ARFF/Test/";
-	private String trainFolderPath = "Can Labeled ARFF/Training/";
-	private String csvPath = "Can Labeled ARFF/CSV/";
-	private String projectCSVPath = "Can Labeled ARFF/ProjectCSV/";
+	private String testFolderPath = "test/Test/";
+	private String trainFolderPath = "test/Training/";
+	private String csvPath = "test/CSV/";
+	private String projectCSVPath = "test/ProjectCSV/";
 	private String[] csvFileNamesWithoutExtension; 
 	
 	public CaseEEG(){
@@ -199,13 +199,13 @@ public class CaseEEG {
 //		CsvToArff.csv2arff("f" + fileName, "frustrated");
 		
 		EEGClassifier svmClassifier = new EEGClassifier();
-		String[] options = {"-R", "1", "-C", "1", "-H", "1"};
+		String[] options = null;//{"-R", "1", "-C", "1", "-H", "1"};
 		
-		svmClassifier.train( trainFolderPath + "cantrainingDisgusting1Out.arff", "weka.classifiers.mi.CitationKNN", options);
-		svmClassifier.test( testFolderPath + "fcan - disgusting1 - 10.arff");
+		//svmClassifier.train( trainFolderPath + "cantrainingDisgusting1Out.arff", "weka.classifiers.bayes.NaiveBayes", null);
+		//svmClassifier.test( testFolderPath + "fcan - disgusting1 - 10.arff");
 
-//		svmClassifier.train( trainFolderPath + "cantrainingDisgusting2Out.arff", "weka.classifiers.mi.CitationKNN", options);
-//		svmClassifier.test( testFolderPath + "fcan - disgusting2 - 10.arff");
+		svmClassifier.train( trainFolderPath + "cantrainingDisgusting2Out.arff", "weka.classifiers.bayes.NaiveBayes", options);
+		svmClassifier.test( testFolderPath + "fcan - disgusting2 - 10.arff");
 //		
 //		svmClassifier.train( trainFolderPath + "cantrainingDisgusting3Out.arff", "weka.classifiers.mi.CitationKNN", options);
 //		svmClassifier.test( testFolderPath + "fcan - disgusting3 - 8.arff");
@@ -246,7 +246,7 @@ public class CaseEEG {
 //		svmClassifier.train( trainFolderPath + "cantrainingSexy4Out.arff", "weka.classifiers.mi.CitationKNN", options);
 //		svmClassifier.test( testFolderPath + "fcan - sexy4 - 8.arff");
 		
-		svmClassifier.trainWithCrossValidation( trainFolderPath + "cantrainingall.arff", "weka.classifiers.mi.CitationKNN", options, 10);
+		svmClassifier.trainWithCrossValidation( trainFolderPath + "cantrainingall.arff", "weka.classifiers.bayes.NaiveBayes", null, 10);
 	}
 
 	public void testUserManager() {

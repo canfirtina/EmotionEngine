@@ -40,11 +40,6 @@ public class SensorListenerGSR extends SensorListener{
 		return 0;
 	}
 
-	@Override
-	public int getPortNumber() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
 	@Override
 	public boolean isConnected() {

@@ -17,17 +17,6 @@ public abstract class SensorListener {
 	 */
 	protected DataEpocher dataEpocher;
 
-	/**
-	 * Port number of the sensor
-	 */
-	protected int portNumber;
-	
-	/**
-	 * Tells if the connection is established.
-	 * True: Connection established
-	 * False: Connection is not established
-	 */
-	private boolean connectionStatus;
 	
 	/**
 	 * Stores all the observers that registered to
@@ -44,7 +33,7 @@ public abstract class SensorListener {
 	/**
 	 * Frequency of the sensor (Hz)
 	 */
-	private int freq;
+	protected int freq;
 	
 	/**
 	 * Tries to connect with the sensor
@@ -69,12 +58,7 @@ public abstract class SensorListener {
 	 * @return the numerical value of the frequency in Hz.
 	 */
 	public abstract int getFrequency();
-	
-	/**
-	 * Port number of the sensor
-	 * @return the numerical value of the port number of the sensor
-	 */
-	public abstract int getPortNumber();
+
 	
 	/**
 	 * States if Emotion Engine is currently connected to a sensor

@@ -1,9 +1,6 @@
 package sensormanager;
 
-import gnu.io.CommPort;
-import gnu.io.CommPortIdentifier;
-import gnu.io.NoSuchPortException;
-import gnu.io.SerialPort;
+import gnu.io.*;
 import shared.TimestampedRawData;
 
 import java.io.IOException;
@@ -44,22 +41,20 @@ public class SensorListenerEEG extends SensorListener{
 	private SerialWriter serialWriter;
 	private CommPortIdentifier commPortIdentifier;
 	private CommPort commPort;
-	private int frequency;
 	private SerialPort serialPort;
 	private InputStream inputStream;
 	private OutputStream outputStream;
 	private Thread readerThread;
 	private Thread interpreterThread;
-	private boolean streaming;
+	private boolean threadsActive;
 
 	private BlockingQueue<Byte> readQueue;
 	private String identificationString;
 	private ArrayList<TimestampedRawData> lastEpoch;
 
-	public SensorListenerEEG(int portNumber) {
-		
-		// TODO Auto-generated constructor stub
-	}
+
+	private boolean connectionEstablished;
+
 
 	public SensorListenerEEG(String comPort) {
 		try {
@@ -73,46 +68,61 @@ public class SensorListenerEEG extends SensorListener{
 
 	@Override
 	public boolean connect() {
-		System.out.println(Integer.toBinaryString(DATA_HEADER));
-		System.out.println(Integer.toBinaryString(DATA_FOOT));
 		try {
 
-			if(commPortIdentifier.isCurrentlyOwned()) {
+
+			if (commPortIdentifier.isCurrentlyOwned()) {
 				throw new Exception("EEG port is currently owned");
 			}
 
 			commPort = commPortIdentifier.open(this.getClass().getName(), COMM_PORT_TIMEOUT);
 
-			if(commPort instanceof SerialPort == false) {
+			if (commPort instanceof SerialPort == false) {
 				throw new Exception("EEG port is not a serial port");
 			}
-			
-			serialPort = (SerialPort)commPort;
+
+			serialPort = (SerialPort) commPort;
 			serialPort.setSerialPortParams(COMM_PORT_BAUD_RATE, COMM_PORT_DATABITS, COMM_PORT_STOPBITS, COMM_PORT_PARITY);
 
 			inputStream = serialPort.getInputStream();
 			outputStream = serialPort.getOutputStream();
-
-			serialReader = new SerialReader(inputStream);
-
-			readerThread = new Thread(serialReader);
-			System.out.println("thread baslangic");
-			readerThread.start();
-
-			dataInterpreter = new DataInterpreter();
-			System.out.println("interpreter started");
-			interpreterThread = new Thread(dataInterpreter);
-			interpreterThread.start();
-
-			serialWriter = new SerialWriter(outputStream);
-			serialWriter.writeByte(CODE_RESET);
-
-
-		} catch (NoSuchPortException e) {
+		} catch (PortInUseException | UnsupportedCommOperationException e) {
 			e.printStackTrace();
+			return false;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return false;
 		}
+		new Runnable() {
+			@Override
+			public void run() {
+				try {
+					threadsActive = true;
+					serialReader = new SerialReader(inputStream);
+
+					readerThread = new Thread(serialReader);
+					System.out.println("thread baslangic");
+					readerThread.start();
+
+					dataInterpreter = new DataInterpreter();
+					System.out.println("interpreter started");
+					interpreterThread = new Thread(dataInterpreter);
+					interpreterThread.start();
+
+					serialWriter = new SerialWriter(outputStream);
+					serialWriter.writeByte(CODE_RESET);
+
+					connectionEstablished = true;
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}.run();
+
 
 		return true;
 	}
@@ -135,17 +145,14 @@ public class SensorListenerEEG extends SensorListener{
 
 	@Override
 	public boolean disconnect() {
-		// TODO Auto-generated method stub
-		return false;
+		serialPort.close();
+		threadsActive = false;
+		return true;
 	}
 
 	@Override
 	public ArrayList<TimestampedRawData> getSensorData() {
 		return lastEpoch;
-	}
-
-	public float[] getNextSample() {
-		return null;
 	}
 
 	@Override
@@ -154,16 +161,10 @@ public class SensorListenerEEG extends SensorListener{
 		return 0;
 	}
 
-	@Override
-	public int getPortNumber() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
 	@Override
 	public boolean isConnected() {
-		// TODO Auto-generated method stub
-		return false;
+		return connectionEstablished;
 	}
 
 	@Override
@@ -176,14 +177,12 @@ public class SensorListenerEEG extends SensorListener{
 	@Override
 	public boolean registerObserver(SensorObserver observer) {
 
-		observerCollection.add(observer);
-		return true; //TODO i do not know how this function can return false
+		return observerCollection.add(observer);
 	}
 
 	@Override
 	public boolean removeObserver(SensorObserver observer) {
-		// TODO Auto-generated method stub
-		return false;
+		return observerCollection.remove(observer);
 	}
 
 
@@ -196,9 +195,13 @@ public class SensorListenerEEG extends SensorListener{
 				byte[] data = new byte[MESSAGE_LENGTH-2];
 				Byte b;
 
-				while( (b = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS)) != null ) {
+				while( true ) {
+					b = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
+					//disconnection routine
+					if(!threadsActive)
+						return;
 
-					if (b.compareTo(DATA_HEADER) == 0 ) {
+					if (b!= null && b.compareTo(DATA_HEADER) == 0 ) {
 
 						for(int i = 0;i<MESSAGE_LENGTH-2;i++) {
 							data[i] = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -214,14 +217,6 @@ public class SensorListenerEEG extends SensorListener{
 
 							}
 
-
-
-/*
-							for (int i = 0; i < CHANNEL_LENGTH; i++) {
-								System.out.print(retfloat[i] + " ");
-							}
-							System.out.println();
-*/
 						}
 					}
 
@@ -313,6 +308,10 @@ public class SensorListenerEEG extends SensorListener{
 			System.out.println("runnnnn");
 			try {
 				while( ( len = inputStream.read(buffer) ) > -1) {
+					//disconnection routine
+					if(!threadsActive)
+						return;
+
 					for(int i=0;i<len;i++) {
 						readQueue.put(buffer[i]);
 					}
@@ -325,6 +324,7 @@ public class SensorListenerEEG extends SensorListener{
 		}
 	}
 
+
 	private class SerialWriter  {
 		private OutputStream outputStream;
 		private long lastSentTime;
@@ -334,6 +334,8 @@ public class SensorListenerEEG extends SensorListener{
 		}
 
 		public void writeByte(byte bytes) {
+			if(!connectionEstablished)
+				return;
 			try {
 				if(System.currentTimeMillis() - lastSentTime - CONTINUOUS_COMMAND_DELAY < 0)
 					Thread.sleep(Math.max(CONTINUOUS_COMMAND_DELAY - System.currentTimeMillis() + lastSentTime,0));
