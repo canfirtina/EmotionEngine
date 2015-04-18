@@ -1,33 +1,45 @@
 package persistentdatamanagement;
 
-import shared.Sample;
 import usermanager.User;
 
-import javax.jws.soap.SOAPBinding;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Scanner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import shared.Emotion;
+import shared.FeatureList;
+import shared.Sensor;
+import shared.UserData;
 
 /**
  * Responsible for providing other packages with file input output operations.
  */
 public class DataManager {
+
     private static final String GAME_RECORDS_DIRECTORY = "User Data";
     private static final String USER_OBJECT_NAME = "user_object.obj";
     private static final String CURRENT_USER = "curr_user_object.obj";
 
-    private static DataManager ourInstance = new DataManager();
+    private static DataManager instance = null;
+
+    private ExecutorService executorService;
 
     public static DataManager getInstance() {
-        return ourInstance;
+        if (instance == null) {
+            instance = new DataManager();
+        }
+
+        return instance;
     }
 
     /**
-     * Keeps the locations of directories of user-games records.
+     * Keeps the current user information.
      */
-    private String userFilesDirectory;
     private String currentUser;
-    private String currentGame;
 
     private DataManager() {
         File dir = new File(GAME_RECORDS_DIRECTORY);
@@ -38,23 +50,24 @@ public class DataManager {
             // if directory is newly created, create a default user
             saveUser(new User("default", "default"));
         }
-        
+
         dir = new File(GAME_RECORDS_DIRECTORY + "/" + CURRENT_USER);
         // If data directory doesn't exist, create it
         if (!dir.exists()) {
-        	FileOutputStream fout;
+            FileOutputStream fout;
             try {
                 fout = new FileOutputStream(GAME_RECORDS_DIRECTORY + "/" + CURRENT_USER);
                 ObjectOutputStream oos = new ObjectOutputStream(fout);
                 oos.writeObject(new User("default", "default"));
                 oos.flush();
-                oos.close();                
+                oos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             };
         }
 
         currentUser = getCurrentUser().getName();
+        executorService = Executors.newSingleThreadExecutor();
     }
 
     /**
@@ -82,24 +95,57 @@ public class DataManager {
     }
 
     /**
-     * Saves given sample to current game.
+     * Saves given sample to current user.
+     *
      * @param sample
      */
-    public void saveSample( Sample sample) {
+    public boolean saveSample(FeatureList list, Sensor sensor, Emotion label) {
+        //Tasks are guaranteed to execute sequentially, and no more than one task will be active at any given time
+        executorService.submit(new Callable() {
+            public Object call() {
+                String fileName = getUserDirectory(currentUser) + "/" + sensor.toString() + "_features.ftr";
+                try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)))) {
+                    out.print(label.toString() + ",");
+                    for (int i = 0; i < list.size() - 1; ++i) {
+                        out.print(list.get(i) + ",");
+                    }
+                    out.println(list.get(list.size() - 1));
+                    out.flush();
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println("Couldn't write to file " + getUserDirectory(currentUser) + "/" + fileName);
+                }
+                return null;
+            }
+        });
 
+        return true;
     }
 
     /**
      * Gets all samples for current user and game.
-     * @return Sample array
+     *
+     * @param sensor type of sensor
+     * @return User data
      */
-    public Sample[] getGameData() {
+    public UserData getGameData(Sensor sensor) {
+        ArrayList<FeatureList> list = new ArrayList<FeatureList>();
+        String fileName = getUserDirectory(currentUser) + "/" + sensor.toString() + "_features.ftr";
+        String content = "";
 
-        return new Sample[0];
+        try {
+            content = new Scanner(new File(fileName)).useDelimiter("\\Z").next(); // reads whole file
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(DataManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return new UserData(content);
     }
 
     /**
      * Updates user information.
+     *
      * @param userData serializable user object
      */
     public boolean saveUser(User userData) {
@@ -120,6 +166,7 @@ public class DataManager {
 
     /**
      * Gets data of all users.
+     *
      * @return array of objects
      */
     public ArrayList<User> getAllUsers() {
@@ -127,10 +174,8 @@ public class DataManager {
         String[] names = file.list();
         ArrayList<User> users = new ArrayList<User>();
 
-        for(String name : names)
-        {
-            if (new File(GAME_RECORDS_DIRECTORY + "/" + name).isDirectory())
-            {
+        for (String name : names) {
+            if (new File(GAME_RECORDS_DIRECTORY + "/" + name).isDirectory()) {
                 users.add(getUser(name));
             }
         }
@@ -140,15 +185,17 @@ public class DataManager {
 
     /**
      * Checks if the user exists
+     *
      * @param userName
      * @return
      */
-    public boolean checkUserExist(String userName){
+    public boolean checkUserExist(String userName) {
         return !(getUser(userName) == null);
     }
 
     /**
      * Gets data of a user.
+     *
      * @return User object
      */
     public User getUser(String userName) {
@@ -177,12 +224,14 @@ public class DataManager {
 
     /**
      * Changes active user to userName.
+     *
      * @param userName
      */
-    public boolean setCurrentUser(String userName){
+    public boolean setCurrentUser(String userName) {
         User user = getUser(userName);
-        if (user == null)
+        if (user == null) {
             return false;
+        }
 
         FileOutputStream fout;
         try {
@@ -201,9 +250,10 @@ public class DataManager {
 
     /**
      * Gets active user.
+     *
      * @return user
      */
-    public User getCurrentUser(){
+    public User getCurrentUser() {
         User currUser = null;
 
         // read current user
@@ -226,30 +276,4 @@ public class DataManager {
 
         return currUser;
     }
-
-    /**
-     * Changes active game.
-     * @param gameId unique identifier of game
-     */
-    public void setCurrentGame(String gameId){
-
-    }
-
-    /**
-     * Gets active game.
-     * @return unique identifier of game
-     */
-    public String getCurrentGame(){
-        throw new RuntimeException("get current game from file and return");
-        //return "asd";
-    }
-
-    /**
-     * Registers a new game to the system.
-     * @param gameId unique identifier of game
-     */
-    public void addGame(String gameId) {
-
-    }
-
 }
