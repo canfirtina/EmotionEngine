@@ -10,6 +10,7 @@ public class FeatureWindow {
      * Label of this window for training.
      */
     private Label label;
+    
     /**
      * FeatureLists that are included in this window.
      */
