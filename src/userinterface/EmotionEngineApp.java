@@ -42,14 +42,14 @@ public class EmotionEngineApp extends Application {
         root.getChildren().addAll(mainContainer);
         Scene scene = new Scene(root, 320, 250, Color.TRANSPARENT);
         stage.setScene(scene);
-        stage.initStyle(StageStyle.TRANSPARENT);
+        //stage.initStyle(StageStyle.TRANSPARENT);
         stage.show();
         
         
-        Rectangle r = new Rectangle(5, 5, stage.getWidth() - 10, stage.getHeight() - 10);
-        r.setFill(Color.STEELBLUE);
-        r.setEffect(new DropShadow());
-        root.getChildren().add(0,r);
+//        Rectangle r = new Rectangle(5, 5, stage.getWidth() - 10, stage.getHeight() - 10);
+//        r.setFill(Color.STEELBLUE);
+//        r.setEffect(new DropShadow());
+//        root.getChildren().add(0,r);
     }
 
     /**
