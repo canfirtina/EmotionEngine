@@ -17,7 +17,7 @@ import javafx.util.Duration;
  * Catches the user interactions made to EmotionEngineUI View. User's emotion engine actions are controlled by this controller
  *
  */
-public class EmotionEngineController extends StackPane implements PresentingScreen{
+public class EmotionEngineController extends StackPane implements PresentingController{
 	
     private HashMap<String, Node> screenCollection = new HashMap<>();
     
@@ -50,8 +50,8 @@ public class EmotionEngineController extends StackPane implements PresentingScre
                         new KeyFrame(new Duration(1000), new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent t) {
-                        getChildren().remove(0);                    //remove the displayed screen
-                        getChildren().add(0, screenCollection.get(screenName));     //add the screen
+                        getChildren().remove(0); //remove the displayed screen
+                        getChildren().add(0, screenCollection.get(screenName)); //add the screen
                         Timeline fadeIn = new Timeline(
                                 new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
                                 new KeyFrame(new Duration(800), new KeyValue(opacity, 1.0)));
@@ -62,7 +62,7 @@ public class EmotionEngineController extends StackPane implements PresentingScre
 
             } else {
                 setOpacity(0.0);
-                getChildren().add(screenCollection.get(screenName));       //no one else been displayed, then just show
+                getChildren().add(screenCollection.get(screenName)); //no one else been displayed, then just show
                 Timeline fadeIn = new Timeline(
                         new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
                         new KeyFrame(new Duration(2500), new KeyValue(opacity, 1.0)));
@@ -70,7 +70,7 @@ public class EmotionEngineController extends StackPane implements PresentingScre
             }
             return true;
         } else {
-            System.out.println("screen hasn't been loaded!!! \n");
+            System.out.println("screen hasn't been loaded!!!\n");
             return false;
         }
     }
@@ -78,11 +78,11 @@ public class EmotionEngineController extends StackPane implements PresentingScre
     @Override
     public boolean addScreen( String screenName, String resource) {
         try {
-            FXMLLoader myLoader = new FXMLLoader(getClass().getResource(resource));
-            Parent loadScreen = (Parent) myLoader.load();
-            PresentedScreen myScreenControler = ((PresentedScreen) myLoader.getController());
-            myScreenControler.setPresentingScreen(this);
-            screenCollection.put(screenName, loadScreen);
+            FXMLLoader screenLoader = new FXMLLoader(getClass().getResource(resource));
+            Parent loadedScreen = (Parent)screenLoader.load();
+            PresentedScreen presentedScreenController = ((PresentedScreen)screenLoader.getController());
+            presentedScreenController.setPresentingScreen(this);
+            screenCollection.put(screenName, loadedScreen);
             return true;
         } catch (Exception e) {
             System.out.println(e.getMessage());
