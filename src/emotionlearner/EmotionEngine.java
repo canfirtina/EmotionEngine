@@ -50,6 +50,11 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Queue locker for synchronization
 	 */
 	private Object executorLocker;
+        
+        /**
+         * Keep session information
+         */
+        private Emotion sessionLabel;
 	
 	/**
 	 * Singleton instance
@@ -77,12 +82,12 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		this.featureExtractors = new ArrayList<FeatureExtractor>();
 		this.executorService = Executors.newSingleThreadExecutor();
 		this.executorLocker = new Object();
+                this.sessionLabel = null;
 	}
 	
 	/**
 	 * Starts a training session with a label
 	 * @param label
-	 * @return
 	 */
 	public boolean openTrainingSession(Emotion emotion){
 		return true;
@@ -92,8 +97,8 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Finishes the current training session
 	 * @return
 	 */
-	public boolean closeTrainingSession(){
-		return true;
+	public void closeTrainingSession(){
+		sessionLabel = null;
 	}
 	
 	/**
@@ -179,6 +184,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					for(int i=0;i<list.size();++i)
 						System.out.print(list.get(i));
 					System.out.println();
+                                        
+                                        // For testing
+                                        //DataManager.getInstance().saveSample(list, sensor.getSensorType(), sessionLabel);
+                                        
 					return null;
 				}
 			});
