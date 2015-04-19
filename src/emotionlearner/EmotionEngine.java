@@ -49,8 +49,12 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	/**
 	 * Queue locker for synchronization
 	 */
-	private Object executorLocker;
+	private final Object executorLocker;
         
+	/**
+	 * registered observers which are to be notified when a sensor connection status is changed
+	 */
+	private ArrayList<EmotionEngineObserver> engineObservers;
         /**
          * Keep session information
          */
@@ -77,11 +81,13 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Constructor
 	 */
 	private EmotionEngine(){
-		this.sensorListeners = new ArrayList<SensorListener>();
-		this.pendingSensorListeners = new ArrayList<SensorListener>();
-		this.featureExtractors = new ArrayList<FeatureExtractor>();
+		this.sensorListeners = new ArrayList<>();
+		this.pendingSensorListeners = new ArrayList<>();
+		this.featureExtractors = new ArrayList<>();
 		this.executorService = Executors.newSingleThreadExecutor();
 		this.executorLocker = new Object();
+		this.engineObservers = new ArrayList<>();
+		
                 this.sessionLabel = null;
 	}
 	
@@ -145,6 +151,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 			final Class sensorType) {
 		synchronized (executorLocker) {
 			executorService.submit(new Callable<Void>() {
+				@Override
 				public Void call(){
 					SensorListener listener = null;
 					
@@ -169,6 +176,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	public void dataArrived(final SensorListener sensor) {
 		synchronized (executorLocker) {
 			executorService.submit(new Callable<Void>() {
+				@Override
 				public Void call(){
 					FeatureExtractor extractor = featureExtractors.get(sensorListeners.indexOf(sensor));
 					
@@ -202,6 +210,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	public void connectionError(final SensorListener sensor) {
 		synchronized(executorLocker){
 			executorService.submit(new Callable<Void>(){
+				@Override
 				public Void call(){
 					//if there is no such sensor, ignore it
 					if(!sensorListeners.contains(sensor))
@@ -225,6 +234,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	public void connectionEstablished(final SensorListener sensor) {
 		synchronized (executorLocker) {
 			executorService.submit(new Callable<Void>() {
+				@Override
 				public Void call(){
 					//if sensor is not in pending sensors
 					if(!pendingSensorListeners.contains(sensor))
@@ -257,6 +267,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	public void connectionFailed(final SensorListener sensor) {
 		synchronized (executorLocker) {
 			executorService.submit(new Callable<Void>() {
+				@Override
 				public Void call(){
 					//if sensor is not in pending sensors
 					if(!pendingSensorListeners.contains(sensor))
@@ -269,6 +280,30 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 				}
 			});
 		}
+	}
+	
+	/**
+	 * Register an EmotionEngineObserver to engine
+	 * @param observer 
+	 */
+	public void registerObserver(final EmotionEngineObserver observer){
+		synchronized(executorLocker){
+			executorService.submit(new Callable<Void>(){
+				@Override
+				public Void call(){
+					engineObservers.add(observer);
+					return null;
+				}
+			});
+		}
+	}
+	
+	/**
+	 * Returns sensors attached that are connected to engine
+	 * @return 
+	 */
+	public ArrayList<SensorListener> getConnectedSensors(){
+		return sensorListeners;
 	}
 	
 	/**
