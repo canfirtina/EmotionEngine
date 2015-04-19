@@ -22,7 +22,7 @@ public class FeatureWindow {
      * Constructor with predefined featurelists
      * @param instances
      */
-    public FeatureWindow(List<FeatureList> instances) {
+    public FeatureWindow(Label label, List<FeatureList> instances) {
         this.instances = instances;
     }
     
