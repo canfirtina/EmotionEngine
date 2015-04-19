@@ -199,8 +199,22 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @param sensor is the sensor which has the connection error
 	 */
 	@Override
-	public void connectionError(SensorListener sensor) {
-		
+	public void connectionError(final SensorListener sensor) {
+		synchronized(executorLocker){
+			executorService.submit(new Callable<Void>(){
+				public Void call(){
+					//if there is no such sensor, ignore it
+					if(!sensorListeners.contains(sensor))
+						return null;
+					
+					featureExtractors.remove(sensorListeners.indexOf(sensor));
+					sensorListeners.remove(sensor);
+					
+					
+					return null;
+				}
+			});
+		}
 	}
 
 	/**
@@ -236,6 +250,28 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	}
 
 	/**
+	 * Called when the pending connection is failed
+	 * @param sensor is the sensor whose connection is failed
+	 */
+	@Override
+	public void connectionFailed(final SensorListener sensor) {
+		synchronized (executorLocker) {
+			executorService.submit(new Callable<Void>() {
+				public Void call(){
+					//if sensor is not in pending sensors
+					if(!pendingSensorListeners.contains(sensor))
+						return null;
+					
+					//remove sensor
+					pendingSensorListeners.remove(sensor);
+					
+					return null;
+				}
+			});
+		}
+	}
+	
+	/**
 	 * Called when the status of data manager changes
 	 * @param manager
 	 */
@@ -243,5 +279,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	public void notify(DataManager manager) {
 		
 	}
+
+	
 	
 }

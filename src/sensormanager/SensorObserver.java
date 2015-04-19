@@ -24,4 +24,10 @@ public interface SensorObserver {
 	 * @param sensor is the sensor whose connection is established
 	 */
 	public void connectionEstablished( SensorListener sensor);
+	
+	/**
+	 * Called when the pending connection is failed
+	 * @param sensor is the sensor whose connection is failed
+	 */
+	public void connectionFailed(SensorListener sensor);
 }
