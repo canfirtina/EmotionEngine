@@ -14,6 +14,11 @@ public class FeatureList {
     //private int timestamp;
     
     /**
+     * Emotion corresponding to features
+     */
+    private Emotion emotion;
+    
+    /**
      * Creates FeatureList object from double features array
      * @param featuresArray
      */
@@ -21,6 +26,11 @@ public class FeatureList {
     	features = new Instance(featuresArray.length);
     	for(int i=0;i<featuresArray.length;++i)
     		features.setValue(i, featuresArray[i]);
+    }
+    
+    public FeatureList(double[] featuresArray, Emotion emotion){
+    	this(featuresArray);
+    	this.emotion = emotion;
     }
     
     public int size(){
@@ -31,5 +41,12 @@ public class FeatureList {
     	return features.value(index);
     }
     
+    public void setEmotion(Emotion emotion){
+    	this.emotion = emotion;
+    }
+    
+    public Emotion getEmotion(){
+    	return emotion;
+    }
 
 }

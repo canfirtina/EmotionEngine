@@ -84,7 +84,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @param label
 	 * @return
 	 */
-	public boolean openTrainingSession(Label label){
+	public boolean openTrainingSession(Emotion emotion){
 		return true;
 	}
 	
@@ -174,6 +174,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					extractor.appendRawData(rawDataArray);
 					
 					FeatureList list = extractor.getFeatures();
+					
 					System.out.println("New Feature List");
 					for(int i=0;i<list.size();++i)
 						System.out.print(list.get(i));
@@ -223,7 +224,6 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 				}
 			});
 		}
-		
 	}
 
 	/**
