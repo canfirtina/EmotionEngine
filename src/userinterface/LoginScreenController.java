@@ -11,9 +11,15 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
+import shared.ScreenInfo;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import usermanager.UserManager;
 
 /**
  * FXML Controller class
@@ -25,9 +31,9 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     @FXML
     private Label warningLabel;
     @FXML
-    private Label signUpButton;
+    private Hyperlink signUpButton;
     @FXML
-    private Label forgotPasswordButton;
+    private Hyperlink forgotPasswordButton;
     @FXML
     private Button loginButton;
     @FXML
@@ -36,6 +42,7 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     private TextField passwordField;
     
     PresentingController presentingController;
+    private MessageDigest md;
     
     /**
      * Initializes the controller class.
@@ -51,17 +58,32 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     }
     
     @FXML
-    public void loginPressed( ActionEvent event){
+    private void loginPressed( ActionEvent event){
         
         warningLabel.setText("");
         
         if( isValidEmailAddress( emailField.getText())){
             
-            
+            if(UserManager.getInstance().login( emailField.getText(), getCipherText(passwordField.getText())))
+                System.out.println("login succ");
+            else
+                System.out.println("fucked up");
         }else{
             
             warningLabel.setText("Please enter a valid e-mail address");
         }
+    }
+    
+    @FXML
+    private void signUpPressed( ActionEvent event){
+        
+        presentingController.displayScreen(ScreenInfo.SignUpScreen.screenId());
+    }
+    
+    @FXML
+    private void forgotPasswordPressed( ActionEvent event){
+        
+        presentingController.displayScreen(ScreenInfo.ForgotPasswordScreen.screenId());
     }
     
     private boolean isValidEmailAddress( String email) {
@@ -70,5 +92,22 @@ public class LoginScreenController implements Initializable, PresentedScreen {
            java.util.regex.Matcher m = p.matcher(email);
            return m.matches();
     }
+    
+    private String getCipherText( String password){
+        
+        try {
+            md = MessageDigest.getInstance("MD5");
+            byte[] passBytes = password.getBytes();
+            md.reset();
+            byte[] digested = md.digest(passBytes);
+            StringBuffer sb = new StringBuffer();
+            for(int i=0;i<digested.length;i++)
+                sb.append(Integer.toHexString(0xff & digested[i]));
+            return sb.toString();
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+   }
     
 }
