@@ -44,6 +44,8 @@ public class EmotionEngineApp extends Application {
         Group root = new Group();
         root.getChildren().addAll(mainContainer);
         Scene scene = new Scene(root, Color.TRANSPARENT);
+        //stage.setMinHeight();
+        //stage.setMinWidth(1000);
         stage.setScene(scene);
         //stage.initStyle(StageStyle.TRANSPARENT);
         stage.show();
