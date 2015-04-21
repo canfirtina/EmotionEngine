@@ -15,10 +15,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import shared.ScreenInfo;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import shared.SecurityControl;
 import usermanager.UserManager;
 
 /**
@@ -42,7 +39,6 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     private TextField passwordField;
     
     PresentingController presentingController;
-    private MessageDigest md;
     
     /**
      * Initializes the controller class.
@@ -62,16 +58,17 @@ public class LoginScreenController implements Initializable, PresentedScreen {
         
         warningLabel.setText("");
         
-        if( isValidEmailAddress( emailField.getText())){
+        if( SecurityControl.isValidEmailAddress( emailField.getText())){
             
-            if(UserManager.getInstance().login( emailField.getText(), getCipherText(passwordField.getText())))
-                System.out.println("login succ");
-            else
-                System.out.println("fucked up");
-        }else{
-            
+            if(passwordField.getText().length() > 0 && UserManager.getInstance().login( emailField.getText(), SecurityControl.getCipherText(passwordField.getText()))){
+                emailField.clear();
+                passwordField.clear();
+                warningLabel.setText("");
+                presentingController.displayScreen(ScreenInfo.ProfileScreen.screenId());
+            }else
+                warningLabel.setText("Username or password is wrong");
+        }else
             warningLabel.setText("Please enter a valid e-mail address");
-        }
     }
     
     @FXML
@@ -85,29 +82,4 @@ public class LoginScreenController implements Initializable, PresentedScreen {
         
         presentingController.displayScreen(ScreenInfo.ForgotPasswordScreen.screenId());
     }
-    
-    private boolean isValidEmailAddress( String email) {
-           String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
-           java.util.regex.Pattern p = java.util.regex.Pattern.compile(ePattern);
-           java.util.regex.Matcher m = p.matcher(email);
-           return m.matches();
-    }
-    
-    private String getCipherText( String password){
-        
-        try {
-            md = MessageDigest.getInstance("MD5");
-            byte[] passBytes = password.getBytes();
-            md.reset();
-            byte[] digested = md.digest(passBytes);
-            StringBuffer sb = new StringBuffer();
-            for(int i=0;i<digested.length;i++)
-                sb.append(Integer.toHexString(0xff & digested[i]));
-            return sb.toString();
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-   }
-    
 }
