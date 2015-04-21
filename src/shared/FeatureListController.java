@@ -79,6 +79,14 @@ public class FeatureListController {
 	}
 	
 	/**
+	 * returns registered sensorListeners
+	 * @return 
+	 */
+	public List<SensorListener> getSensorListeners(){
+		return (List<SensorListener>) sensorListeners.clone();
+	}
+	
+	/**
 	 * add featureList which is coming from a specific SensorListener
 	 * @param listener
 	 * @param list
