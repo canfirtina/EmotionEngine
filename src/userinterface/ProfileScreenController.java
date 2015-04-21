@@ -44,7 +44,10 @@ public class ProfileScreenController implements Initializable, PresentedScreen {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        ObservableList<String> names = FXCollections.observableArrayList("");
+        sensorList.setItems(names);
+        tutorialList.setItems(names);
+        activityList.setItems(names);
     }    
 
     @Override
