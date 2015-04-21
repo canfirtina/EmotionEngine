@@ -1,5 +1,7 @@
 package emotionlearner;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -58,7 +60,18 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
         /**
          * Keep session information
          */
-        private Emotion sessionLabel;
+    
+	/**
+	 * FeatureListController that is used to keep training feature lists
+	 */
+	private FeatureListController trainingFeatures;
+	
+	/**
+	 * FeatureListController that is used to keep test feature lists
+	 */
+	private FeatureListController testFeatures;
+	
+	private Emotion sessionLabel;
 	
 	/**
 	 * Singleton instance
@@ -87,9 +100,67 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		this.executorService = Executors.newSingleThreadExecutor();
 		this.executorLocker = new Object();
 		this.engineObservers = new ArrayList<>();
+		this.trainingFeatures = new FeatureListController();
+		
+		//20 seconds for now
+		this.testFeatures = new FeatureListController(20000);
 		
                 this.sessionLabel = null;
 	}
+	
+	/**
+	 * Last n milliseconds are used for training as an emotion
+	 * @param time
+	 * @param emotion
+	 * @return 
+	 */
+	public void trainLastNMilliseconds(long time, Emotion emotion){
+		synchronized(executorLocker){
+			executorService.submit(new Callable<Void>() {
+
+				@Override
+				public Void call(){
+					for(SensorListener listener : testFeatures.getSensorListeners()){
+						List<FeatureList> lists = testFeatures.getLastFeatureListsInMilliseconds(listener, time);
+						if(lists!=null)
+							for(FeatureList list : lists)
+								trainingFeatures.addFeatureList(listener, list);
+					}
+					
+					//training operation is missing 
+					
+					return null;
+				}
+			});
+		}
+	}
+	
+	/**
+	 * train whole feature list set
+	 * @param controller 
+	 */
+	public void trainAll(FeatureListController controller){
+		synchronized(executorLocker){
+			executorService.submit(new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+					
+					for(SensorListener listener:sensorListeners){
+						List<FeatureList> lists = controller.getLastNFeatureList(listener, -1);
+						if(lists!=null)
+							for(FeatureList list : lists)
+								trainingFeatures.addFeatureList(listener, list);
+					}
+					
+					//training operation is missing
+					
+					return null;
+				}
+			});
+		}
+	}
+	
+	
 	
 	/**
 	 * Starts a training session with a label
@@ -183,10 +254,12 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					//new epoch
 					extractor.reset();
 					List<TimestampedRawData> rawDataArray = sensor.getSensorData();
-
 					extractor.appendRawData(rawDataArray);
 					
+					//get list and add it to test feature list controller
 					FeatureList list = extractor.getFeatures();
+					list.setTimestamp(new Timestamp(new Date().getTime()));
+					testFeatures.addFeatureList(sensor, list);
 					
 					System.out.println("New Feature List");
 					for(int i=0;i<list.size();++i)
@@ -218,6 +291,11 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					
 					featureExtractors.remove(sensorListeners.indexOf(sensor));
 					sensorListeners.remove(sensor);
+					
+					//unregister sensor listener from both training and test feature list controllers
+					trainingFeatures.unregisterSensorListener(sensor);
+					testFeatures.unregisterSensorListener(sensor);
+					
 					
 					notifyEngineObservers();
 					
@@ -252,6 +330,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					pendingSensorListeners.remove(sensor);
 					sensorListeners.add(sensor);
 					featureExtractors.add(extractor);
+					
+					//register sensor listener to both training and test feature list controllers
+					trainingFeatures.registerSensorListener(sensor);
+					testFeatures.registerSensorListener(sensor);
 					
 					sensor.startStreaming();
 					
@@ -329,10 +411,6 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	@Override
 	public void notify(DataManager manager) {
 		
-	}
-	
-	
-
-	
+	}	
 	
 }
