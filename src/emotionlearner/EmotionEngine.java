@@ -219,6 +219,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					featureExtractors.remove(sensorListeners.indexOf(sensor));
 					sensorListeners.remove(sensor);
 					
+					notifyEngineObservers();
 					
 					return null;
 				}
@@ -253,6 +254,9 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					featureExtractors.add(extractor);
 					
 					sensor.startStreaming();
+					
+					notifyEngineObservers();
+					
 					return null;
 				}
 			});
@@ -275,6 +279,8 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					
 					//remove sensor
 					pendingSensorListeners.remove(sensor);
+					
+					notifyEngineObservers();
 					
 					return null;
 				}
@@ -299,11 +305,21 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	}
 	
 	/**
+	 * notify emotion engine's observers
+	 */
+	private void notifyEngineObservers(){
+		for(EmotionEngineObserver o : engineObservers)
+			o.notify(engine);
+	}
+	
+	/**
 	 * Returns sensors attached that are connected to engine
 	 * @return 
 	 */
 	public ArrayList<SensorListener> getConnectedSensors(){
-		return sensorListeners;
+		synchronized(executorLocker){
+			return sensorListeners;
+		}
 	}
 	
 	/**
@@ -314,6 +330,8 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	public void notify(DataManager manager) {
 		
 	}
+	
+	
 
 	
 	
