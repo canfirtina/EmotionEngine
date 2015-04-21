@@ -2,139 +2,162 @@ package usermanager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import javafx.util.Pair;
 
 import persistentdatamanagement.DataManager;
+import shared.Sensor;
+import shared.Tutorial;
 
 /**
- * Manages users and user related like logging in, creating or changing users, keeping track of which sensors are used by which users. 
+ * Manages users and user related like logging in, creating or changing users,
+ * keeping track of which sensors are used by which users.
  */
 public class UserManager {
-	private static UserManager instance = null;
-	private ArrayList<User> users;
-	private String currentUser;
-	/**
-	 * Public constructor method.
-	 */
-	public static UserManager getInstance() {
-		if (instance == null) {
-			instance = new UserManager();
-		}
-		
-		return instance;
-	}
 
-	/**
-	 * Private constructor.
-	 */
-	protected UserManager() {
-		users = DataManager.getInstance().getAllUsers();
-		currentUser = DataManager.getInstance().getCurrentUser().getName();
-	}
-	
-	/**
-	 * Checks the validity of the given credentials and logs the user in (changes the current user).
-	 * @param userName
-	 * @param password
-	 * @return
-	 */
-	public boolean login(String userName, String password) {
-		User user = DataManager.getInstance().getUser(userName);
+    private static UserManager instance = null;
+    private ArrayList<User> users;
+    private String currentUser;
 
-		boolean res = (user != null) && user.checkPassword(password) && DataManager.getInstance().setCurrentUser(user.getName()) ;
+    /**
+     * Public constructor method.
+     */
+    public static UserManager getInstance() {
+        if (instance == null) {
+            instance = new UserManager();
+        }
 
-		if(res)
-			currentUser = user.getName();
+        return instance;
+    }
 
-		return res;
-	}
-	
-	/**
-	 * Logs the user out.
-	 */
-	public boolean logout(){
-		if(DataManager.getInstance().setCurrentUser("default")){
-			currentUser = "default";
-			return true;
-		}
-		return false;
-	}
+    /**
+     * Private constructor.
+     */
+    protected UserManager() {
+        users = DataManager.getInstance().getAllUsers();
+        currentUser = DataManager.getInstance().getCurrentUser().getName();
+    }
 
-	/**
-	 * Returns a list of users.
-	 * 
-	 * @return
-	 */
-	public ArrayList<User> getAllUsers() {
-		return users;
-	}
-	
-	/**
-	 * Returns the user object with the given name.
-	 * @param userName
-	 * @return
-	 */
-	public User getUser(String userName) {
-		for (User usr : users)
-			if (usr.getName().equals(userName))
-				return usr;
+    /**
+     * Checks the validity of the given credentials and logs the user in
+     * (changes the current user).
+     *
+     * @param userName
+     * @param password
+     * @return
+     */
+    public boolean login(String userName, String password) {
+        User user = DataManager.getInstance().getUser(userName);
 
-		return null;
-	}
-	
-	/**
-	 * Returns the current user.
-	 * @return
-	 */
-	public User getCurrentUser(){
-		return getUser(currentUser);
-	}
+        boolean res = (user != null) && user.checkPassword(password) && DataManager.getInstance().setCurrentUser(user.getName());
 
-	/**
-	 * Creates a new user
-	 * @param userName
-	 * @param password
-	 * @return
-	 */
-	public boolean newUser(String userName, String password){
-		// if user already exists
-		if(getUser(userName) != null)
-			return false;
+        if (res) {
+            currentUser = user.getName();
+        }
 
-		User user = new User(userName,password);
-		if( DataManager.getInstance().saveUser(user)) {
-			users.add(user);
-			return true;
-		}
+        return res;
+    }
 
-		return false;
-	}
+    /**
+     * Logs the user out.
+     */
+    public boolean logout() {
+        if (DataManager.getInstance().setCurrentUser("default")) {
+            currentUser = "default";
+            return true;
+        }
+        return false;
+    }
 
-	
-	/**
-	 * Checks if the given sensor exists in the current user.
-	 * 
-	 * @param sensorID
-	 * @return if sensor is in use
-	 */
-	public boolean checkSensor(String sensorID) {
-		return getCurrentUser().checkSensor(sensorID);
-	}
-	
-	/**
-	 * Enables the given sensor for the current user. In the case that sensor does not exist, adds it
-	 * to enabled sensors.
-	 * 
-	 * @param sensorID
-	 */
-	public void enableSensor(String sensorID) {
-		getCurrentUser().enableSensor(sensorID);
-	}
-	
-	/**
-	 * Disables the given sensor for the current user.
-	 * @param sensorID
-	 */
-	public void disableSensor(String sensorID) {
-		getCurrentUser().disableSensor(sensorID);
-	}
+    /**
+     * Returns a list of users.
+     *
+     * @return
+     */
+    public ArrayList<User> getAllUsers() {
+        return users;
+    }
+
+    /**
+     * Returns the user object with the given name.
+     *
+     * @param userName
+     * @return
+     */
+    public User getUser(String userName) {
+        for (User usr : users) {
+            if (usr.getName().equals(userName)) {
+                return usr;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the current user.
+     *
+     * @return
+     */
+    public User getCurrentUser() {
+        return getUser(currentUser);
+    }
+
+    /**
+     * Creates a new user
+     *
+     * @param userName
+     * @param password
+     * @return
+     */
+    public boolean newUser(String userName, String password) {
+        // if user already exists
+        if (getUser(userName) != null) {
+            return false;
+        }
+
+        User user = new User(userName, password);
+        if (DataManager.getInstance().saveUser(user)) {
+            users.add(user);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if the given sensor exists in the current user.
+     *
+     * @param sensorID
+     * @return if sensor is in use
+     */
+    public boolean checkSensor(String sensorID) {
+        return getCurrentUser().checkSensor(sensorID);
+    }
+
+    /**
+     * Enables the given sensor for the current user. In the case that sensor
+     * does not exist, adds it to enabled sensors.
+     *
+     * @param sensorID
+     */
+    public void enableSensor(String sensorID) {
+        getCurrentUser().enableSensor(sensorID);
+    }
+
+    /**
+     * Disables the given sensor for the current user.
+     *
+     * @param sensorID
+     */
+    public void disableSensor(String sensorID) {
+        getCurrentUser().disableSensor(sensorID);
+    }
+
+    public void playedTutorial(Pair<Sensor, Tutorial> tutPair) {
+        getCurrentUser().playedTutorial(tutPair);
+    }
+    
+    public int getTutorialPlayCount(Pair<Sensor, Tutorial> tutPair){
+        return getCurrentUser().getTutorialPlayCount(tutPair);
+    }
 }
