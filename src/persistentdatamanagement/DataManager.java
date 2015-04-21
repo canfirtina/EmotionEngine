@@ -4,8 +4,11 @@ import java.awt.image.BufferedImage;
 import usermanager.User;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,7 +18,6 @@ import javax.imageio.ImageIO;
 import shared.Emotion;
 import shared.FeatureList;
 import shared.Sensor;
-import shared.UserData;
 
 /**
  * Responsible for providing other packages with file input output operations.
@@ -66,7 +68,7 @@ public class DataManager {
                 oos.close();
             } catch (IOException e) {
                 e.printStackTrace();
-            };
+            }
         }
 
         currentUser = getCurrentUser().getName();
@@ -107,17 +109,17 @@ public class DataManager {
     }
 
     /**
-     * Saves given sample to current user.
-     *
-     * @param sample
+     * Saves given sample to current user. non-blocking.
+     * @param list
+     * @param sensor
      */
-    public boolean saveSample(FeatureList list, Sensor sensor, Emotion label) {
+    public void saveSample(FeatureList list, Sensor sensor) {
         //Tasks are guaranteed to execute sequentially, and no more than one task will be active at any given time
         executorService.submit(new Callable() {
             public Object call() {
                 String fileName = getUserDirectory(currentUser) + "/" + sensor.toString() + "_features.ftr";
                 try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)))) {
-                    out.print(label.toString() + ",");
+                    out.print(list.getEmotion().toString() + ",");
                     for (int i = 0; i < list.size() - 1; ++i) {
                         out.print(list.get(i) + ",");
                     }
@@ -131,9 +133,18 @@ public class DataManager {
                 return null;
             }
         });
-
-        return true;
     }
+    
+    /**
+     * saves a batch of samples for a sensor. non-blocking.
+     * @param list
+     * @param sensor 
+     */
+    public void saveMultipleSamples(ArrayList<FeatureList> list, Sensor sensor){
+        for(FeatureList fl : list){
+            saveSample(fl, sensor);
+        }
+    } 
 
     /**
      * Gets all samples for current user and game.
@@ -141,18 +152,32 @@ public class DataManager {
      * @param sensor type of sensor
      * @return User data
      */
-    public UserData getGameData(Sensor sensor) {
-        ArrayList<FeatureList> list = new ArrayList<FeatureList>();
+    public ArrayList<FeatureList> getGameData(Sensor sensor) {
+        ArrayList<FeatureList> featureLabelPairs = new ArrayList<FeatureList>();
         String fileName = getUserDirectory(currentUser) + "/" + sensor.toString() + "_features.ftr";
-        String content = "";
+        List<String> lines = new ArrayList<>();
 
         try {
-            content = new Scanner(new File(fileName)).useDelimiter("\\Z").next(); // reads whole file
+            lines = Files.readAllLines(Paths.get(fileName), Charset.defaultCharset());
         } catch (FileNotFoundException ex) {
             Logger.getLogger(DataManager.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Couldnt find file: " + fileName);
+        } catch (IOException ex) {
+            Logger.getLogger(DataManager.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("IOException while reading: " + fileName);
         }
 
-        return new UserData(content);
+        for (String line : lines) {
+            String[] current = line.split(",");
+            Emotion label = Emotion.valueOf(current[0]);
+            double[] features = new double[current.length - 2];
+            for (int i = 1; i < current.length; i++) {
+                features[i] = Double.parseDouble(current[i]);
+            }
+
+            featureLabelPairs.add(new FeatureList(features, label));
+        }
+        return featureLabelPairs;
     }
 
     /**
@@ -216,10 +241,11 @@ public class DataManager {
         // read current user
         ObjectInputStream ois = null;
         try {
-            if(new File(GAME_RECORDS_DIRECTORY + "/" + userName + "/" + USER_OBJECT_NAME).exists())
+            if (new File(GAME_RECORDS_DIRECTORY + "/" + userName + "/" + USER_OBJECT_NAME).exists()) {
                 ois = new ObjectInputStream(new FileInputStream(GAME_RECORDS_DIRECTORY + "/" + userName + "/" + USER_OBJECT_NAME));
-            else
+            } else {
                 return null;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
