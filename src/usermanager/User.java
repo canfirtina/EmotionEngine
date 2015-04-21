@@ -2,6 +2,7 @@ package usermanager;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 import javafx.util.Pair;
 import shared.Sensor;
 import shared.Tutorial;
@@ -80,7 +81,7 @@ public class User implements Serializable {
      * Checks if the given password is correct.
      *
      * @param password
-     * @return 
+     * @return
      */
     public boolean checkPassword(String password) {
         return this.password.equals(password);
@@ -102,16 +103,36 @@ public class User implements Serializable {
         return false;
     }
 
-    public void playedTutorial(Pair<Sensor, Tutorial> tutPair) {
-        if(playCount.containsKey(tutPair))
-            playCount.put(tutPair, playCount.replace(tutPair, playCount.get(tutPair)+1));
-        else
-            playCount.put(tutPair, 1);
+    public void playedTutorial(Pair<Sensor, Tutorial> sen_tut) {
+        if (playCount.containsKey(sen_tut)) {
+            playCount.replace(sen_tut, 1 + playCount.get(sen_tut));
+        } else {
+            playCount.put(sen_tut, 1);
+        }
     }
-    
-    public int getTutorialPlayCount(Pair<Sensor, Tutorial> tutPair){
-        return playCount.get(tutPair);
+
+    public int getTutorialPlayCount(Pair<Sensor, Tutorial> sen_tut) {
+        return playCount.get(sen_tut);
     }
-    
-    
+
+    public void playedGame(String game, int minutes) {
+        if (gamesPlayed.containsKey(game)) {
+            gamesPlayed.replace(game, minutes + gamesPlayed.get(game));
+        } else {
+            gamesPlayed.put(game, minutes);
+        }
+    }
+
+    public String getGameplayTime(String game) {
+        int hours, minutes;
+
+        if (gamesPlayed.containsKey(game)) {
+            hours = (int) TimeUnit.HOURS.convert(gamesPlayed.get(game), TimeUnit.MINUTES);
+            minutes = gamesPlayed.get(game) - hours * 60;
+        } else {
+            return "N/A";
+        }
+
+        return hours + "h " + minutes + "m";
+    }
 }

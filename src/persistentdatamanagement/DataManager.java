@@ -102,7 +102,7 @@ public class DataManager {
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("Couldn't save profile image");
-            }            
+            }
         }
     }
 

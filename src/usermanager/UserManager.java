@@ -1,7 +1,6 @@
 package usermanager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import javafx.util.Pair;
 
 import persistentdatamanagement.DataManager;
@@ -142,6 +141,7 @@ public class UserManager {
      */
     public void enableSensor(String sensorID) {
         getCurrentUser().enableSensor(sensorID);
+        DataManager.getInstance().saveUser(getCurrentUser());
     }
 
     /**
@@ -151,13 +151,27 @@ public class UserManager {
      */
     public void disableSensor(String sensorID) {
         getCurrentUser().disableSensor(sensorID);
+        DataManager.getInstance().saveUser(getCurrentUser());
     }
 
+    /**
+     * Updates which tutorials the user has played
+     *
+     * @param tutPair
+     */
     public void playedTutorial(Pair<Sensor, Tutorial> tutPair) {
         getCurrentUser().playedTutorial(tutPair);
+        DataManager.getInstance().saveUser(getCurrentUser());
     }
-    
-    public int getTutorialPlayCount(Pair<Sensor, Tutorial> tutPair){
+
+    /**
+     * Gets how many times the user played the given tutorial for the given
+     * sensor
+     *
+     * @param tutPair
+     * @return
+     */
+    public int getTutorialPlayCount(Pair<Sensor, Tutorial> tutPair) {
         return getCurrentUser().getTutorialPlayCount(tutPair);
     }
 }
