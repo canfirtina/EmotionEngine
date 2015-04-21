@@ -1,5 +1,6 @@
 package persistentdatamanagement;
 
+import java.awt.image.BufferedImage;
 import usermanager.User;
 
 import java.io.*;
@@ -10,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import shared.Emotion;
 import shared.FeatureList;
 import shared.Sensor;
@@ -23,6 +25,7 @@ public class DataManager {
     private static final String GAME_RECORDS_DIRECTORY = "User Data";
     private static final String USER_OBJECT_NAME = "user_object.obj";
     private static final String CURRENT_USER = "curr_user_object.obj";
+    private static final String PROFILE_PIC = "profile_picture";
 
     private static DataManager instance = null;
 
@@ -91,6 +94,15 @@ public class DataManager {
         // If user directory doesn't exist, create it
         if (!dir.exists()) {
             dir.mkdir();
+            BufferedImage img = null;
+            try {
+                img = ImageIO.read(new File("icon-user-default.png"));
+                File outputfile = new File(dir.getAbsolutePath() + "/profile.png");
+                ImageIO.write(img, "png", outputfile);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Couldn't save profile image");
+            }
         }
     }
 
@@ -204,7 +216,10 @@ public class DataManager {
         // read current user
         ObjectInputStream ois = null;
         try {
-            ois = new ObjectInputStream(new FileInputStream(GAME_RECORDS_DIRECTORY + "/" + userName + "/" + USER_OBJECT_NAME));
+            if(new File(GAME_RECORDS_DIRECTORY + "/" + userName + "/" + USER_OBJECT_NAME).exists())
+                ois = new ObjectInputStream(new FileInputStream(GAME_RECORDS_DIRECTORY + "/" + userName + "/" + USER_OBJECT_NAME));
+            else
+                return null;
         } catch (IOException e) {
             e.printStackTrace();
         }

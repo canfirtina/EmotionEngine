@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="417.0" prefWidth="687.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.ProfileScreenController">
+   <children>
+      <BorderPane prefHeight="417.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <top>
+            <Pane prefHeight="81.0" prefWidth="687.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ImageView fx:id="profileImage" fitHeight="60.0" fitWidth="60.0" layoutX="20.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true">
+                     <viewport>
+                        <Rectangle2D />
+                     </viewport>
+                     <image>
+                        <Image url="@../../icon-user-default.png" />
+                     </image>
+                  </ImageView>
+                  <Label fx:id="userEMail" layoutX="88.0" layoutY="33.0" prefHeight="15.0" prefWidth="123.0">
+                     <font>
+                        <Font size="12.0" />
+                     </font>
+                  </Label>
+               </children>
+            </Pane>
+         </top>
+         <left>
+            <ScrollPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <content>
+                  <VBox>
+                     <children>
+                        <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#refreshButtonPressed" text="Refresh" />
+                        <ListView fx:id="sensorList" editable="true" />
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
+         </left>
+         <center>
+            <ScrollPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <content>
+                  <ListView fx:id="tutorialList" />
+               </content>
+            </ScrollPane>
+         </center>
+         <right>
+            <ScrollPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <content>
+                  <ListView fx:id="activityList" />
+               </content>
+            </ScrollPane>
+         </right>
+      </BorderPane>
+   </children>
+</AnchorPane>

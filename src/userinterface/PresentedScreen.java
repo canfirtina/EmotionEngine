@@ -11,5 +11,10 @@ package userinterface;
  */
 public interface PresentedScreen {
     
-    void setPresentingScreen( PresentingScreen screen);
+    /**
+     * Tells this presentingController that it is presented by this
+     * presentingController
+     * @param presentingController is responsible for displaying this screen
+     */
+    void setPresentingScreen( PresentingController presentingController);
 }

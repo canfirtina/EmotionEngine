@@ -2,89 +2,137 @@ package usermanager;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+import javafx.util.Pair;
+import shared.Sensor;
+import shared.Tutorial;
 
 /**
- * Class that is used for storing User related data. Implements "Serializable" in order to be able to save the object to a file.
+ * Class that is used for storing User related data. Implements "Serializable"
+ * in order to be able to save the object to a file.
  */
 public class User implements Serializable {
-	private String userName;
-	private String password;
-	private HashMap<String, Boolean> enabledSensors;
 
-	/**
-	 * Constructor for User class that takes userName and password.
-	 * 
-	 * @param userName 
-	 * @param password
-	 */
-	public User(String userName, String password) {
-		this.userName = userName;
-		this.password = password;
-		enabledSensors = new HashMap<String, Boolean>();
-	}
+    private String userName;
+    private String password;
+    private HashMap<String, Boolean> enabledSensors;
+    private HashMap<Pair<Sensor, Tutorial>, Integer> playCount;
+    private HashMap<String, Integer> gamesPlayed;
 
-	/**
-	 * Checks if the given sensor exists.
-	 * 
-	 * @param sensorID
-	 * @return
-	 */
-	public boolean checkSensor(String sensorID) {
-		if (!enabledSensors.containsKey(sensorID))
-			return false;
-		return enabledSensors.get(sensorID);
-	}
-	
-	/**
-	 * Returns the name of the user.
-	 * @return
-	 */
-	public String getName() {
-		return this.userName;
-	}
+    /**
+     * Constructor for User class that takes userName and password.
+     *
+     * @param userName
+     * @param password
+     */
+    public User(String userName, String password) {
+        this.userName = userName;
+        this.password = password;
+        enabledSensors = new HashMap<>();
+        playCount = new HashMap<Pair<Sensor, Tutorial>, Integer>();
+        gamesPlayed = new HashMap<>();
+    }
 
-	/**
-	 * Enables the given sensor. In the case that sensor does not exist, adds it
-	 * to enabled sensors.
-	 * 
-	 * @param sensorID
-	 */
-	public void enableSensor(String sensorID) {
-		enabledSensors.put(sensorID, true);
-	}
+    /**
+     * Checks if the given sensor exists.
+     *
+     * @param sensorID
+     * @return
+     */
+    public boolean checkSensor(String sensorID) {
+        if (!enabledSensors.containsKey(sensorID)) {
+            return false;
+        }
+        return enabledSensors.get(sensorID);
+    }
 
-	/**
-	 * Disables the given sensor.
-	 * 
-	 * @param sensorID
-	 */
-	public void disableSensor(String sensorID) {
-		if (!enabledSensors.containsKey(sensorID))
-			return;
-		enabledSensors.put(sensorID, false);
-	}
+    /**
+     * Returns the name of the user.
+     *
+     * @return
+     */
+    public String getName() {
+        return this.userName;
+    }
 
-	/**
-	 * Checks if the given password is correct.
-	 * 
-	 * @param password
-	 */
-	public boolean checkPassword(String password) {
-		return this.password.equals(password);
-	}
-	
-	/**
-	 * Changes the password.
-	 * @param oldPassword 
-	 * @param newPassword
-	 * @return
-	 */
-	public boolean changePassword(String oldPassword, String newPassword){
-		if(checkPassword(oldPassword)){
-			this.password = newPassword;
-			return true;
-		}
-		
-		return false;
-	}
+    /**
+     * Enables the given sensor. In the case that sensor does not exist, adds it
+     * to enabled sensors.
+     *
+     * @param sensorID
+     */
+    public void enableSensor(String sensorID) {
+        enabledSensors.put(sensorID, true);
+    }
+
+    /**
+     * Disables the given sensor.
+     *
+     * @param sensorID
+     */
+    public void disableSensor(String sensorID) {
+        if (!enabledSensors.containsKey(sensorID)) {
+            return;
+        }
+        enabledSensors.put(sensorID, false);
+    }
+
+    /**
+     * Checks if the given password is correct.
+     *
+     * @param password
+     * @return
+     */
+    public boolean checkPassword(String password) {
+        return this.password.equals(password);
+    }
+
+    /**
+     * Changes the password.
+     *
+     * @param oldPassword
+     * @param newPassword
+     * @return
+     */
+    public boolean changePassword(String oldPassword, String newPassword) {
+        if (checkPassword(oldPassword)) {
+            this.password = newPassword;
+            return true;
+        }
+
+        return false;
+    }
+
+    public void playedTutorial(Pair<Sensor, Tutorial> sen_tut) {
+        if (playCount.containsKey(sen_tut)) {
+            playCount.replace(sen_tut, 1 + playCount.get(sen_tut));
+        } else {
+            playCount.put(sen_tut, 1);
+        }
+    }
+
+    public int getTutorialPlayCount(Pair<Sensor, Tutorial> sen_tut) {
+        return playCount.get(sen_tut);
+    }
+
+    public void playedGame(String game, int minutes) {
+        if (gamesPlayed.containsKey(game)) {
+            gamesPlayed.replace(game, minutes + gamesPlayed.get(game));
+        } else {
+            gamesPlayed.put(game, minutes);
+        }
+    }
+
+    public String getGameplayTime(String game) {
+        int hours, minutes;
+
+        if (gamesPlayed.containsKey(game)) {
+            hours = (int) TimeUnit.HOURS.convert(gamesPlayed.get(game), TimeUnit.MINUTES);
+            minutes = gamesPlayed.get(game) - hours * 60;
+        } else {
+            return "N/A";
+        }
+
+        return hours + "h " + minutes + "m";
+    }
 }

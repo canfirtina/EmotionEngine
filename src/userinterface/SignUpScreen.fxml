@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.SignUpScreenController">
+   <children>
+      <TextField fx:id="emailField" layoutX="226.0" layoutY="119.0" promptText="E-mail Address">
+         <font>
+            <Font size="12.0" />
+         </font>
+      </TextField>
+      <PasswordField fx:id="passwordField" layoutX="226.0" layoutY="160.0" promptText="Password">
+         <font>
+            <Font size="12.0" />
+         </font>
+      </PasswordField>
+      <Button layoutX="272.0" layoutY="200.0" mnemonicParsing="false" onAction="#signUpPressed" text="Sign Up">
+         <font>
+            <Font size="12.0" />
+         </font></Button>
+      <Label fx:id="warningLabel" layoutX="137.0" layoutY="87.0" prefHeight="15.0" prefWidth="329.0" textFill="RED">
+         <font>
+            <Font size="12.0" />
+         </font>
+      </Label>
+      <Hyperlink fx:id="cancelButton" layoutX="279.0" layoutY="234.0" onAction="#cancelButtonPressed" text="Cancel" underline="true">
+         <font>
+            <Font size="12.0" />
+         </font>
+      </Hyperlink>
+   </children>
+</AnchorPane>

@@ -9,7 +9,7 @@ package userinterface;
  *
  * @author CanFirtina
  */
-public interface PresentingScreen {
+public interface PresentingController {
     
     /**
      * Call it when you want screen with screenName displayed
@@ -32,7 +32,7 @@ public interface PresentingScreen {
     /**
      * Removes the previously added screen from the list
      * @param screenName name of the screen to be removed
-     * @return true if removal is successfull.
+     * @return true if removal is successful.
      */
     public boolean removeScreen( String screenName);
 }
