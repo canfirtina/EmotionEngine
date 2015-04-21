@@ -405,6 +405,16 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	}
 	
 	/**
+	 * Returns sensors that are pending
+	 * @return 
+	 */
+	public ArrayList<SensorListener> getPendingSensors(){
+		synchronized(executorLocker){
+			return pendingSensorListeners;
+		}
+	}
+	
+	/**
 	 * Called when the status of data manager changes
 	 * @param manager
 	 */
