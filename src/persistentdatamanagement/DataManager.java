@@ -216,7 +216,10 @@ public class DataManager {
         // read current user
         ObjectInputStream ois = null;
         try {
-            ois = new ObjectInputStream(new FileInputStream(GAME_RECORDS_DIRECTORY + "/" + userName + "/" + USER_OBJECT_NAME));
+            if(new File(GAME_RECORDS_DIRECTORY + "/" + userName + "/" + USER_OBJECT_NAME).exists())
+                ois = new ObjectInputStream(new FileInputStream(GAME_RECORDS_DIRECTORY + "/" + userName + "/" + USER_OBJECT_NAME));
+            else
+                return null;
         } catch (IOException e) {
             e.printStackTrace();
         }
