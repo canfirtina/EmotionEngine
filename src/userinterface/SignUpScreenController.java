@@ -16,6 +16,8 @@ import javafx.fxml.Initializable;
  */
 public class SignUpScreenController implements Initializable, PresentedScreen {
 
+    PresentingController presentingController;
+    
     /**
      * Initializes the controller class.
      */
@@ -27,6 +29,7 @@ public class SignUpScreenController implements Initializable, PresentedScreen {
     @Override
     public void setPresentingScreen(PresentingController presentingController) {
         
+        this.presentingController = presentingController;
     }
     
 }
