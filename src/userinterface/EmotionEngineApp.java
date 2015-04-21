@@ -17,6 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import shared.*;
 
 /**
  *
@@ -33,10 +34,12 @@ public class EmotionEngineApp extends Application {
     public void start(Stage stage) throws Exception {
         
         EmotionEngineController mainContainer = new EmotionEngineController();
-        mainContainer.addScreen(EmotionEngineApp.screen1ID, EmotionEngineApp.screen1File);
-        mainContainer.addScreen(EmotionEngineApp.screen2ID, EmotionEngineApp.screen2File);
+        mainContainer.addScreen(ScreenInfo.LoginScreen.screenId(), ScreenInfo.LoginScreen.screenFileName());
+        mainContainer.addScreen(ScreenInfo.SignUpScreen.screenId(), ScreenInfo.SignUpScreen.screenFileName());
+        mainContainer.addScreen(ScreenInfo.ForgotPasswordScreen.screenId(), ScreenInfo.ForgotPasswordScreen.screenFileName());
+        mainContainer.addScreen(ScreenInfo.ProfileScreen.screenId(), ScreenInfo.ProfileScreen.screenFileName());
         
-        mainContainer.displayScreen(EmotionEngineApp.screen1ID);
+        mainContainer.displayScreen(ScreenInfo.LoginScreen.screenId());
         
         Group root = new Group();
         root.getChildren().addAll(mainContainer);
