@@ -167,5 +167,10 @@ public class SensorListenerGSR extends SensorListener {
             }
         }
     }
-
+    
+    @Override
+    public String toString(){
+        
+        return "GSR";
+    }
 }
