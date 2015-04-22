@@ -39,7 +39,7 @@ public class EmotionEngineController extends StackPane implements PresentingCont
     }
 
     @Override
-    public boolean displayScreen( String screenName) {
+    public boolean displayScreen(final String screenName) {
         
         if ( screenCollection.get( screenName) != null) {   //screen loaded
             final DoubleProperty opacity = opacityProperty();

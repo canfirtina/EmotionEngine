@@ -113,7 +113,7 @@ public class DataManager {
      * @param list
      * @param sensor
      */
-    public void saveSample(FeatureList list, Sensor sensor) {
+    public void saveSample(final FeatureList list, final Sensor sensor) {
         //Tasks are guaranteed to execute sequentially, and no more than one task will be active at any given time
         executorService.submit(new Callable() {
             public Object call() {

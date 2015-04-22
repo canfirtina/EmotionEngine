@@ -114,7 +114,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @param emotion
 	 * @return 
 	 */
-	public void trainLastNMilliseconds(long time, Emotion emotion){
+	public void trainLastNMilliseconds(final long time,final Emotion emotion){
 		synchronized(executorLocker){
 			executorService.submit(new Callable<Void>() {
 
@@ -139,7 +139,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * train whole feature list set
 	 * @param controller 
 	 */
-	public void trainAll(FeatureListController controller){
+	public void trainAll(final FeatureListController controller){
 		synchronized(executorLocker){
 			executorService.submit(new Callable<Void>() {
 				@Override
