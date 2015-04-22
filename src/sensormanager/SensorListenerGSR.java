@@ -7,15 +7,13 @@ import shared.TimestampedRawData;
 import java.util.List;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.concurrent.ArrayBlockingQueue;
 import shared.Sensor;
 /**
  * Connects to a GSR sensor on a specific port, 
  * gets raw GSR data from the sensor and notifies its observers periodically
  *
  */
-public class SensorListenerGSR extends SensorListener{
+public class SensorListenerGSR extends SensorListener {
 
 	private static final int COMM_PORT_TIMEOUT = 2000;
 	private static final int COMM_PORT_BAUD_RATE = 9600;
@@ -23,34 +21,31 @@ public class SensorListenerGSR extends SensorListener{
 	private static final int COMM_PORT_STOPBITS = SerialPort.STOPBITS_1;
 	private static final int COMM_PORT_PARITY = SerialPort.PARITY_NONE;
 	private static final int MESSAGE_LENGTH = 2;
-	private static final int BUFFER_LENGTH = 10;
+	private static final int BUFFER_LENGTH = 10010;
 
 	private CommPortIdentifier commPortIdentifier;
 	private CommPort commPort;
 	private SerialPort serialPort;
 	private InputStream inputStream;
+	private String comPortString;
 
 	private boolean threadsActive;
 	private boolean connectionEstablished;
 	private boolean streamingOn;
 	private List<TimestampedRawData> lastEpoch;
 
+
+
 	public SensorListenerGSR(String comPort) {
 
-		try {
-			this.commPortIdentifier = CommPortIdentifier.getPortIdentifier(comPort);
-			//this.readQueue = new ArrayBlockingQueue<Byte>(BUFFER_SIZE);
-		} catch (NoSuchPortException e) {
-			e.printStackTrace();
-		}
+		this.comPortString = comPort;
 		sensorType = Sensor.GSR;
 	}
 
 	@Override
 	public boolean connect() {
 		try {
-
-
+			this.commPortIdentifier = CommPortIdentifier.getPortIdentifier(comPortString);
 			if (commPortIdentifier.isCurrentlyOwned()) {
 				throw new Exception("EEG port is currently owned");
 			}
@@ -65,21 +60,17 @@ public class SensorListenerGSR extends SensorListener{
 			serialPort.setSerialPortParams(COMM_PORT_BAUD_RATE, COMM_PORT_DATABITS, COMM_PORT_STOPBITS, COMM_PORT_PARITY);
 			threadsActive = true;
 			inputStream = serialPort.getInputStream();
-			new Thread(new SerialReader(inputStream)).run();
-		} catch (PortInUseException | UnsupportedCommOperationException e) {
-			e.printStackTrace();
-			return false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
+			new Thread(new SerialReader(inputStream)).start();
 		} catch (Exception e) {
-			e.printStackTrace();
+			notifyObserversConnectionFail();
 			return false;
 		}
 
 
 		return true;
 	}
+
+
 
 	@Override
 	public boolean disconnect() {
@@ -123,6 +114,12 @@ public class SensorListenerGSR extends SensorListener{
 		
 	}
 
+	private void notifyObserversConnectionFail() {
+		System.out.println("connection fail");
+		for(SensorObserver observer : observerCollection)
+			observer.dataArrived(this);
+	}
+
 	@Override
 	public boolean registerObserver(SensorObserver observer) {
 		return observerCollection.add(observer);
@@ -138,8 +135,15 @@ public class SensorListenerGSR extends SensorListener{
 			observer.connectionEstablished(this);
 	}
 
+	private void notifyObserversConnectionError() {
+		System.out.println("connectionerror");
+		for (SensorObserver observer : observerCollection)
+			observer.connectionError(this);
+	}
+
 	private class SerialReader implements Runnable {
 		private InputStream inputStream;
+		private long lastDataArrived;
 
 		public SerialReader(InputStream inputStream) {
 			this.inputStream = inputStream;
@@ -151,9 +155,24 @@ public class SensorListenerGSR extends SensorListener{
 			int len = -1;
 			int val = 0;
 			int d=0;
+			int notAvailableSignal = 0;
 			try {
-				while( ( len = inputStream.read(buffer) ) > -1) {
+				while( true ) {
+					while(inputStream.available() <= 0) {
+						try {
+							if(notAvailableSignal > 100) {
+								notifyObserversConnectionError();
+								return;
+							}
+							notAvailableSignal++;
+							Thread.sleep(50);
 
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					notAvailableSignal = 0;
+					len = inputStream.read(buffer);
 					//disconnection statement
 					if (!threadsActive)
 						return;
@@ -171,6 +190,7 @@ public class SensorListenerGSR extends SensorListener{
 							if (d == 0) {
 								double rd[] = new double[1];
 								rd[0] = (double) val;
+								System.out.println(val);
 								TimestampedRawData rawData = new TimestampedRawData(rd);
 								if (dataEpocher.addData(rawData) == false) {
 									lastEpoch = dataEpocher.getEpoch();
@@ -179,6 +199,7 @@ public class SensorListenerGSR extends SensorListener{
 									notifyObservers();
 
 								}
+								val=0;
 							}
 
 
@@ -186,7 +207,7 @@ public class SensorListenerGSR extends SensorListener{
 					}
 				}
 			} catch (IOException e) {
-					e.printStackTrace();
+				notifyObserversConnectionError();
 			}
 		}
 

@@ -1,5 +1,7 @@
 package test;
 
+import emotionlearner.DataEpocher;
+import emotionlearner.TimeBasedDataEpocher;
 import sensormanager.SensorListener;
 import sensormanager.SensorListenerGSR;
 
@@ -11,17 +13,15 @@ public class CaseGSR {
     public CaseGSR() {
 
         gsr = new SensorListenerGSR("COM3");
+        DataEpocher de = new TimeBasedDataEpocher(4000);
         gsr.connect();
+        gsr.setDataEpocher(de);
     }
 
     public void runtest1() {
-        while(!gsr.isConnected()) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+
+        gsr.startStreaming();
+        System.out.println("streeeaming");
 
     }
 }
