@@ -8,21 +8,30 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.LoginScreenController">
+<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.LoginScreenController">
    <children>
-      <Label fx:id="warningLabel" layoutX="75.0" layoutY="73.0" prefHeight="16.0" prefWidth="450.0" textAlignment="RIGHT" textFill="RED">
+      <Label fx:id="warningLabel" alignment="CENTER" layoutX="135.0" layoutY="98.0" prefHeight="15.0" prefWidth="450.0" textAlignment="CENTER" textFill="RED" AnchorPane.topAnchor="100.0">
          <font>
             <Font size="12.0" />
          </font></Label>
-      <TextField fx:id="emailField" layoutX="219.0" layoutY="103.0" promptText="E-mail address" />
-      <PasswordField fx:id="passwordField" layoutX="219.0" layoutY="153.0" promptText="Password" />
-      <Button fx:id="loginButton" layoutX="275.0" layoutY="200.0" mnemonicParsing="false" onAction="#loginPressed" text="Login" />
-      <Hyperlink fx:id="signUpButton" layoutX="219.0" layoutY="239.0" onAction="#signUpPressed" text="Sign Up" underline="true">
+      <TextField fx:id="emailField" layoutX="298.0" layoutY="131.0" promptText="E-mail address">
+         <font>
+            <Font size="12.0" />
+         </font></TextField>
+      <PasswordField fx:id="passwordField" layoutX="298.0" layoutY="165.0" promptText="Password">
+         <font>
+            <Font size="12.0" />
+         </font></PasswordField>
+      <Button fx:id="loginButton" layoutX="350.0" layoutY="203.0" mnemonicParsing="false" onAction="#loginPressed" text="Login">
+         <font>
+            <Font size="12.0" />
+         </font></Button>
+      <Hyperlink fx:id="signUpButton" layoutX="297.0" layoutY="238.0" onAction="#signUpPressed" text="Sign Up" underline="true">
          <font>
             <Font size="12.0" />
          </font>
       </Hyperlink>
-      <Hyperlink fx:id="forgotPasswordButton" layoutX="280.0" layoutY="239.0" onAction="#forgotPasswordPressed" text="Forgot Password" underline="true">
+      <Hyperlink fx:id="forgotPasswordButton" layoutX="349.0" layoutY="238.0" onAction="#forgotPasswordPressed" text="Forgot Password" underline="true">
          <font>
             <Font size="12.0" />
          </font>
