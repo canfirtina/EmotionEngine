@@ -3,7 +3,6 @@ package sensormanager;
 import shared.TimestampedRawData;
 
 import java.util.List;
-import shared.Sensor;
 
 /**
  * Connects to a GSR sensor on a specific port, gets raw GSR data from the
@@ -13,7 +12,6 @@ import shared.Sensor;
 public class SensorListenerHR extends SensorListener {
 
     public SensorListenerHR(int portNumber) {
-        sensorType = Sensor.HR;
         // TODO Auto-generated constructor stub
     }
 

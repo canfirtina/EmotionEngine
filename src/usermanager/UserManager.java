@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import javafx.util.Pair;
 
 import persistentdatamanagement.DataManager;
-import shared.Sensor;
 import shared.Tutorial;
 
 /**
@@ -159,7 +158,7 @@ public class UserManager {
      *
      * @param tutPair
      */
-    public void playedTutorial(Pair<Sensor, Tutorial> tutPair) {
+    public void playedTutorial(Pair<String, Tutorial> tutPair) {
         getCurrentUser().playedTutorial(tutPair);
         DataManager.getInstance().saveUser(getCurrentUser());
     }
@@ -171,7 +170,7 @@ public class UserManager {
      * @param tutPair
      * @return
      */
-    public int getTutorialPlayCount(Pair<Sensor, Tutorial> tutPair) {
+    public int getTutorialPlayCount(Pair<String, Tutorial> tutPair) {
         return getCurrentUser().getTutorialPlayCount(tutPair);
     }
 }

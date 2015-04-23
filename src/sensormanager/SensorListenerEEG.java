@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import shared.Sensor;
 
 /**
  * Connects to a EEG sensor on a specific port, gets raw EEG data from the
@@ -62,7 +61,6 @@ public class SensorListenerEEG extends SensorListener {
         } catch (NoSuchPortException e) {
             e.printStackTrace();
         }
-        sensorType = Sensor.EEG;
     }
 
     @Override
