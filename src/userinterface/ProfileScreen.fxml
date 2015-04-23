@@ -37,7 +37,7 @@
                      <content>
                         <VBox>
                            <children>
-                              <ListView fx:id="sensorList" editable="true" />
+                              <ListView fx:id="sensorList" editable="true" onEditStart="#editTriggered" />
                            </children>
                         </VBox>
                      </content>

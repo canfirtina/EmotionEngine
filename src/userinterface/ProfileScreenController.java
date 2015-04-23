@@ -19,8 +19,20 @@ import javafx.scene.control.ListView;
 import javafx.scene.image.ImageView;
 import emotionlearner.EmotionEngine;
 import emotionlearner.EmotionEngineObserver;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.ListView.EditEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 import sensormanager.*;
+import shared.ScreenInfo;
 
 /**
  * FXML Controller class
@@ -56,7 +68,8 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
         engine.registerObserver(this);
-    }    
+        
+    }
 
     @Override
     public void setPresentingScreen(PresentingController presentingController) {
@@ -67,7 +80,27 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @FXML
     private void refreshButtonPressed( ActionEvent event){
         
-        updateSensorList();
+        ObservableList<String> sensors = FXCollections.observableArrayList("Sensor1");
+        sensorList.setItems(sensors);
+//        updateSensorList();
+    }
+    
+    @FXML
+    private void editTriggered( EditEvent event){
+        
+        //System.out.println(sensorList.getItems().get(event.getIndex()));
+        
+        Parent root;
+        try {
+            root = new FXMLLoader(getClass().getResource(ScreenInfo.TutorialScreen.screenFileName())).load();
+            Stage stage = new Stage();
+            stage.setTitle("My New Stage Title");
+            stage.setScene(new Scene(root, 750, 480));
+            stage.setResizable(false);
+            stage.show();
+        } catch (IOException ex) {
+            Logger.getLogger(ProfileScreenController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     private void updateSensorList(){
