@@ -20,6 +20,10 @@ import javafx.scene.image.ImageView;
 import emotionlearner.EmotionEngine;
 import emotionlearner.EmotionEngineObserver;
 import java.util.ArrayList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.scene.control.ListView.EditEvent;
+import javafx.scene.input.MouseEvent;
 import sensormanager.*;
 
 /**
@@ -56,7 +60,8 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
         engine.registerObserver(this);
-    }    
+        
+    }
 
     @Override
     public void setPresentingScreen(PresentingController presentingController) {
@@ -67,7 +72,15 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @FXML
     private void refreshButtonPressed( ActionEvent event){
         
+//        ObservableList<String> sensors = FXCollections.observableArrayList("Sensor1");
+//        sensorList.setItems(sensors);
         updateSensorList();
+    }
+    
+    @FXML
+    private void editTriggered( EditEvent event){
+        
+        //System.out.println(sensorList.getItems().get(event.getIndex()));
     }
     
     private void updateSensorList(){
