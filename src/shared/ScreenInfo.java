@@ -14,7 +14,8 @@ public enum ScreenInfo {
     LoginScreen( "login", "LoginScreen.fxml"),
     SignUpScreen( "signUp", "SignUpScreen.fxml"),
     ForgotPasswordScreen( "forgotPassword", "ForgotPasswordScreen.fxml"),
-    ProfileScreen( "profile", "ProfileScreen.fxml");
+    ProfileScreen( "profile", "ProfileScreen.fxml"),
+    TutorialScreen( "tutorial", "TutorialScreen.fxml");
     
     private final String screenID;
     private final String screenFileName;
