@@ -37,6 +37,7 @@ public class SensorListenerEEG extends SensorListener {
     private static final byte DATA_FOOT = (byte) 0xC0;
     private static final int NOT_AVAILABLE_LIMIT = 100;
     private static final int CONNECTION_RETRY_INTERVAL = 50;
+    private static final int RECEIVE_TIMEOUT = 5000;
 
     private DataInterpreter dataInterpreter;
     private SerialReader serialReader;
@@ -53,23 +54,20 @@ public class SensorListenerEEG extends SensorListener {
     private BlockingQueue<Byte> readQueue;
     private String identificationString;
     private List<TimestampedRawData> lastEpoch;
+    private String comPortString;
 
     private boolean connectionEstablished;
     private boolean streamingOn;
 
     public SensorListenerEEG(String comPort) {
-        try {
-            this.commPortIdentifier = CommPortIdentifier.getPortIdentifier(comPort);
-            this.readQueue = new ArrayBlockingQueue<Byte>(BUFFER_SIZE);
-        } catch (NoSuchPortException e) {
-            e.printStackTrace();
-        }
+        this.comPortString = comPort;
+        this.readQueue = new ArrayBlockingQueue<Byte>(BUFFER_SIZE);
     }
 
     @Override
     public boolean connect() {
         try {
-
+            this.commPortIdentifier = CommPortIdentifier.getPortIdentifier(comPortString);
             if (commPortIdentifier.isCurrentlyOwned()) {
                 throw new Exception("EEG port is currently owned");
             }
@@ -85,14 +83,15 @@ public class SensorListenerEEG extends SensorListener {
 
             inputStream = serialPort.getInputStream();
             outputStream = serialPort.getOutputStream();
+            serialPort.enableReceiveTimeout(RECEIVE_TIMEOUT);
         } catch (PortInUseException | UnsupportedCommOperationException e) {
-            e.printStackTrace();
+            notifyObserversConnectionFailed();
             return false;
         } catch (IOException e) {
-            e.printStackTrace();
+            notifyObserversConnectionFailed();
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
+            notifyObserversConnectionFailed();
             return false;
         }
         new Thread(new Runnable() {
@@ -100,7 +99,13 @@ public class SensorListenerEEG extends SensorListener {
             public void run() {
                 try {
                     threadsActive = true;
-                    serialReader = new SerialReader(inputStream);
+                    try {
+                        serialReader = new SerialReader(inputStream);
+                    } catch (IOException e) {
+                        threadsActive = false;
+                        notifyObserversConnectionFailed();
+                        return;
+                    }
 
                     readerThread = new Thread(serialReader);
                     System.out.println("thread baslangic");
@@ -294,50 +299,35 @@ public class SensorListenerEEG extends SensorListener {
 
         private InputStream inputStream;
 
-        public SerialReader(InputStream inputStream) throws Exception {
+        public SerialReader(InputStream inputStream) throws IOException {
 
             this.inputStream = inputStream;
 
             byte[] buffer = new byte[BUFFER_SIZE];
             int len = 0;
-            byte lastByte = (byte) 'a';
             identificationString = "";
-            int notAvailableSignal = 0;
-            while (identificationString.endsWith("$$$") == false ) {
+            int bytesread = 0;
 
-                try {
+            while (identificationString.endsWith("$$$") == false) {
 
-                    while(inputStream.available() <= 0) {
-                        try {
-                            if( notAvailableSignal > NOT_AVAILABLE_LIMIT) {
-                                notifyObserversConnectionFailed();
-                                return;
-                            }
-                            notAvailableSignal++;
-                            Thread.sleep(CONNECTION_RETRY_INTERVAL);
 
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                len = inputStream.read(buffer);
 
-                    notAvailableSignal = 0;
-                    len = inputStream.read(buffer);
-                    for (int i = 0; i < len; i++) {
-                        identificationString += String.valueOf((char) buffer[i]);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    break;
+                if (len == 0 || bytesread > 500) {
+                    throw new IOException();
+                }
+                bytesread += len;
+                for (int i = 0; i < len; i++) {
+                    identificationString += String.valueOf((char) buffer[i]);
                 }
             }
+
 
             if (identificationString.endsWith("$$$")) {
                 System.out.println(identificationString);
                 //send reset signal
             } else {
-                notifyObserversConnectionError();
-                throw new Exception("Identification does not match with expected ->" + identificationString);
+                throw new IOException("Identification does not match with expected ->" + identificationString);
             }
 
         }
@@ -346,25 +336,14 @@ public class SensorListenerEEG extends SensorListener {
         public void run() {
             byte[] buffer = new byte[MESSAGE_LENGTH];
             int len = -1;
-            int notAvailableSignal = 0;
             System.out.println("runnnnn");
             try {
-                while ( true ) {
-                    while(inputStream.available() <= 0) {
-                        try {
-                            if(streamingOn && notAvailableSignal > NOT_AVAILABLE_LIMIT) {
-                                notifyObserversConnectionError();
-                                return;
-                            }
-                            notAvailableSignal++;
-                            Thread.sleep(CONNECTION_RETRY_INTERVAL);
+                while ( (len = inputStream.read(buffer)) > -1 ) {
 
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                    if(streamingOn && len == 0) {
+                        throw new IOException();
                     }
-                    len = inputStream.read(buffer);
-                    notAvailableSignal = 0;
+
                     //disconnection routine
                     if (!threadsActive) {
                         return;
@@ -375,9 +354,10 @@ public class SensorListenerEEG extends SensorListener {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                notifyObserversConnectionError();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                notifyObserversConnectionError();
             }
         }
     }
