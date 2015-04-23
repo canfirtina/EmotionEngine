@@ -7,7 +7,6 @@ import shared.TimestampedRawData;
 import java.util.List;
 import java.io.IOException;
 import java.io.InputStream;
-import shared.Sensor;
 /**
  * Connects to a GSR sensor on a specific port, 
  * gets raw GSR data from the sensor and notifies its observers periodically
@@ -39,7 +38,6 @@ public class SensorListenerGSR extends SensorListener {
 	public SensorListenerGSR(String comPort) {
 
 		this.comPortString = comPort;
-		sensorType = Sensor.GSR;
 	}
 
 	@Override
