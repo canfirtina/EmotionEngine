@@ -36,6 +36,8 @@ public class SensorListenerEEG extends SensorListener {
     private static final long CONTINUOUS_COMMAND_DELAY = 500;
     private static final byte DATA_HEADER = (byte) 0xA0;
     private static final byte DATA_FOOT = (byte) 0xC0;
+    private static final int NOT_AVAILABLE_LIMIT = 100;
+    private static final int CONNECTION_RETRY_INTERVAL = 50;
 
     private DataInterpreter dataInterpreter;
     private SerialReader serialReader;
@@ -54,6 +56,7 @@ public class SensorListenerEEG extends SensorListener {
     private List<TimestampedRawData> lastEpoch;
 
     private boolean connectionEstablished;
+    private boolean streamingOn;
 
     public SensorListenerEEG(String comPort) {
         try {
@@ -94,7 +97,7 @@ public class SensorListenerEEG extends SensorListener {
             e.printStackTrace();
             return false;
         }
-        new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -121,16 +124,18 @@ public class SensorListenerEEG extends SensorListener {
                     e.printStackTrace();
                 }
             }
-        }.run();
+        }).start();
 
         return true;
     }
 
     public void startStreaming() {
+        streamingOn = true;
         serialWriter.writeByte(CODE_START_STREAMING);
     }
 
     public void stopStreaming() {
+        streamingOn = false;
         serialWriter.writeByte(CODE_STOP_STREAMING);
     }
 
@@ -177,6 +182,23 @@ public class SensorListenerEEG extends SensorListener {
         for (SensorObserver observer : observerCollection) {
             observer.connectionEstablished(this);
         }
+    }
+
+    protected void notifyObserversConnectionFailed() {
+        threadsActive = false;
+        System.out.println("connection fail");
+        for (SensorObserver observer : observerCollection) {
+            observer.connectionFailed(this);
+        }
+    }
+
+    protected void notifyObserversConnectionError() {
+        threadsActive = false;
+        System.out.println("connection error");
+        for (SensorObserver observer : observerCollection) {
+            observer.connectionError(this);
+        }
+
     }
 
     @Override
@@ -282,8 +304,26 @@ public class SensorListenerEEG extends SensorListener {
             int len = 0;
             byte lastByte = (byte) 'a';
             identificationString = "";
-            while (identificationString.endsWith("$$$") == false) {
+            int notAvailableSignal = 0;
+            while (identificationString.endsWith("$$$") == false ) {
+
                 try {
+
+                    while(inputStream.available() <= 0) {
+                        try {
+                            if( notAvailableSignal > NOT_AVAILABLE_LIMIT) {
+                                notifyObserversConnectionFailed();
+                                return;
+                            }
+                            notAvailableSignal++;
+                            Thread.sleep(CONNECTION_RETRY_INTERVAL);
+
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    notAvailableSignal = 0;
                     len = inputStream.read(buffer);
                     for (int i = 0; i < len; i++) {
                         identificationString += String.valueOf((char) buffer[i]);
@@ -298,6 +338,7 @@ public class SensorListenerEEG extends SensorListener {
                 System.out.println(identificationString);
                 //send reset signal
             } else {
+                notifyObserversConnectionError();
                 throw new Exception("Identification does not match with expected ->" + identificationString);
             }
 
@@ -307,9 +348,25 @@ public class SensorListenerEEG extends SensorListener {
         public void run() {
             byte[] buffer = new byte[MESSAGE_LENGTH];
             int len = -1;
+            int notAvailableSignal = 0;
             System.out.println("runnnnn");
             try {
-                while ((len = inputStream.read(buffer)) > -1) {
+                while ( true ) {
+                    while(inputStream.available() <= 0) {
+                        try {
+                            if(streamingOn && notAvailableSignal > NOT_AVAILABLE_LIMIT) {
+                                notifyObserversConnectionError();
+                                return;
+                            }
+                            notAvailableSignal++;
+                            Thread.sleep(CONNECTION_RETRY_INTERVAL);
+
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    len = inputStream.read(buffer);
+                    notAvailableSignal = 0;
                     //disconnection routine
                     if (!threadsActive) {
                         return;

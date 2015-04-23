@@ -15,7 +15,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import emotionlearner.*;
+import sensormanager.SensorListener;
 import sensormanager.SensorListenerEEG;
+import sensormanager.SensorListenerGSR;
 import shared.FeatureList;
 import shared.TimestampedRawData;
 import usermanager.User;
@@ -55,6 +57,7 @@ public class CaseEEG {
 	public void runtest6(){
 		EmotionEngine engine = EmotionEngine.sharedInstance(null);
 		engine.createSensorListener("COM4", SensorListenerEEG.class);
+		//engine.createSensorListener("COM3", SensorListenerGSR.class);
 	}
 
 	/**

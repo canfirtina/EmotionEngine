@@ -109,12 +109,14 @@ public class SensorListenerGSR extends SensorListener {
 
 	@Override
 	protected void notifyObservers() {
+		threadsActive = false;
 		for(SensorObserver observer : observerCollection)
 			observer.dataArrived(this);
 		
 	}
 
 	private void notifyObserversConnectionFail() {
+		threadsActive = false;
 		System.out.println("connection fail");
 		for(SensorObserver observer : observerCollection)
 			observer.dataArrived(this);
@@ -154,13 +156,13 @@ public class SensorListenerGSR extends SensorListener {
 			byte[] buffer = new byte[BUFFER_LENGTH];
 			int len = -1;
 			int val = 0;
-			int d=0;
 			int notAvailableSignal = 0;
 			try {
 				while( true ) {
 					while(inputStream.available() <= 0) {
 						try {
 							if(notAvailableSignal > 100) {
+								threadsActive = false;
 								notifyObserversConnectionError();
 								return;
 							}
@@ -184,10 +186,10 @@ public class SensorListenerGSR extends SensorListener {
 
 					if (streamingOn) {
 						for (int i = 0; i < len; i++) {
-							val = (val << 8) | buffer[i];
-							d++;
-							d = d % 2;
-							if (d == 0) {
+							if(buffer[i] == 13) {
+								continue;
+							}
+							if(buffer[i] == 10) {
 								double rd[] = new double[1];
 								rd[0] = (double) val;
 								System.out.println(val);
@@ -200,7 +202,10 @@ public class SensorListenerGSR extends SensorListener {
 
 								}
 								val=0;
+							} else {
+								val = val * 10 + (buffer[i]) - '0';
 							}
+
 
 
 						}
