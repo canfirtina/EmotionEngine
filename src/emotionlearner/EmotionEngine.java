@@ -71,7 +71,15 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 */
 	private FeatureListController testFeatures;
 	
-	private Emotion sessionLabel;
+	/**
+	 * open training session sets this variable
+	 */
+	private Emotion sessionEmotion;
+	
+	/**
+	 * open training session instantiates this variable
+	 */
+	private FeatureListController sessionTrainingFeatures;
 	
 	/**
 	 * Singleton instance
@@ -105,7 +113,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		//20 seconds for now
 		this.testFeatures = new FeatureListController(20000);
 		
-                this.sessionLabel = null;
+        this.sessionEmotion = null;
 	}
 	
 	/**
@@ -166,7 +174,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Starts a training session with a label
 	 * @param label
 	 */
-	public boolean openTrainingSession(Emotion emotion){
+	public synchronized boolean openTrainingSession(Emotion emotion){
+		this.sessionEmotion = emotion;
+		this.sessionTrainingFeatures = new FeatureListController();
+
 		return true;
 	}
 	
@@ -174,8 +185,8 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Finishes the current training session
 	 * @return
 	 */
-	public void closeTrainingSession(){
-		sessionLabel = null;
+	public synchronized void closeTrainingSession(){
+		sessionEmotion = null;
 	}
 	
 	/**
@@ -261,6 +272,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					list.setTimestamp(new Timestamp(new Date().getTime()));
 					testFeatures.addFeatureList(sensor, list);
 					
+					//if session t
+					if(sessionTrainingFeatures!=null)
+						sessionTrainingFeatures.addFeatureList(sensor, list);
+					
 					System.out.println("New Feature List");
 					for(int i=0;i<list.size();++i)
 						System.out.print(list.get(i));
@@ -295,6 +310,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					//unregister sensor listener from both training and test feature list controllers
 					trainingFeatures.unregisterSensorListener(sensor);
 					testFeatures.unregisterSensorListener(sensor);
+					
+					if(sessionTrainingFeatures!=null)
+						sessionTrainingFeatures.unregisterSensorListener(sensor);
+					
 					
 					
 					notifyEngineObservers();
@@ -334,6 +353,9 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					//register sensor listener to both training and test feature list controllers
 					trainingFeatures.registerSensorListener(sensor);
 					testFeatures.registerSensorListener(sensor);
+					
+					if(sessionTrainingFeatures!=null)
+						sessionTrainingFeatures.registerSensorListener(sensor);
 					
 					sensor.startStreaming();
 					
