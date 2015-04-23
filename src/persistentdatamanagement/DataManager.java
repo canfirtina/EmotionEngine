@@ -118,6 +118,7 @@ public class DataManager {
         executorService.submit(new Callable() {
             public Object call() {
                 String fileName = getUserDirectory(currentUser) + "/" + sensor.toString() + "_features.ftr";
+                if(new File(fileName).exists())
                 try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)))) {
                     out.print(list.getEmotion().toString() + ",");
                     for (int i = 0; i < list.size() - 1; ++i) {
@@ -140,7 +141,7 @@ public class DataManager {
      * @param list
      * @param sensor 
      */
-    public void saveMultipleSamples(ArrayList<FeatureList> list, SensorListener sensor){
+    public void saveMultipleSamples(List<FeatureList> list, SensorListener sensor){
         for(FeatureList fl : list){
             saveSample(fl, sensor);
         }
@@ -170,9 +171,9 @@ public class DataManager {
         for (String line : lines) {
             String[] current = line.split(",");
             Emotion label = Emotion.valueOf(current[0]);
-            double[] features = new double[current.length - 2];
+            double[] features = new double[current.length - 1];
             for (int i = 1; i < current.length; i++) {
-                features[i] = Double.parseDouble(current[i]);
+                features[i-1] = Double.parseDouble(current[i]);
             }
 
             featureLabelPairs.add(new FeatureList(features, label));

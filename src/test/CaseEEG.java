@@ -1,33 +1,35 @@
 package test;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import emotionlearner.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import persistentdatamanagement.DataManager;
 import sensormanager.SensorListener;
 import sensormanager.SensorListenerEEG;
-import sensormanager.SensorListenerGSR;
+import shared.Emotion;
 import shared.FeatureList;
+import shared.FeatureListController;
 import shared.TimestampedRawData;
 import usermanager.User;
 import usermanager.UserManager;
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
-import weka.core.converters.ArffLoader.ArffReader;
 
 public class CaseEEG {
 	private String testFolderPath = "test/Test/";
@@ -253,6 +255,95 @@ public class CaseEEG {
 		svmClassifier.trainWithCrossValidation( trainFolderPath + "cantrainingall.arff", "weka.classifiers.bayes.NaiveBayes", null, 10);
 	}
 
+        public void testDataManagerEmotionEngineWrite(){
+            BufferedReader br = null;
+            
+                System.out.println("asdsa");
+            try {
+                System.out.println("asdsa");
+                DataManager manager = DataManager.getInstance();
+                if(!manager.checkUserExist("test"))
+                    UserManager.getInstance().newUser("test", "password");
+                UserManager.getInstance().login("test", "password");
+                List<FeatureList> lists;
+                FeatureListController c = new FeatureListController();
+                br = new BufferedReader(new FileReader(new File("testData.csv")));
+                String line;
+                SensorListenerEEG listener = new SensorListenerEEG("COM4");
+                c.registerSensorListener(listener);
+                while((line = br.readLine())!=null){
+                    Scanner scanner = new Scanner(line);
+                    String[] d = line.split(",");
+                    double []ds = new double[64];
+                    if(d.length != 64){
+                        System.out.println("dur burada");
+                    }
+                    for(int i=0;i<64;++i)
+                        ds[i] = Double.parseDouble(d[i]);
+                    FeatureList x = new FeatureList(ds);
+                    x.setEmotion(Emotion.JOY);
+                    c.addFeatureList(listener,x);
+                  
+                }
+                
+                lists = c.getLastNFeatureList(listener, -1);
+                manager.saveMultipleSamples(lists, listener);
+                
+                for(FeatureList l : lists){
+                    for(int i=0;i<l.size();++i)
+                        System.out.print(l.get(i) + " ");
+                    System.out.println();
+                }
+                
+                
+                
+                
+                //EmotionEngine engine = EmotionEngine.sharedInstance(manager);
+                //engine.createSensorListener("COM4", SensorListenerEEG.class);
+                //engine.trainAll();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(CaseEEG.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(CaseEEG.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    br.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(CaseEEG.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        
+        
+        public void testDataManagerEmotionEngineRead() throws InterruptedException{
+            
+            DataManager manager = DataManager.getInstance();
+            if(!manager.checkUserExist("test"))
+                UserManager.getInstance().newUser("test", "password");
+            UserManager.getInstance().login("test", "password");
+            System.out.println("0");
+            EmotionEngine engine = EmotionEngine.sharedInstance(manager);
+            engine.createSensorListener("COM4", SensorListenerEEG.class);
+            System.out.println("A");
+            List<SensorListener> listeners = engine.getPendingSensors();
+            FeatureListController c = new FeatureListController();
+            
+            Thread.sleep(1000);
+            
+            System.out.println("B");
+            for(SensorListener l:listeners){
+                c.registerSensorListener(l);
+                List<FeatureList> features = manager.getGameData(l);
+                System.out.println("C");
+                for(FeatureList list : features)
+                    c.addFeatureList(l, list);
+                
+            }
+            System.out.println("D");
+            engine.trainAll(c);
+            System.out.println("E");
+        }
+        
 	public void testUserManager() {
 		UserManager um = UserManager.getInstance();
 		new Scanner(System.in).nextLine();
@@ -268,4 +359,9 @@ public class CaseEEG {
 		user = um.getCurrentUser();
 
 	}
+        
+        public static void main(String[] args) throws Exception{
+            System.out.println("asdsadadsads");
+            new CaseEEG().testDataManagerEmotionEngineRead();
+        }
 }
