@@ -2,21 +2,20 @@ package communicator;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import emotionlearner.EmotionEngine;
 import shared.Emotion;
-import shared.Label;
 
 /**
  * Handles communication between client and server processes
  */
 public class Communicator {
-	public static final int port = 9999;
+	public static final int port = 44630;
+	private static final int READ_TIMEOUT = 2000;
+	private static final String HEART_BEAT = "HB";
 
 	/**
 	 * Executor for sending non-blocking message to client
@@ -33,10 +32,16 @@ public class Communicator {
 	 */
 	private static Socket adapter;
 
+
 	/**
-	 * Gets messages from adapter
+	 * InputStream from adapter to Communicator
 	 */
-	private static DataInputStream is;
+	private static InputStream inputStream;
+
+	/**
+	 * BufferedReader to wrap InputStream object
+	 */
+	private static BufferedReader bufferedReader;
 
 	/**
 	 * Sends messages to adapter
@@ -55,19 +60,10 @@ public class Communicator {
 	 * Starts a server that constantly listens for requests coming from clients
 	 */
 	public static void startServer() {
-		/*
-		 * Buralar internetten. duzelt.
-		 */
 
 		ee= EmotionEngine.sharedInstance(null);
-		// declaration section:
-		// declare a server socket and a client socket for the server
-		// declare an input and an output stream
 
-
-		Socket clientSocket = null;
-
-		// Try to open a server socket on port 9999
+		// Try to open a server socket on port specified port
 		// Note that we can't choose a port less than 1023 if we are not
 		// privileged users (root)
 		try {
@@ -76,6 +72,11 @@ public class Communicator {
 			System.out.println(e);
 		}
 
+
+
+	}
+
+	public static void waitClient() {
 		// Create a socket object from the ServerSocket to listen and accept
 		// connections.
 		// Open input and output streams
@@ -84,23 +85,48 @@ public class Communicator {
 			public void run() {
 				try {
 					System.out.println("waiitng for client");
+
 					adapter = server.accept();
+
+					//read operations timeout after a while so we can check if client is still there
+					adapter.setSoTimeout(READ_TIMEOUT);
+
 					System.out.println("client connected");
-					is = new DataInputStream(adapter.getInputStream());
+					inputStream = adapter.getInputStream();
+					bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 					os = new PrintStream(adapter.getOutputStream());
 
 					//Get message, parse it and do what it requires
 					while (true) {
-						String line = is.readLine();
-						os.println(line);
-						parseAndExecuteRequest(line);
+
+						try {
+							String line = bufferedReader.readLine();
+
+							//if end of stream then client may be disconncted
+							if(line == null) {
+								throw new SocketTimeoutException();
+							}
+
+							//echo back what is told
+							os.println(line);
+
+
+							parseAndExecuteRequest(line);
+
+						} catch (SocketTimeoutException e) {
+							//check if we can still write to client socket
+							sendMessage(HEART_BEAT);
+						}
 					}
 				} catch (IOException e) {
-					System.out.println(e);
+					//client is disconnected
+					onClientDisconnected();
+				} catch (Exception e) {
+					//i do not know how this is possible
+					e.printStackTrace();
 				}
 			}
 		}).start();
-
 	}
 
 	/**
@@ -148,7 +174,7 @@ public class Communicator {
 	 * Convert Emotion object to string message and send it to client
 	 * @param emotion
 	 */
-	private static void sendEmotionToClient(final Emotion emotion) {
+	private static void sendEmotionToClient(final Emotion emotion) throws IOException{
 
 		sendMessage("emotion " + emotion.name());
 
@@ -158,13 +184,17 @@ public class Communicator {
 	 * Send message to client (blocking)
 	 * @param str message to be sent
 	 */
-	private static synchronized void sendMessage(final String str) {
+	private static synchronized void sendMessage(final String str) throws IOException {
 		os.println(str);
+		if(os.checkError())
+			throw new IOException();
 	}
 
 	/**
+	 * TODO Ali bunu deneme amacli yazmis diye dusunuyorum. Su anki yapida bir isi yok ama ona sormadan silemedim.
 	 * Listens to the port for new requests
 	 */
+	@Deprecated
 	public static void checkForRequest() {
 		int request = 1;
 
@@ -183,11 +213,21 @@ public class Communicator {
 		executorService.submit(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
+
 				sendEmotionToClient(emotion);
+
 				return null;
 			}
 		});
 
+	}
+
+	/**
+	 * Makes thread wait for another client
+	 */
+	private static void onClientDisconnected() {
+		System.out.println("connection failed");
+		waitClient();
 	}
 
 
