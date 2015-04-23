@@ -21,6 +21,7 @@ public class SensorListenerGSR extends SensorListener {
 	private static final int COMM_PORT_PARITY = SerialPort.PARITY_NONE;
 	private static final int MESSAGE_LENGTH = 2;
 	private static final int BUFFER_LENGTH = 10010;
+	private static final int RECEIVE_TIMEOUT = 5000;
 
 	private CommPortIdentifier commPortIdentifier;
 	private CommPort commPort;
@@ -58,6 +59,7 @@ public class SensorListenerGSR extends SensorListener {
 			serialPort.setSerialPortParams(COMM_PORT_BAUD_RATE, COMM_PORT_DATABITS, COMM_PORT_STOPBITS, COMM_PORT_PARITY);
 			threadsActive = true;
 			inputStream = serialPort.getInputStream();
+			serialPort.enableReceiveTimeout(RECEIVE_TIMEOUT);
 			new Thread(new SerialReader(inputStream)).start();
 		} catch (Exception e) {
 			notifyObserversConnectionFail();
@@ -107,12 +109,14 @@ public class SensorListenerGSR extends SensorListener {
 
 	@Override
 	protected void notifyObservers() {
+		threadsActive = false;
 		for(SensorObserver observer : observerCollection)
 			observer.dataArrived(this);
 		
 	}
 
 	private void notifyObserversConnectionFail() {
+		threadsActive = false;
 		System.out.println("connection fail");
 		for(SensorObserver observer : observerCollection)
 			observer.dataArrived(this);
@@ -141,7 +145,6 @@ public class SensorListenerGSR extends SensorListener {
 
 	private class SerialReader implements Runnable {
 		private InputStream inputStream;
-		private long lastDataArrived;
 
 		public SerialReader(InputStream inputStream) {
 			this.inputStream = inputStream;
@@ -152,25 +155,13 @@ public class SensorListenerGSR extends SensorListener {
 			byte[] buffer = new byte[BUFFER_LENGTH];
 			int len = -1;
 			int val = 0;
-			int d=0;
-			int notAvailableSignal = 0;
 			try {
-				while( true ) {
-					while(inputStream.available() <= 0) {
-						try {
-							if(notAvailableSignal > 100) {
-								notifyObserversConnectionError();
-								return;
-							}
-							notAvailableSignal++;
-							Thread.sleep(50);
+				while( (len = inputStream.read(buffer)) > -1 ) {
 
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
+					if(len == 0) {
+						throw new IOException();
 					}
-					notAvailableSignal = 0;
-					len = inputStream.read(buffer);
+
 					//disconnection statement
 					if (!threadsActive)
 						return;
@@ -182,10 +173,10 @@ public class SensorListenerGSR extends SensorListener {
 
 					if (streamingOn) {
 						for (int i = 0; i < len; i++) {
-							val = (val << 8) | buffer[i];
-							d++;
-							d = d % 2;
-							if (d == 0) {
+							if(buffer[i] == 13) {
+								continue;
+							}
+							if(buffer[i] == 10) {
 								double rd[] = new double[1];
 								rd[0] = (double) val;
 								System.out.println(val);
@@ -198,7 +189,10 @@ public class SensorListenerGSR extends SensorListener {
 
 								}
 								val=0;
+							} else {
+								val = val * 10 + (buffer[i]) - '0';
 							}
+
 
 
 						}

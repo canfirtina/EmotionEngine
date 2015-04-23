@@ -16,29 +16,24 @@ import gnu.io.*;
  */
 public class COMPortListener {
 
-    HashMap<String, Class> connectedPorts = new HashMap<>();
+    private static HashMap<String, Class> connectedPorts = new HashMap<>();
 
     public static HashMap<String, Class> getConnectedPorts(){
         Enumeration identifiers = CommPortIdentifier.getPortIdentifiers();
 
         while(identifiers.hasMoreElements()) {
             CommPortIdentifier port = (CommPortIdentifier)identifiers.nextElement();
-
             if(port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-                try {
-                    SerialPort ppp = (SerialPort) port.open("AAA",11000);
-                    System.out.println(port.getName() + " " + port.getPortType() + " " + ppp.getBaudRate());
-                } catch (PortInUseException e) {
-                    e.printStackTrace();
-                }
+                //Class types does not mean anything, they are here just for if we could add this functionality later
+                if(port.getName().equals("COM3"))
+                    connectedPorts.put(port.getName(), SensorListenerGSR.class);
+                else
+                    connectedPorts.put(port.getName(), SensorListenerEEG.class);
+
             }
         }
 
-        HashMap<String, Class> testPorts = new HashMap<String,Class>();
 
-        testPorts.put("COM4", sensormanager.SensorListenerEEG.class);
-        testPorts.put("COM3", sensormanager.SensorListenerGSR.class);
-
-        return testPorts;
+        return connectedPorts;
     }
 }
