@@ -9,11 +9,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="417.0" prefWidth="687.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.ProfileScreenController">
+<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.ProfileScreenController">
    <children>
-      <BorderPane prefHeight="417.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <top>
-            <Pane prefHeight="81.0" prefWidth="687.0" BorderPane.alignment="CENTER">
+      <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Pane prefHeight="80.0">
                <children>
                   <ImageView fx:id="profileImage" fitHeight="60.0" fitWidth="60.0" layoutX="20.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true">
                      <viewport>
@@ -28,35 +28,36 @@
                         <Font size="12.0" />
                      </font>
                   </Label>
+                  <Button fx:id="refreshButton" layoutX="670.0" layoutY="8.0" mnemonicParsing="false" onAction="#refreshButtonPressed" text="Refresh" />
                </children>
             </Pane>
-         </top>
-         <left>
-            <ScrollPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-               <content>
-                  <VBox>
-                     <children>
-                        <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#refreshButtonPressed" text="Refresh" />
-                        <ListView fx:id="sensorList" editable="true" />
-                     </children>
-                  </VBox>
-               </content>
-            </ScrollPane>
-         </left>
-         <center>
-            <ScrollPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-               <content>
-                  <ListView fx:id="tutorialList" />
-               </content>
-            </ScrollPane>
-         </center>
-         <right>
-            <ScrollPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-               <content>
-                  <ListView fx:id="activityList" />
-               </content>
-            </ScrollPane>
-         </right>
-      </BorderPane>
+            <HBox VBox.vgrow="ALWAYS">
+               <children>
+                  <ScrollPane HBox.hgrow="ALWAYS">
+                     <content>
+                        <VBox>
+                           <children>
+                              <ListView fx:id="sensorList" editable="true" />
+                           </children>
+                        </VBox>
+                     </content>
+                  </ScrollPane>
+                  <ScrollPane HBox.hgrow="ALWAYS">
+                     <content>
+                        <ListView fx:id="tutorialList" />
+                     </content>
+                  </ScrollPane>
+                  <ScrollPane HBox.hgrow="ALWAYS">
+                     <content>
+                        <ListView fx:id="activityList" />
+                     </content>
+                  </ScrollPane>
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
    </children>
 </AnchorPane>
