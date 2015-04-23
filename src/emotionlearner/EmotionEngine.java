@@ -226,7 +226,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Returns last calculated emotional status for the classifying session  
 	 * @return
 	 */
-	public Label currentEmotion(){
+	public Emotion currentEmotion(){
 		return null;
 	}
 	
