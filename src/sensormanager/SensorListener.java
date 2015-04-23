@@ -5,7 +5,6 @@ import shared.TimestampedRawData;
 
 import java.util.ArrayList;
 import java.util.List;
-import shared.Sensor;
 
 /**
  * Blue print of listeners of the sensors. Connects to a sensor on a specific port, 
@@ -37,11 +36,6 @@ public abstract class SensorListener {
 	 */
 	protected int freq;
         
-        /**
-         * Type of the sensor being listened to
-         */
-        protected Sensor sensorType;
-	
 	/**
 	 * Tries to connect with the sensor
 	 * @return true if the connection is established
@@ -108,7 +102,4 @@ public abstract class SensorListener {
 		this.dataEpocher = dataEpocher;
 	}
         
-        public Sensor getSensorType(){
-            return sensorType;
-        }
 }

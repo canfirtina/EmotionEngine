@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import javafx.util.Pair;
-import shared.Sensor;
 import shared.Tutorial;
 
 /**
@@ -16,7 +15,7 @@ public class User implements Serializable {
     private String userName;
     private String password;
     private HashMap<String, Boolean> enabledSensors;
-    private HashMap<Pair<Sensor, Tutorial>, Integer> playCount;
+    private HashMap<Pair<String, Tutorial>, Integer> playCount;
     private HashMap<String, Integer> gamesPlayed;
 
     /**
@@ -29,7 +28,7 @@ public class User implements Serializable {
         this.userName = userName;
         this.password = password;
         enabledSensors = new HashMap<>();
-        playCount = new HashMap<Pair<Sensor, Tutorial>, Integer>();
+        playCount = new HashMap<Pair<String, Tutorial>, Integer>();
         gamesPlayed = new HashMap<>();
     }
 
@@ -103,7 +102,7 @@ public class User implements Serializable {
         return false;
     }
 
-    public void playedTutorial(Pair<Sensor, Tutorial> sen_tut) {
+    public void playedTutorial(Pair<String, Tutorial> sen_tut) {
         if (playCount.containsKey(sen_tut)) {
             playCount.replace(sen_tut, 1 + playCount.get(sen_tut));
         } else {
@@ -111,7 +110,7 @@ public class User implements Serializable {
         }
     }
 
-    public int getTutorialPlayCount(Pair<Sensor, Tutorial> sen_tut) {
+    public int getTutorialPlayCount(Pair<String, Tutorial> sen_tut) {
         return playCount.get(sen_tut);
     }
 

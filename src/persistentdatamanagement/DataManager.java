@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import shared.Emotion;
 import shared.FeatureList;
-import shared.Sensor;
+import sensormanager.*;
 
 /**
  * Responsible for providing other packages with file input output operations.
@@ -113,7 +113,7 @@ public class DataManager {
      * @param list
      * @param sensor
      */
-    public void saveSample(final FeatureList list, final Sensor sensor) {
+    public void saveSample(final FeatureList list, final SensorListener sensor) {
         //Tasks are guaranteed to execute sequentially, and no more than one task will be active at any given time
         executorService.submit(new Callable() {
             public Object call() {
@@ -140,7 +140,7 @@ public class DataManager {
      * @param list
      * @param sensor 
      */
-    public void saveMultipleSamples(ArrayList<FeatureList> list, Sensor sensor){
+    public void saveMultipleSamples(ArrayList<FeatureList> list, SensorListener sensor){
         for(FeatureList fl : list){
             saveSample(fl, sensor);
         }
@@ -152,7 +152,7 @@ public class DataManager {
      * @param sensor type of sensor
      * @return User data
      */
-    public ArrayList<FeatureList> getGameData(Sensor sensor) {
+    public ArrayList<FeatureList> getGameData(SensorListener sensor) {
         ArrayList<FeatureList> featureLabelPairs = new ArrayList<FeatureList>();
         String fileName = getUserDirectory(currentUser) + "/" + sensor.toString() + "_features.ftr";
         List<String> lines = new ArrayList<>();
