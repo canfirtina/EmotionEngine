@@ -52,6 +52,16 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Queue locker for synchronization
 	 */
 	private final Object executorLocker;
+	
+	/**
+	 * Sensor locker for synchronization
+	 */
+	private final Object sensorLocker;
+	
+	/**
+	 * Train session locker for synchronization
+	 */
+	private final Object trainSessionLocker;
         
 	/**
 	 * registered observers which are to be notified when a sensor connection status is changed
@@ -107,6 +117,8 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		this.featureExtractors = new ArrayList<>();
 		this.executorService = Executors.newSingleThreadExecutor();
 		this.executorLocker = new Object();
+		this.sensorLocker = new Object();
+		this.trainSessionLocker = new Object();
 		this.engineObservers = new ArrayList<>();
 		this.trainingFeatures = new FeatureListController();
 		
@@ -128,13 +140,14 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 
 				@Override
 				public Void call(){
-					for(SensorListener listener : testFeatures.getSensorListeners()){
-						List<FeatureList> lists = testFeatures.getLastFeatureListsInMilliseconds(listener, time);
-						if(lists!=null)
-							for(FeatureList list : lists)
-								trainingFeatures.addFeatureList(listener, list);
+					synchronized(sensorLocker){
+						for(SensorListener listener : testFeatures.getSensorListeners()){
+							List<FeatureList> lists = testFeatures.getLastFeatureListsInMilliseconds(listener, time);
+							if(lists!=null)
+								for(FeatureList list : lists)
+									trainingFeatures.addFeatureList(listener, list);
+						}
 					}
-					
 					//training operation is missing 
 					
 					return null;
@@ -152,12 +165,13 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 			executorService.submit(new Callable<Void>() {
 				@Override
 				public Void call() throws Exception {
-					
-					for(SensorListener listener:sensorListeners){
-						List<FeatureList> lists = controller.getLastNFeatureList(listener, -1);
-						if(lists!=null)
-							for(FeatureList list : lists)
-								trainingFeatures.addFeatureList(listener, list);
+					synchronized(sensorLocker){
+						for(SensorListener listener:sensorListeners){
+							List<FeatureList> lists = controller.getLastNFeatureList(listener, -1);
+							if(lists!=null)
+								for(FeatureList list : lists)
+									trainingFeatures.addFeatureList(listener, list);
+						}
 					}
 					
 					//training operation is missing
@@ -175,9 +189,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @param label
 	 */
 	public synchronized boolean openTrainingSession(Emotion emotion){
-		this.sessionEmotion = emotion;
-		this.sessionTrainingFeatures = new FeatureListController();
-
+		synchronized(trainSessionLocker){
+			this.sessionEmotion = emotion;
+			this.sessionTrainingFeatures = new FeatureListController();
+		}
 		return true;
 	}
 	
@@ -186,7 +201,9 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @return
 	 */
 	public synchronized void closeTrainingSession(){
-		sessionEmotion = null;
+		synchronized(trainSessionLocker){
+			sessionEmotion = null;
+		}
 	}
 	
 	/**
@@ -209,7 +226,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Returns last calculated emotional status for the classifying session  
 	 * @return
 	 */
-	public Label currentEmotion(){
+	public Emotion currentEmotion(){
 		return null;
 	}
 	
@@ -241,7 +258,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 						listener = new SensorListenerEEG("COM4");
 					
 					listener.registerObserver(engine);
-					pendingSensorListeners.add(listener);
+					
+					synchronized(sensorLocker){
+						pendingSensorListeners.add(listener);
+					}
 					listener.connect();
 
 					return null;
@@ -260,8 +280,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 			executorService.submit(new Callable<Void>() {
 				@Override
 				public Void call(){
-					FeatureExtractor extractor = featureExtractors.get(sensorListeners.indexOf(sensor));
-					
+					FeatureExtractor extractor = null;
+					synchronized(sensorLocker){
+						 extractor = featureExtractors.get(sensorListeners.indexOf(sensor));
+					}
 					//new epoch
 					extractor.reset();
 					List<TimestampedRawData> rawDataArray = sensor.getSensorData();
@@ -276,14 +298,6 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					if(sessionTrainingFeatures!=null)
 						sessionTrainingFeatures.addFeatureList(sensor, list);
 					
-					System.out.println("New Feature List");
-					for(int i=0;i<list.size();++i)
-						System.out.print(list.get(i));
-					System.out.println();
-                                        
-                                        // For testing
-                                        //DataManager.getInstance().saveSample(list, sensor.getSensorType(), sessionLabel);
-                                        
 					return null;
 				}
 			});
@@ -300,12 +314,14 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 			executorService.submit(new Callable<Void>(){
 				@Override
 				public Void call(){
-					//if there is no such sensor, ignore it
-					if(!sensorListeners.contains(sensor))
-						return null;
-					
-					featureExtractors.remove(sensorListeners.indexOf(sensor));
-					sensorListeners.remove(sensor);
+					synchronized(sensorLocker){
+						//if there is no such sensor, ignore it
+						if(!sensorListeners.contains(sensor))
+							return null;
+
+						featureExtractors.remove(sensorListeners.indexOf(sensor));
+						sensorListeners.remove(sensor);
+					}
 					
 					//unregister sensor listener from both training and test feature list controllers
 					trainingFeatures.unregisterSensorListener(sensor);
@@ -346,8 +362,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					}
 					
 					sensor.setDataEpocher(epocher);
-					pendingSensorListeners.remove(sensor);
-					sensorListeners.add(sensor);
+					synchronized(sensorLocker){
+						pendingSensorListeners.remove(sensor);
+						sensorListeners.add(sensor);
+					}
 					featureExtractors.add(extractor);
 					
 					//register sensor listener to both training and test feature list controllers
@@ -377,13 +395,14 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 			executorService.submit(new Callable<Void>() {
 				@Override
 				public Void call(){
-					//if sensor is not in pending sensors
-					if(!pendingSensorListeners.contains(sensor))
-						return null;
-					
-					//remove sensor
-					pendingSensorListeners.remove(sensor);
-					
+					synchronized(sensorLocker){
+						//if sensor is not in pending sensors
+						if(!pendingSensorListeners.contains(sensor))
+							return null;
+
+						//remove sensor
+						pendingSensorListeners.remove(sensor);
+					}
 					notifyEngineObservers();
 					
 					return null;
@@ -421,7 +440,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @return 
 	 */
 	public ArrayList<SensorListener> getConnectedSensors(){
-		synchronized(executorLocker){
+		synchronized(sensorLocker){
 			return sensorListeners;
 		}
 	}
@@ -431,7 +450,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @return 
 	 */
 	public ArrayList<SensorListener> getPendingSensors(){
-		synchronized(executorLocker){
+		synchronized(sensorLocker){
 			return pendingSensorListeners;
 		}
 	}
