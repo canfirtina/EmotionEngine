@@ -13,7 +13,7 @@ import shared.Emotion;
  * Handles communication between client and server processes
  */
 public class Communicator {
-	public static final int port = 44630;
+	public static final int port = 9999;
 	private static final int READ_TIMEOUT = 2000;
 	private static final String HEART_BEAT = "HB";
 
@@ -188,21 +188,6 @@ public class Communicator {
 		os.println(str);
 		if(os.checkError())
 			throw new IOException();
-	}
-
-	/**
-	 * TODO Ali bunu deneme amacli yazmis diye dusunuyorum. Su anki yapida bir isi yok ama ona sormadan silemedim.
-	 * Listens to the port for new requests
-	 */
-	@Deprecated
-	public static void checkForRequest() {
-		int request = 1;
-
-		switch (request) {
-		case 1:
-			ee.openTrainingSession(null); break;
-		default: break;
-		}
 	}
 	
 	/**
