@@ -7,6 +7,11 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -14,6 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.util.Pair;
 import javax.imageio.ImageIO;
 import shared.Emotion;
 import shared.FeatureList;
@@ -24,12 +30,20 @@ import sensormanager.*;
  */
 public class DataManager {
 
+    private static final String USER_OBJECT_NAME = "d";
+    private String CURRENT_USER;
+
     private static final String GAME_RECORDS_DIRECTORY = "User Data";
-    private static final String USER_OBJECT_NAME = "user_object.obj";
-    private static final String CURRENT_USER = "curr_user_object.obj";
     private static final String PROFILE_PIC = "profile_picture";
+    private final String url = "jdbc:mysql://localhost/emotion_db";
+    private final String user = "root";
+    private final String password = "emotionalpassword";
 
     private static DataManager instance = null;
+
+    Connection con = null;
+    Statement st = null;
+    ResultSet rs = null;
 
     private ExecutorService executorService;
 
@@ -47,32 +61,19 @@ public class DataManager {
     private String currentUser;
 
     private DataManager() {
+
         File dir = new File(GAME_RECORDS_DIRECTORY);
         // If data directory doesn't exist, create it
         if (!dir.exists()) {
             dir.mkdir();
 
             // if directory is newly created, create a default user
-            saveUser(new User("default", "default"));
+            // saveUser(new User("default", "default"));
         }
 
-        dir = new File(GAME_RECORDS_DIRECTORY + "/" + CURRENT_USER);
-        // If data directory doesn't exist, create it
-        if (!dir.exists()) {
-            FileOutputStream fout;
-            try {
-                fout = new FileOutputStream(GAME_RECORDS_DIRECTORY + "/" + CURRENT_USER);
-                ObjectOutputStream oos = new ObjectOutputStream(fout);
-                oos.writeObject(new User("default", "default"));
-                oos.flush();
-                oos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        currentUser = getCurrentUser().getName();
         executorService = Executors.newSingleThreadExecutor();
+        System.out.println("current=" + getCurrentUser().getName());
+
     }
 
     /**
@@ -110,6 +111,7 @@ public class DataManager {
 
     /**
      * Saves given sample to current user. non-blocking.
+     *
      * @param list
      * @param sensor
      */
@@ -134,17 +136,18 @@ public class DataManager {
             }
         });
     }
-    
+
     /**
      * saves a batch of samples for a sensor. non-blocking.
+     *
      * @param list
-     * @param sensor 
+     * @param sensor
      */
-    public void saveMultipleSamples(List<FeatureList> list, SensorListener sensor){
-        for(FeatureList fl : list){
+    public void saveMultipleSamples(List<FeatureList> list, SensorListener sensor) {
+        for (FeatureList fl : list) {
             saveSample(fl, sensor);
         }
-    } 
+    }
 
     /**
      * Gets all samples for current user and game.
@@ -172,7 +175,7 @@ public class DataManager {
             Emotion label = Emotion.valueOf(current[0]);
             double[] features = new double[current.length - 1];
             for (int i = 1; i < current.length; i++) {
-                features[i-1] = Double.parseDouble(current[i]);
+                features[i - 1] = Double.parseDouble(current[i]);
             }
 
             featureLabelPairs.add(new FeatureList(features, label));
@@ -294,27 +297,8 @@ public class DataManager {
      *
      * @return user
      */
-    public User getCurrentUser() {
-        User currUser = null;
-
-        // read current user
-        ObjectInputStream ois = null;
-        try {
-            ois = new ObjectInputStream(new FileInputStream(GAME_RECORDS_DIRECTORY + "/" + CURRENT_USER));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // start getting the objects out in the order in which they were written
-        try {
-            currUser = (User) ois.readObject();
-            ois.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return currUser;
+    public User getCurrentUser() {    
+        DatabaseService ds = DatabaseService.sharedInstance();
+        return ds.getCurrentUser();
     }
 }
