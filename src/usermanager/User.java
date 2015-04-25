@@ -52,6 +52,10 @@ public class User implements Serializable {
     public String getName() {
         return this.userName;
     }
+    
+    public String getPass(){
+        return password;
+    }
 
     /**
      * Enables the given sensor. In the case that sensor does not exist, adds it
