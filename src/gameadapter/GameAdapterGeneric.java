@@ -81,7 +81,6 @@ public class GameAdapterGeneric {
 
     /**
      * Decomposes and interprets server messages.
-     * HB: heartbeat
      * emotion <Emotion>: user feels <Emotion>
      * @param response
      */
