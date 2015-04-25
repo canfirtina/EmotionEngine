@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
  */
 public class GameAdapterGeneric {
 
-    private ArrayList<GameAdapterObserver> observerCollection;
+    private ArrayList<GameAdapterObserver> observerCollection = new ArrayList<>(1);
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -69,7 +69,7 @@ public class GameAdapterGeneric {
                     notifyObserversConnectionFailed();
                 }
             }
-        });
+        }).start();
     }
 
     /**
