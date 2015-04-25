@@ -41,7 +41,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	/**
 	 * Learns and predicts emotions
 	 */
-	private EmotionClassifier emotionClassifier;
+	private EnsembleClassifier emotionClassifier;
 	
 	/**
 	 * Executer service which has a event queue

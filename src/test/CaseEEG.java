@@ -15,6 +15,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import emotionlearner.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import sensormanager.SensorListener;
 import sensormanager.SensorListenerEEG;
 import sensormanager.SensorListenerGSR;
@@ -203,13 +205,15 @@ public class CaseEEG {
 //		CsvToArff.csv2arff("f" + fileName, "frustrated");
 		
 		EEGClassifier svmClassifier = new EEGClassifier();
-		String[] options = null;//{"-R", "1", "-C", "1", "-H", "1"};
+		String[] options ={"-K", "1", "-R", "1.0", "-D", "1"};
 		
-		//svmClassifier.train( trainFolderPath + "cantrainingDisgusting1Out.arff", "weka.classifiers.bayes.NaiveBayes", null);
-		//svmClassifier.test( testFolderPath + "fcan - disgusting1 - 10.arff");
+		String arffFolder = "test/ali/ARFF/";
+		
+		svmClassifier.train( arffFolder + "alidisgust1out.arff", "weka.classifiers.functions.LibSVM", options);
+		svmClassifier.test( arffFolder + "fali disgusting 1 9.arff");
 
-		svmClassifier.train( trainFolderPath + "cantrainingDisgusting2Out.arff", "weka.classifiers.bayes.NaiveBayes", options);
-		svmClassifier.test( testFolderPath + "fcan - disgusting2 - 10.arff");
+//		svmClassifier.train( trainFolderPath + "cantrainingDisgusting2Out.arff", "weka.classifiers.functions.LibSVM", options);
+//		svmClassifier.test( testFolderPath + "fcan - disgusting2 - 10.arff");
 //		
 //		svmClassifier.train( trainFolderPath + "cantrainingDisgusting3Out.arff", "weka.classifiers.mi.CitationKNN", options);
 //		svmClassifier.test( testFolderPath + "fcan - disgusting3 - 8.arff");
@@ -250,7 +254,7 @@ public class CaseEEG {
 //		svmClassifier.train( trainFolderPath + "cantrainingSexy4Out.arff", "weka.classifiers.mi.CitationKNN", options);
 //		svmClassifier.test( testFolderPath + "fcan - sexy4 - 8.arff");
 		
-		svmClassifier.trainWithCrossValidation( trainFolderPath + "cantrainingall.arff", "weka.classifiers.bayes.NaiveBayes", null, 10);
+//		svmClassifier.trainWithCrossValidation( "test/ali/ARFF/" + "alialltraining.arff", "weka.classifiers.functions.LibSVM", options, 10);
 	}
 
 	public void testUserManager() {
@@ -267,5 +271,62 @@ public class CaseEEG {
 
 		user = um.getCurrentUser();
 
+	}
+	
+	public void crossVal(String path, String classPath, String[] options){
+		try {
+			EEGClassifier svmClassifier = new EEGClassifier();
+			svmClassifier.trainWithCrossValidation( path, classPath, options, 10);
+		} catch (Exception ex) {
+			Logger.getLogger(CaseEEG.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+	
+	public void testOneOut(String path, String classPath, String[] options ){
+		try {
+			EEGClassifier svmClassifier = new EEGClassifier();
+			svmClassifier.train( path+"-out.arff", classPath, options);
+			svmClassifier.test( path);
+		} catch (Exception ex) {
+			Logger.getLogger(CaseEEG.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+	
+	public void testAli(){
+		String classifierClassPath = "weka.classifiers.functions.LibSVM";
+		String[] options ={"-K", "1", "-R", "1.0", "-D", "1"};
+		boolean isCrossVallAll = false;
+		int outIndex = 4;
+		
+		String arffPath = "test/ali/ARFF/";
+		String all = "alitrainingall.arff";
+		String[] names = new String[]{"fali boring 1 10.arff",
+									"fali boring 2 9.arff",
+									"fali disgusting 1 9.arff",
+									"fali disgusting 2 9.arff",
+									"fali disgusting 3 7.arff",
+									"fali disgusting 4 7.arff",
+									"fali disgusting 6 10.arff",
+									"fali peaceful 1 9.arff",
+									"fali peaceful 3 8.arff",
+									"fali peaceful 4 7.arff",
+									"fali peaceful 5 8.arff",
+									"fali sexy 1 9.arff",
+									"fali sexy 2 8.arff",
+									"fali sexy 3 9.arff",
+									"fali sexy 4 8.arff"};
+		
+		if(isCrossVallAll)
+			crossVal(arffPath + all, classifierClassPath, options);
+		else {
+			testOneOut(arffPath + names[outIndex], classifierClassPath, options);
+		}
+		
+	}
+	
+	public static void main(String[] args) throws Exception{
+		
+		
+		new CaseEEG().testAli();
 	}
 }
