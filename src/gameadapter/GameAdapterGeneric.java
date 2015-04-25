@@ -28,16 +28,15 @@ public class GameAdapterGeneric {
      */
     private String host;
 
+    private Socket socket;
+
     private PrintStream outputStream;
 
     private BufferedReader bufferedReader;
 
+    private volatile Emotion activeEmotion;
 
-
-    private Socket socket;
-
-
-    private Emotion activeEmotion;
+    private Thread listeningThread;
 
 
     public GameAdapterGeneric(String host, int port) {
@@ -46,7 +45,7 @@ public class GameAdapterGeneric {
     }
 
     public void connectToServer() {
-        new Thread(new Runnable() {
+        listeningThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -63,13 +62,21 @@ public class GameAdapterGeneric {
                             interpretResponse(line);
                         } catch (IOException e) {
                             notifyObserversConnectionError();
+                            return;
                         }
                     }
                 } catch (IOException e) {
                     notifyObserversConnectionFailed();
+                    return;
                 }
             }
-        }).start();
+        });
+        listeningThread.start();
+    }
+
+    public void disconnect() {
+        executorService.shutdown();
+        listeningThread.stop();
     }
 
     /**
@@ -79,34 +86,20 @@ public class GameAdapterGeneric {
      * @param response
      */
     private void interpretResponse(String response) {
-        //EmotionEngine sends heartbeat packages just to check client is still there. Ignore them
-        if(response.equals("HB"))
-            return;
-        else if(response.startsWith("emotion")) {
-            String[] responseSplitted = response.split(" ");
+        // EmotionEngine sends heartbeat packages just to check client is still there.
+        // This method ignores all unidentified responses
+        String splitResponse[] = response.split(" ");
+        String header = splitResponse[0];
+
+        if(header.equals("emotion")) {
             for( Emotion emotion : Emotion.values()) {
-                if( responseSplitted[1].equals(emotion.name())) {
+                if( splitResponse[1].equals(emotion.name())) {
                     activeEmotion = emotion;
                     notifyObserversDataArrived();
                     break;
                 }
             }
         }
-    }
-
-    /**
-     * TODO Since we are planning to use training sessions I do not think this method is neccessary. Use openTrainingSession instead
-     * Sends a signal to indicate predetermined label of scene.
-     * @param emotion
-     */
-    public void sendEmotionSignal(Emotion emotion) {
-        executorService.submit(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                outputStream.println("getemotion");
-                return null;
-            }
-        });
     }
 
     /**
@@ -133,6 +126,19 @@ public class GameAdapterGeneric {
             @Override
             public Void call() throws Exception {
                 outputStream.println("stop");
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Requests cancellation of current training session if there is any
+     */
+    public void cancelTrainingSession() {
+        executorService.submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                outputStream.println("cancel");
                 return null;
             }
         });
@@ -171,6 +177,7 @@ public class GameAdapterGeneric {
      * @return Returns the most recently received emotion from Emotion Engine
      */
     public Emotion getStoredEmotion() {
+
         return activeEmotion;
     }
 
@@ -178,26 +185,26 @@ public class GameAdapterGeneric {
         observerCollection.add(observer);
     }
 
-    public void notifyObserversConnectionEstablished() {
-        System.out.println("Connection Established");
+    public void removeObserver(GameAdapterObserver observer) {
+        observerCollection.remove(observer);
+    }
+
+    private void notifyObserversConnectionEstablished() {
         for( GameAdapterObserver observer : observerCollection)
             observer.connectionEstablished(this);
     }
 
-    public void notifyObserversConnectionFailed() {
-        System.out.println("Connection Failed");
+    private void notifyObserversConnectionFailed() {
         for( GameAdapterObserver observer : observerCollection)
             observer.connectionFailed(this);
     }
 
-    public void notifyObserversConnectionError() {
-        System.out.println("Connection error");
+    private void notifyObserversConnectionError() {
         for( GameAdapterObserver observer : observerCollection)
             observer.connectionError(this);
     }
 
-    public void notifyObserversDataArrived() {
-        System.out.println("Data arrived");
+    private void notifyObserversDataArrived() {
         for( GameAdapterObserver observer : observerCollection)
             observer.dataArrived(this);
     }

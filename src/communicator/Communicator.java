@@ -134,6 +134,7 @@ public class Communicator {
 	 * getemotion: adapter wants to know current emotion
 	 * train <Emotion>: adapter advises EmotionEngine to open training session for <Emotion>
 	 * stop: adapter advises to close current training session
+	 * cancel: adapter requests cancellation of current training session if there is any
 	 * ntrain <Emotion> <Milliseconds>: adapter indicates that <Emotion> should have been triggered <Milliseconds> ago
 	 * @param line
 	 */
@@ -145,9 +146,7 @@ public class Communicator {
 
 				if(request[0].equals("getemotion")) {
 					sendEmotionToClient(ee.currentEmotion());
-
 				} else if(request[0].equals("train")) {
-
 					//Find the emotion in request and start training with that
 					for(Emotion em : Emotion.values()) {
 						if(em.name().equals(request[1])) {
@@ -155,7 +154,6 @@ public class Communicator {
 							break;
 						}
 					}
-
 				} else if(request[0].equals("ntrain")) {
 					//find the emotion in enum
 					for(Emotion em: Emotion.values()) {
@@ -163,6 +161,8 @@ public class Communicator {
 							ee.trainLastNMilliseconds(Integer.parseInt(request[2]),em);
 						}
 					}
+				} else if(request[0].equals("cancel")) {
+					//TODO At the time, EmotioneEngine had no cancel method
 				}
 				return null;
 			}
@@ -175,9 +175,7 @@ public class Communicator {
 	 * @param emotion
 	 */
 	private static void sendEmotionToClient(final Emotion emotion) throws IOException{
-
 		sendMessage("emotion " + emotion.name());
-
 	}
 
 	/**
