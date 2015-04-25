@@ -198,9 +198,7 @@ public class Communicator {
 		executorService.submit(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
-
 				sendEmotionToClient(emotion);
-
 				return null;
 			}
 		});
