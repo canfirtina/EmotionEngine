@@ -173,7 +173,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 									trainingFeatures.addFeatureList(listener, list);
 						}
 					}
-					
+
 					//training operation is missing
 					
 					return null;
@@ -188,7 +188,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Starts a training session with a label
 	 * @param label
 	 */
-	public synchronized boolean openTrainingSession(Emotion emotion){
+	public boolean openTrainingSession(Emotion emotion){
 		synchronized(trainSessionLocker){
 			this.sessionEmotion = emotion;
 			this.sessionTrainingFeatures = new FeatureListController();
@@ -200,7 +200,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Finishes the current training session
 	 * @return
 	 */
-	public synchronized void closeTrainingSession(){
+	public void closeTrainingSession(){
 		synchronized(trainSessionLocker){
 			sessionEmotion = null;
 		}
