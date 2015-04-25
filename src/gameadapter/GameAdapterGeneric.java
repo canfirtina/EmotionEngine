@@ -1,7 +1,7 @@
 package gameadapter;
 
 import communicator.Communicator;
-import shared.Label;
+import shared.Emotion;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,7 +13,7 @@ public class GameAdapterGeneric {
 
     private ServerSocket serverSocket;
     private Socket socket;
-    private Label activeEmotionalLabel;
+    private Emotion activeEmotion;
 
     public GameAdapterGeneric() {
         //initialize serversocket and socket
@@ -24,7 +24,7 @@ public class GameAdapterGeneric {
      * Sends a signal to indicate predetermined label of scene.
      * @param label
      */
-    public void sendEmotionSignal(Label label) {
+    public void sendEmotionSignal(Emotion label) {
 
     }
 
