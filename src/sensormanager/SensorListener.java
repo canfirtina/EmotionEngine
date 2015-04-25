@@ -53,12 +53,6 @@ public abstract class SensorListener {
 	 * @return the raw data of the sensor
 	 */
 	public abstract List<TimestampedRawData> getSensorData();
-	
-	/**
-	 * Frequency of the sensors in Hz.
-	 * @return the numerical value of the frequency in Hz.
-	 */
-	public abstract int getFrequency();
 
 	
 	/**

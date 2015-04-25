@@ -84,12 +84,6 @@ public class SensorListenerGSR extends SensorListener {
 		return lastEpoch;
 	}
 
-	@Override
-	public int getFrequency() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
 
 	@Override
 	public boolean isConnected() {
