@@ -53,6 +53,7 @@ public class FeatureList {
     public FeatureList(double[] featuresArray, Emotion emotion){
     	this(featuresArray);
     	this.emotion = emotion;
+		this.features.setClassValue(emotion.getValue());
     }
     
     public int size(){
@@ -65,6 +66,7 @@ public class FeatureList {
     
     public void setEmotion(Emotion emotion){
     	this.emotion = emotion;
+		this.features.setClassValue(emotion.getValue());
     }
     
     public Emotion getEmotion(){
