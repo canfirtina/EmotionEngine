@@ -45,7 +45,7 @@ public class EnsembleClassifier {
 		List<SensorListener> listeners = featureController.sensorListeners;
 		
 		ArrayList<SensorListener> newSensorListeners = new ArrayList<>();
-		ArrayList<SensorListener> 
+		//ArrayList<SensorListener> 
 		for(SensorListener listener : listeners)
 			if(!prevListeners.contains(listener))
 				newSensorListeners.add(listener);
