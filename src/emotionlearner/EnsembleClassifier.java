@@ -25,7 +25,7 @@ public class EnsembleClassifier {
 	/**
 	 * All classifiers that are used 
 	 */
-	private ArrayList<Pair<Class, Classifier>> classifiers;
+	private ArrayList<Classifier> classifiers;
 	
 	/**
 	 * Classifier weights
