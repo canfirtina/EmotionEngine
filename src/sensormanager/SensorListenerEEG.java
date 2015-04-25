@@ -6,6 +6,7 @@ import shared.TimestampedRawData;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -58,6 +59,7 @@ public class SensorListenerEEG extends SensorListener {
 
     private boolean connectionEstablished;
     private boolean streamingOn;
+    private boolean deviceReady;
 
     public SensorListenerEEG(String comPort) {
         this.comPortString = comPort;
@@ -97,35 +99,23 @@ public class SensorListenerEEG extends SensorListener {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    threadsActive = true;
-                    try {
-                        serialReader = new SerialReader(inputStream);
-                    } catch (IOException e) {
-                        threadsActive = false;
-                        notifyObserversConnectionFailed();
-                        return;
-                    }
 
-                    readerThread = new Thread(serialReader);
-                    System.out.println("thread baslangic");
-                    readerThread.start();
+                threadsActive = true;
 
-                    dataInterpreter = new DataInterpreter();
-                    System.out.println("interpreter started");
-                    interpreterThread = new Thread(dataInterpreter);
-                    interpreterThread.start();
+                serialWriter = new SerialWriter(outputStream);
 
-                    serialWriter = new SerialWriter(outputStream);
-                    serialWriter.writeByte(CODE_RESET);
+                serialReader = new SerialReader(inputStream);
 
-                    connectionEstablished = true;
+                readerThread = new Thread(serialReader);
+                System.out.println("thread baslangic");
+                readerThread.start();
 
-                    notifyObserversConnectionEstablished();
+                dataInterpreter = new DataInterpreter();
+                System.out.println("interpreter started");
+                interpreterThread = new Thread(dataInterpreter);
+                interpreterThread.start();
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
             }
         }).start();
 
@@ -148,6 +138,10 @@ public class SensorListenerEEG extends SensorListener {
         } else {
             serialWriter.writeByte(CODE_CHANNEL_OFF[channel]);
         }
+    }
+
+    public void sendReset() {
+        serialWriter.writeByte(CODE_RESET);
     }
 
     @Override
@@ -215,6 +209,9 @@ public class SensorListenerEEG extends SensorListener {
         return observerCollection.remove(observer);
     }
 
+    /**
+     * DataInterpreter interprets raw OpenBCI data packets.
+     */
     private class DataInterpreter implements Runnable {
 
         @Override
@@ -223,30 +220,54 @@ public class SensorListenerEEG extends SensorListener {
 
                 byte[] data = new byte[MESSAGE_LENGTH - 2];
                 Byte b;
-
+                String answer = "";
+                Thread.sleep(2000);
+                sendReset();
                 while (true) {
-                    b = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
-                    //disconnection routine
+                    //this thread terminates itself if requested by the object
                     if (!threadsActive) {
                         return;
                     }
 
-                    if (b != null && b.compareTo(DATA_HEADER) == 0) {
+                    //Read raw packet header from thread safe queue
+                    b = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
 
-                        for (int i = 0; i < MESSAGE_LENGTH - 2; i++) {
-                            data[i] = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
-                        }
-                        if (readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS).compareTo(DATA_FOOT) == 0) {
 
-                            TimestampedRawData tsrd = new TimestampedRawData(convertData(data, MESSAGE_LENGTH - 2));
-                            if (dataEpocher.addData(tsrd) == false) {
-                                lastEpoch = dataEpocher.getEpoch();
-                                dataEpocher.reset();
-                                dataEpocher.addData(tsrd);
-                                notifyObservers();
+                    if(b==null)
+                        continue;
+                    if(connectionEstablished) {
+                        if (streamingOn) {
+                            //make sure packet is not broken
+                            if (b != null && b.compareTo(DATA_HEADER) == 0) {
 
+                                //header is valid, so read the rest of the packet
+                                for (int i = 0; i < MESSAGE_LENGTH - 2; i++) {
+                                    data[i] = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
+                                }
+                                //make sure footer is valid
+                                if (readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS).compareTo(DATA_FOOT) == 0) {
+                                    System.out.println(Arrays.toString(convertData(data,MESSAGE_LENGTH-2)));
+                                    //we are sure that packet is not damaged.
+                                    //interpret it and put it into epoch
+                                    TimestampedRawData tsrd = new TimestampedRawData(convertData(data, MESSAGE_LENGTH - 2));
+
+                                    if (dataEpocher.addData(tsrd) == false) {
+                                        lastEpoch = dataEpocher.getEpoch();
+                                        dataEpocher.reset();
+                                        dataEpocher.addData(tsrd);
+                                        notifyObservers();
+
+                                    }
+
+                                }
                             }
-
+                        }
+                    } else {
+                        System.out.println(answer);
+                        answer += String.valueOf((char)b.byteValue());
+                        if(answer.endsWith("$$$")) {
+                            answer = "";
+                            setAndNotifyConnectionEstablished();
                         }
                     }
 
@@ -256,6 +277,12 @@ public class SensorListenerEEG extends SensorListener {
             }
         }
 
+        /**
+         * Gets volt values of all channels
+         * @param bytes OpenBCI data packet
+         * @param len Length of data packet in bytes
+         * @return An array of volt values ordered by channel number
+         */
         private double[] convertData(byte[] bytes, int len) {
             int sampleNumber = ((int) bytes[0]) & 0x00FF;
 
@@ -271,6 +298,11 @@ public class SensorListenerEEG extends SensorListener {
             return doubleData;
         }
 
+        /**
+         * Converts 24 bit integers to 32 bit integers.
+         * @param byteArray bytes to be converted. First 3 bytes are used if there is more than 3 in the array.
+         * @return 32 bit representation of the given integer
+         */
         private int interpret24bitAsInt32(byte[] byteArray) {
             int newInt = (((0xFF & byteArray[0]) << 16)
                     | ((0xFF & byteArray[1]) << 8)
@@ -283,6 +315,11 @@ public class SensorListenerEEG extends SensorListener {
             return newInt;
         }
 
+        /**
+         * Converts 16 bit integers to 32 bit integers.
+         * @param byteArray bytes to be converted. First 2 bytes are used if there is more than 3 in the array.
+         * @return 32 bit representation of the given integer
+         */
         int interpret16bitAsInt32(byte[] byteArray) {
             int newInt = (((0xFF & byteArray[0]) << 8)
                     | (0xFF & byteArray[1]));
@@ -295,40 +332,26 @@ public class SensorListenerEEG extends SensorListener {
         }
     }
 
+    private synchronized void setAndNotifyConnectionEstablished() {
+        if(!connectionEstablished) {
+            connectionEstablished = true;
+            notifyObserversConnectionEstablished();
+        }
+    }
+
     private class SerialReader implements Runnable {
 
         private InputStream inputStream;
 
-        public SerialReader(InputStream inputStream) throws IOException {
+        /**
+         * Constructor listens for identification string.
+         * @param inputStream Input stream where sensor puts data onto
+         * @throws IOException If identification string sent by sensor does not match OpenBCI identification string
+         * this method throws.
+         */
+        public SerialReader(InputStream inputStream) {
 
             this.inputStream = inputStream;
-
-            byte[] buffer = new byte[BUFFER_SIZE];
-            int len = 0;
-            identificationString = "";
-            int bytesread = 0;
-
-            while (identificationString.endsWith("$$$") == false) {
-
-
-                len = inputStream.read(buffer);
-
-                if (len == 0 || bytesread > 500) {
-                    throw new IOException();
-                }
-                bytesread += len;
-                for (int i = 0; i < len; i++) {
-                    identificationString += String.valueOf((char) buffer[i]);
-                }
-            }
-
-
-            if (identificationString.endsWith("$$$")) {
-                System.out.println(identificationString);
-                //send reset signal
-            } else {
-                throw new IOException("Identification does not match with expected ->" + identificationString);
-            }
 
         }
 
@@ -340,16 +363,20 @@ public class SensorListenerEEG extends SensorListener {
             try {
                 while ( (len = inputStream.read(buffer)) > -1 ) {
 
-                    if(streamingOn && len == 0) {
-                        throw new IOException();
-                    }
-
-                    //disconnection routine
+                    //this thread destroys itself if requested by object
                     if (!threadsActive) {
                         return;
                     }
 
+                    //streaming is on and there is no data. There is some connection error
+                    if(streamingOn && len == 0) {
+                        throw new IOException();
+                    }
+                    if(len == 0)
+                        continue;
+
                     for (int i = 0; i < len; i++) {
+                        //System.out.println(buffer[i]);
                         readQueue.put(buffer[i]);
                     }
                 }
@@ -362,9 +389,19 @@ public class SensorListenerEEG extends SensorListener {
         }
     }
 
+    /**
+     * Inner class that provides write method to sensor
+     */
     private class SerialWriter {
 
+        /**
+         * Output stream object that is connected to the sensor
+         */
         private OutputStream outputStream;
+
+        /**
+         * Last time a command was sent to the sensor. There needs to be some delay between subsequent writes to sensor
+         */
         private long lastSentTime;
 
         public SerialWriter(OutputStream outputStream) {
@@ -372,14 +409,13 @@ public class SensorListenerEEG extends SensorListener {
         }
 
         public void writeByte(byte bytes) {
-            if (!connectionEstablished) {
-                return;
-            }
             try {
+                //Make sure enough time has passed since last write operation
                 if (System.currentTimeMillis() - lastSentTime - CONTINUOUS_COMMAND_DELAY < 0) {
                     Thread.sleep(Math.max(CONTINUOUS_COMMAND_DELAY - System.currentTimeMillis() + lastSentTime, 0));
                 }
                 lastSentTime = System.currentTimeMillis();
+                System.out.println("written byte: " + bytes);
                 outputStream.write(bytes);
 
             } catch (IOException e) {
