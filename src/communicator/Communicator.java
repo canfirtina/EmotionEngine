@@ -54,8 +54,6 @@ public class Communicator {
 	 */
 	private static EmotionEngine ee;
 
-
-
 	/**
 	 * Starts a server that constantly listens for requests coming from clients
 	 */
@@ -71,9 +69,6 @@ public class Communicator {
 		} catch (IOException e) {
 			System.out.println(e);
 		}
-
-
-
 	}
 
 	public static void waitClient() {
@@ -84,14 +79,12 @@ public class Communicator {
 			@Override
 			public void run() {
 				try {
-					System.out.println("waiitng for client");
+					System.out.println("Waiting for client");
 
 					adapter = server.accept();
+					adapter.setKeepAlive(true);
 
-					//read operations timeout after a while so we can check if client is still there
-					adapter.setSoTimeout(READ_TIMEOUT);
-
-					System.out.println("client connected");
+					System.out.println("Client connected");
 					inputStream = adapter.getInputStream();
 					bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 					os = new PrintStream(adapter.getOutputStream());
@@ -102,28 +95,22 @@ public class Communicator {
 						try {
 							String line = bufferedReader.readLine();
 
-							//if end of stream then client may be disconncted
-							if(line == null) {
-								throw new SocketTimeoutException();
-							}
+							//if end of stream
+							if(line == null)
+								throw new IOException();
 
 							//echo back what is told
 							os.println(line);
 
-
 							parseAndExecuteRequest(line);
 
-						} catch (SocketTimeoutException e) {
-							//check if we can still write to client socket
-							sendMessage(HEART_BEAT);
+						} catch (IOException e) {
+							onClientDisconnected();
+							return;
 						}
 					}
 				} catch (IOException e) {
-					//client is disconnected
 					onClientDisconnected();
-				} catch (Exception e) {
-					//i do not know how this is possible
-					e.printStackTrace();
 				}
 			}
 		}).start();
@@ -134,6 +121,7 @@ public class Communicator {
 	 * getemotion: adapter wants to know current emotion
 	 * train <Emotion>: adapter advises EmotionEngine to open training session for <Emotion>
 	 * stop: adapter advises to close current training session
+	 * cancel: adapter requests cancellation of current training session if there is any
 	 * ntrain <Emotion> <Milliseconds>: adapter indicates that <Emotion> should have been triggered <Milliseconds> ago
 	 * @param line
 	 */
@@ -143,26 +131,25 @@ public class Communicator {
 			public Object call() throws Exception {
 				String request[] = line.split(" ");
 
-				if(request[0].equals("getemotion")) {
-					sendEmotionToClient(ee.currentEmotion());
-
-				} else if(request[0].equals("train")) {
-
+				if (request[0].equals("getemotion")) {
+					sendMessage("emotion " + ee.currentEmotion().name());
+				} else if (request[0].equals("train")) {
 					//Find the emotion in request and start training with that
-					for(Emotion em : Emotion.values()) {
-						if(em.name().equals(request[1])) {
+					for (Emotion em : Emotion.values()) {
+						if (em.name().equals(request[1])) {
 							ee.openTrainingSession(em);
 							break;
 						}
 					}
-
-				} else if(request[0].equals("ntrain")) {
+				} else if (request[0].equals("ntrain")) {
 					//find the emotion in enum
-					for(Emotion em: Emotion.values()) {
-						if(em.name().equals(request[1])) {
-							ee.trainLastNMilliseconds(Integer.parseInt(request[2]),em);
+					for (Emotion em : Emotion.values()) {
+						if (em.name().equals(request[1])) {
+							ee.trainLastNMilliseconds(Integer.parseInt(request[2]), em);
 						}
 					}
+				} else if (request[0].equals("cancel")) {
+					//TODO At the time, EmotioneEngine had no cancel method
 				}
 				return null;
 			}
@@ -171,26 +158,6 @@ public class Communicator {
 	}
 
 	/**
-	 * Convert Emotion object to string message and send it to client
-	 * @param emotion
-	 */
-	private static void sendEmotionToClient(final Emotion emotion) throws IOException{
-
-		sendMessage("emotion " + emotion.name());
-
-	}
-
-	/**
-	 * Send message to client (blocking)
-	 * @param str message to be sent
-	 */
-	private static synchronized void sendMessage(final String str) throws IOException {
-		os.println(str);
-		if(os.checkError())
-			throw new IOException();
-	}
-	
-	/**
 	 * Serializes and sends the given label to the client
 	 * @param emotion The label containing the information about the user
 	 */
@@ -198,24 +165,22 @@ public class Communicator {
 		executorService.submit(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
-
-				sendEmotionToClient(emotion);
-
+				sendMessage("emotion " + emotion.name());
 				return null;
 			}
 		});
 
 	}
 
+	private static void sendMessage(final String s) {
+		os.println(s);
+	}
+
 	/**
 	 * Makes thread wait for another client
 	 */
 	private static void onClientDisconnected() {
-		System.out.println("connection failed");
+		System.out.println("Client disconnected");
 		waitClient();
 	}
-
-
-
-
 }
