@@ -30,7 +30,7 @@ lib/gsr/gsr.ino
 hs_err_pid*
 /bin/
 /doc/
-/test/
+#/test/
 /.settings/
 /.idea/
 /User Data/

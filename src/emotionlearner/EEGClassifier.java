@@ -12,7 +12,9 @@ import java.util.Random;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.core.FastVector;
 import weka.core.Instances;
+import weka.core.SelectedTag;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -72,7 +74,8 @@ public class EEGClassifier {
 	    if (trainInstance.classIndex() == -1)
 	    	trainInstance.setClassIndex(trainInstance.numAttributes() - 1);
 	    
-	    model = Classifier.forName( classifier, options);
+		model = Classifier.forName( classifier, options);
+		
 	    Random rand = new Random( seed);
 	    trainInstance.randomize( rand);
 	    
@@ -132,6 +135,8 @@ public class EEGClassifier {
 	    System.out.println("Classifier: " + model.getClass().getName() + " " + Utils.joinOptions(model.getOptions()));
 	    System.out.println("Dataset: " + testInstance.relationName());
 	    System.out.println();
-	    System.out.println(eval.toSummaryString(false));
+	    System.out.println(eval.toSummaryString());
+		System.out.println(eval.toMatrixString());
+		
 	}
 }

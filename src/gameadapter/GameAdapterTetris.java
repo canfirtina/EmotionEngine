@@ -5,8 +5,8 @@ package gameadapter;
  */
 public class GameAdapterTetris extends GameAdapterGeneric {
 
-    public GameAdapterTetris() {
-        super();
+    public GameAdapterTetris(String host, int port) {
+        super(host,port);
     }
 
     /**
