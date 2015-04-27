@@ -36,7 +36,7 @@ public class SensorListenerEEG extends SensorListener {
     private static final long CONSECUTIVE_COMMAND_DELAY = 100;
     private static final byte DATA_HEADER = (byte) 0xA0;
     private static final byte DATA_FOOT = (byte) 0xC0;
-    private static final int RECEIVE_TIMEOUT = 5000;
+    private static final int RECEIVE_TIMEOUT = 2000;
 
     private SerialPort serialPort;
     private InputStream inputStream;
@@ -52,7 +52,7 @@ public class SensorListenerEEG extends SensorListener {
     private String lastResponse = "";
 
     private boolean connectionEstablished;
-    private boolean streamingMode;
+    private volatile boolean streamingMode;
 
     /**
      * There should be some time between consecutive write operations.
@@ -87,6 +87,8 @@ public class SensorListenerEEG extends SensorListener {
             inputStream = serialPort.getInputStream();
             outputStream = serialPort.getOutputStream();
             serialPort.enableReceiveTimeout(RECEIVE_TIMEOUT);
+
+
         } catch (Exception e) {
             notifyObserversConnectionFailed();
             return false;
@@ -106,7 +108,6 @@ public class SensorListenerEEG extends SensorListener {
     }
 
     public void startStreaming() {
-        streamingMode = true;
         writeBytes(CODE_START_STREAMING);
     }
 
@@ -130,8 +131,8 @@ public class SensorListenerEEG extends SensorListener {
     public boolean disconnect() {
         interpreterActive = false;
         readerActive = false;
-        serialPort.close();
         executorSender.shutdownNow();
+        serialPort.close();
         connectionEstablished = false;
         return true;
     }
@@ -155,6 +156,7 @@ public class SensorListenerEEG extends SensorListener {
     }
 
     protected void notifyObserversConnectionEstablished() {
+        System.out.println("connection established");
         for (SensorObserver observer : observerCollection) {
             observer.connectionEstablished(this);
         }
@@ -196,6 +198,7 @@ public class SensorListenerEEG extends SensorListener {
             try {
                 byte[] data = new byte[MESSAGE_LENGTH - 2];
                 Byte b;
+                Byte insideByte;
                 while (true) {
                     //this thread terminates itself if requested by the object
                     if (!interpreterActive)
@@ -207,30 +210,40 @@ public class SensorListenerEEG extends SensorListener {
                     if(b==null) {
                         continue;
                     }
-                    //make sure packet is not broken
-                    if (b != null && b.compareTo(DATA_HEADER) == 0) {
+                    try {
+                        //make sure packet is not broken
+                        if (b != null && b.compareTo(DATA_HEADER) == 0) {
 
-                        //header is valid, so read the rest of the packet
-                        for (int i = 0; i < MESSAGE_LENGTH - 2; i++) {
-                            data[i] = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
-                        }
-                        //make sure footer is valid
-                        if (readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS).compareTo(DATA_FOOT) == 0) {
-                            //System.out.println(Arrays.toString(convertData(data,MESSAGE_LENGTH-2)));
-                            //we are sure that packet is not damaged.
-                            //interpret it and put it into epoch
-                            TimestampedRawData tsrd = new TimestampedRawData(convertData(data, MESSAGE_LENGTH - 2));
+                            //header is valid, so read the rest of the packet
+                            for (int i = 0; i < MESSAGE_LENGTH - 2; i++) {
+                                data[i] = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
+                            }
+                            //make sure footer is valid
+                            insideByte = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
+                            if (insideByte != null && insideByte.compareTo(DATA_FOOT) == 0) {
+                                //System.out.println(Arrays.toString(convertData(data,MESSAGE_LENGTH-2)));
+                                //we are sure that packet is not damaged.
+                                //interpret it and put it into epoch
 
-                            if (dataEpocher.addData(tsrd) == false) {
-                                lastEpoch = dataEpocher.getEpoch();
-                                dataEpocher.reset();
-                                dataEpocher.addData(tsrd);
-                                notifyObservers();
+                                //debug
+                                //System.out.println(Arrays.toString(convertData(data,MESSAGE_LENGTH-2)));
+
+                                TimestampedRawData tsrd = new TimestampedRawData(convertData(data, MESSAGE_LENGTH - 2));
+
+                                if (dataEpocher.addData(tsrd) == false) {
+                                    lastEpoch = dataEpocher.getEpoch();
+                                    dataEpocher.reset();
+                                    dataEpocher.addData(tsrd);
+                                    notifyObservers();
+
+                                }
+
 
                             }
-
-
                         }
+                    } catch (Exception e) {
+                        System.out.println(readQueue);
+                        e.printStackTrace();
                     }
                 }
             } catch (InterruptedException e) {
@@ -319,9 +332,11 @@ public class SensorListenerEEG extends SensorListener {
         @Override
         public void run() {
             byte[] buffer = new byte[MESSAGE_LENGTH];
-            int len = -1;
+            boolean expectClearIndication = false;
+            int len;
             int notRespondingCount = 0;
             String responseString = "";
+
             try {
                 while ( (len = inputStream.read(buffer)) > -1 ) {
 
@@ -331,39 +346,34 @@ public class SensorListenerEEG extends SensorListener {
                         return;
                     }
 
-                    //TODO interpretation code should go into executorReader wrapped by Callable
-                    if(!streamingMode) {
-                        if (len > 0) {
-                            for (int i = 0; i < len; i++) {
-                                responseString += String.valueOf((char)buffer[i]);
-                            }
-                            System.out.println("resp: " + responseString);
-                            if (responseString.endsWith("$$$")) {
-                                setAndNotifyConnectionEstablished();
-                                lastResponse = responseString;
-                                notRespondingCount = 0;
-                                responseString = "";
-                            }
-                        } else {
-                            notRespondingCount++;
-                            if (notRespondingCount > 1) {
-                                throw new IOException();
-                            } else {
-                                if(isConnected())
-                                    sendQuerySettings();
-                                else
-                                    sendReset();
-                            }
-                        }
+                    if(len < 1 ) {
+                        streamingMode = false;
+                        expectClearIndication = true;
+                        notRespondingCount++;
+                        System.out.println("try " + notRespondingCount);
+                        if(notRespondingCount > 1)
+                            throw new IOException();
+                        if(isConnected())
+                            sendQuerySettings();
+                        else
+                            sendReset();
                     } else {
-                        if(len<1) {
-                            streamingMode = false;
-                        }
+                        notRespondingCount = 0;
                         for (int i = 0; i < len; i++) {
-                            readQueue.put(buffer[i]);
+                            if(expectClearIndication) {
+                                responseString += (char)buffer[i];
+                                if(responseString.endsWith("$$$")) {
+                                    setAndNotifyConnectionEstablished();
+                                    responseString = "";
+                                    expectClearIndication = false;
+                                }
+                            } else {
+                                streamingMode = true;
+                                readQueue.put(buffer[i]);
+                            }
                         }
-                    }
 
+                    }
                 }
             } catch (IOException e) {
                 disconnect();
@@ -391,19 +401,23 @@ public class SensorListenerEEG extends SensorListener {
     }
 
     private void writeBytes(final byte bytes[]) {
-        executorSender.submit(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                //Make sure enough time has passed since last write operation
-                if (System.currentTimeMillis() - lastCommandSendTime - CONSECUTIVE_COMMAND_DELAY < 0) {
-                    Thread.sleep(Math.max(CONSECUTIVE_COMMAND_DELAY - System.currentTimeMillis() + lastCommandSendTime, 0));
+        try {
+            executorSender.submit(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    //Make sure enough time has passed since last write operation
+                    if (System.currentTimeMillis() - lastCommandSendTime - CONSECUTIVE_COMMAND_DELAY < 0) {
+                        Thread.sleep(Math.max(CONSECUTIVE_COMMAND_DELAY - System.currentTimeMillis() + lastCommandSendTime, 0));
+                    }
+                    lastCommandSendTime = System.currentTimeMillis();
+                    outputStream.write(bytes);
+                    System.out.println("written bytes: " + Arrays.toString(bytes));
+                    return null;
                 }
-                lastCommandSendTime = System.currentTimeMillis();
-                outputStream.write(bytes);
-                System.out.println("written bytes: " + Arrays.toString(bytes));
-                return null;
-            }
-        });
+            });
+        } catch(RejectedExecutionException e) {
+            notifyObserversConnectionError();
+        }
     }
 
     @Override
