@@ -11,8 +11,8 @@ import java.util.HashMap;
 public class CasePortListener {
 
     public void runtest1(){
-        HashMap<String, Class> m = COMPortListener.getConnectedPorts();
-        for (String key : m.keySet())
-            System.out.println(key + " " + m.get(key));
+        String[] m = COMPortListener.getConnectedPorts();
+        for (String key : m)
+            System.out.println(key);
     }
 }

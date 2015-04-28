@@ -6,10 +6,9 @@ import shared.TimestampedRawData;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Connects to a EEG sensor on a specific port, gets raw EEG data from the
@@ -29,50 +28,53 @@ public class SensorListenerEEG extends SensorListener {
     private static final byte CODE_CHANNEL_ON[] = {'!', '@', '#', '$', '%', '^', '&', '*', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I'};
     private static final byte CODE_CHANNEL_OFF[] = {'1', '2', '3', '4', '5', '6', '7', '8', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i'};
     private static final byte CODE_STOP_STREAMING = 's';
+    private static final byte CODE_QUERY = '?';
     private static final int BUFFER_SIZE = 1024;
     private static final int CHANNEL_LENGTH = 8; //8 or 16
     private static final int MESSAGE_LENGTH = 33;
-    private static final long CONTINUOUS_COMMAND_DELAY = 500;
+    private static final long CONSECUTIVE_COMMAND_DELAY = 100;
     private static final byte DATA_HEADER = (byte) 0xA0;
     private static final byte DATA_FOOT = (byte) 0xC0;
-    private static final int NOT_AVAILABLE_LIMIT = 100;
-    private static final int CONNECTION_RETRY_INTERVAL = 50;
-    private static final int RECEIVE_TIMEOUT = 5000;
+    private static final int RECEIVE_TIMEOUT = 2000;
 
-    private DataInterpreter dataInterpreter;
-    private SerialReader serialReader;
-    private SerialWriter serialWriter;
-    private CommPortIdentifier commPortIdentifier;
-    private CommPort commPort;
     private SerialPort serialPort;
     private InputStream inputStream;
     private OutputStream outputStream;
-    private Thread readerThread;
-    private Thread interpreterThread;
-    private boolean threadsActive;
 
-    private BlockingQueue<Byte> readQueue;
-    private String identificationString;
+    private ExecutorService executorWriter = Executors.newSingleThreadExecutor();
+    private ExecutorService executorReader = Executors.newSingleThreadExecutor();
+
     private List<TimestampedRawData> lastEpoch;
-    private String comPortString;
 
     private boolean connectionEstablished;
-    private boolean streamingOn;
+
+    /**
+     * There should be some time between consecutive write operations.
+     * Each write request is processed in a different Callable submitted to the same SingleThreadExecutor.
+     * To instantl reflect changes made by different threads this should strictly be volatile
+     */
+    private volatile long lastCommandSendTime;
+
+    private Object lockStreaming = new Object();
+    private volatile boolean streamingOn;
 
     public SensorListenerEEG(String comPort) {
-        this.comPortString = comPort;
-        this.readQueue = new ArrayBlockingQueue<Byte>(BUFFER_SIZE);
+        this.serialPortString = comPort;
     }
 
+    /**
+     * connects to sensor and initiates a handshake with sensor
+     * @return true if handshake is initiated. false if port is busy or handshake could not be initiated
+     */
     @Override
     public boolean connect() {
         try {
-            this.commPortIdentifier = CommPortIdentifier.getPortIdentifier(comPortString);
+            CommPortIdentifier commPortIdentifier = CommPortIdentifier.getPortIdentifier(serialPortString);
             if (commPortIdentifier.isCurrentlyOwned()) {
                 throw new Exception("EEG port is currently owned");
             }
 
-            commPort = commPortIdentifier.open(this.getClass().getName(), COMM_PORT_TIMEOUT);
+            CommPort commPort = commPortIdentifier.open(this.getClass().getName(), COMM_PORT_TIMEOUT);
 
             if (commPort instanceof SerialPort == false) {
                 throw new Exception("EEG port is not a serial port");
@@ -84,88 +86,66 @@ public class SensorListenerEEG extends SensorListener {
             inputStream = serialPort.getInputStream();
             outputStream = serialPort.getOutputStream();
             serialPort.enableReceiveTimeout(RECEIVE_TIMEOUT);
-        } catch (PortInUseException | UnsupportedCommOperationException e) {
-            notifyObserversConnectionFailed();
-            return false;
-        } catch (IOException e) {
-            notifyObserversConnectionFailed();
-            return false;
+
+            sendReset();
+
         } catch (Exception e) {
             notifyObserversConnectionFailed();
             return false;
         }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    threadsActive = true;
-                    try {
-                        serialReader = new SerialReader(inputStream);
-                    } catch (IOException e) {
-                        threadsActive = false;
-                        notifyObserversConnectionFailed();
-                        return;
-                    }
-
-                    readerThread = new Thread(serialReader);
-                    System.out.println("thread baslangic");
-                    readerThread.start();
-
-                    dataInterpreter = new DataInterpreter();
-                    System.out.println("interpreter started");
-                    interpreterThread = new Thread(dataInterpreter);
-                    interpreterThread.start();
-
-                    serialWriter = new SerialWriter(outputStream);
-                    serialWriter.writeByte(CODE_RESET);
-
-                    connectionEstablished = true;
-
-                    notifyObserversConnectionEstablished();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
 
         return true;
     }
 
+    /**
+     * Tells OpenBCI to start streaming and starts a thread to listen to OpenBCI. As new data arrives dataArrived method
+     * of registered Observers is called
+     */
     public void startStreaming() {
-        streamingOn = true;
-        serialWriter.writeByte(CODE_START_STREAMING);
-    }
-
-    public void stopStreaming() {
-        streamingOn = false;
-        serialWriter.writeByte(CODE_STOP_STREAMING);
-    }
-
-    public void setChannelState(int channel, boolean state) {
-        if (state) {
-            serialWriter.writeByte(CODE_CHANNEL_ON[channel]);
-        } else {
-            serialWriter.writeByte(CODE_CHANNEL_OFF[channel]);
+        synchronized (lockStreaming) {
+            streamingOn = true;
+            writeBytes(CODE_START_STREAMING);
+            executorReader.submit(new DataInterpreter());
         }
     }
 
-    @Override
-    public boolean disconnect() {
-        serialPort.close();
-        threadsActive = false;
-        return true;
+    /**
+     * Tells OpenBCI to stop streaming
+     */
+    public void stopStreaming() {
+        synchronized (lockStreaming) {
+            streamingOn = false;
+            writeBytes(CODE_STOP_STREAMING);
+        }
     }
 
+    /**
+     * Open/close selected channel
+     * @param channel Channel number of desired channel. Valid channels are 0-15
+     * @param state true for opening and false for closing
+     */
+    public void setChannelState(int channel, boolean state) {
+        if (state) {
+            writeBytes(CODE_CHANNEL_ON[channel]);
+        } else {
+            writeBytes(CODE_CHANNEL_OFF[channel]);
+        }
+    }
+
+    /**
+     * Resets OpenBCI board to default state
+     */
+    public void sendReset() {
+        executorReader.submit(new ConnectionInitiator());
+    }
+
+    /**
+     * Gets last recorded epoch
+     * @return A list of raw sensor data ordered by time of arrival
+     */
     @Override
     public List<TimestampedRawData> getSensorData() {
         return lastEpoch;
-    }
-
-    @Override
-    public int getFrequency() {
-        // TODO Auto-generated method stub
-        return 0;
     }
 
     @Override
@@ -174,11 +154,19 @@ public class SensorListenerEEG extends SensorListener {
     }
 
     @Override
+    public boolean disconnect() {
+        executorWriter.shutdownNow();
+        executorReader.shutdownNow();
+        serialPort.close();
+        connectionEstablished = false;
+        return true;
+    }
+
+    @Override
     protected void notifyObservers() {
         for (SensorObserver observer : observerCollection) {
             observer.dataArrived(this);
         }
-
     }
 
     protected void notifyObserversConnectionEstablished() {
@@ -188,16 +176,12 @@ public class SensorListenerEEG extends SensorListener {
     }
 
     protected void notifyObserversConnectionFailed() {
-        threadsActive = false;
-        System.out.println("connection fail");
         for (SensorObserver observer : observerCollection) {
             observer.connectionFailed(this);
         }
     }
 
     protected void notifyObserversConnectionError() {
-        threadsActive = false;
-        System.out.println("connection error");
         for (SensorObserver observer : observerCollection) {
             observer.connectionError(this);
         }
@@ -206,7 +190,6 @@ public class SensorListenerEEG extends SensorListener {
 
     @Override
     public boolean registerObserver(SensorObserver observer) {
-
         return observerCollection.add(observer);
     }
 
@@ -215,47 +198,123 @@ public class SensorListenerEEG extends SensorListener {
         return observerCollection.remove(observer);
     }
 
-    private class DataInterpreter implements Runnable {
+    private synchronized void setAndNotifyConnectionEstablished() {
+        if(!connectionEstablished) {
+            connectionEstablished = true;
+            notifyObserversConnectionEstablished();
+        }
+    }
+
+    private synchronized void setAndNotifyConnectionError() {
+        if(connectionEstablished) {
+            connectionEstablished = false;
+            notifyObserversConnectionError();
+        }
+    }
+
+    public void sendQuerySettings() {
+        writeBytes(CODE_QUERY);
+        executorReader.submit(new ResponseReader());
+    }
+
+
+    private void writeBytes(final byte bytes) {
+        byte arr[] = {bytes};
+        writeBytes(arr);
+    }
+
+    private void writeBytes(final byte bytes[]) {
+        try {
+            executorWriter.submit(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    //Make sure enough time has passed since last write operation
+                    if (System.currentTimeMillis() - lastCommandSendTime - CONSECUTIVE_COMMAND_DELAY < 0) {
+                        Thread.sleep(Math.max(CONSECUTIVE_COMMAND_DELAY - System.currentTimeMillis() + lastCommandSendTime, 0));
+                    }
+                    lastCommandSendTime = System.currentTimeMillis();
+                    outputStream.write(bytes);
+                    return null;
+                }
+            });
+        } catch(RejectedExecutionException e) {
+            notifyObserversConnectionError();
+        }
+    }
+
+    @Override
+    public String toString(){
+        return "OpenBCI EEG";
+    }
+
+    /**
+     * DataInterpreter interprets raw OpenBCI data packets.
+     */
+    private class DataInterpreter implements Callable<Void> {
 
         @Override
-        public void run() {
+        public Void call() {
             try {
+                byte[] buffer = new byte[BUFFER_SIZE];
+                byte[] packet = new byte[MESSAGE_LENGTH];
+                byte[] rawdata = new byte[MESSAGE_LENGTH-2];
+                int index = 0;
+                int len;
 
-                byte[] data = new byte[MESSAGE_LENGTH - 2];
-                Byte b;
+                while ((len = inputStream.read(buffer)) > -1) {
 
-                while (true) {
-                    b = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
-                    //disconnection routine
-                    if (!threadsActive) {
-                        return;
-                    }
+                    if(len == 0)
+                        throw new IOException();
 
-                    if (b != null && b.compareTo(DATA_HEADER) == 0) {
+                    //Read raw packet header from thread safe queue
+                    for (int i = 0; i < len; i++) {
+                        packet[index++] = buffer[i];
 
-                        for (int i = 0; i < MESSAGE_LENGTH - 2; i++) {
-                            data[i] = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
-                        }
-                        if (readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS).compareTo(DATA_FOOT) == 0) {
+                        if(index==MESSAGE_LENGTH) {
 
-                            TimestampedRawData tsrd = new TimestampedRawData(convertData(data, MESSAGE_LENGTH - 2));
-                            if (dataEpocher.addData(tsrd) == false) {
-                                lastEpoch = dataEpocher.getEpoch();
-                                dataEpocher.reset();
-                                dataEpocher.addData(tsrd);
-                                notifyObservers();
+                            if (isValid(packet)) {
+                                for (int j = 0; j < rawdata.length; j++) {
+                                    rawdata[j] = packet[j+1];
+                                }
+                                TimestampedRawData tsrd = new TimestampedRawData(convertData(rawdata, MESSAGE_LENGTH - 2));
 
+                                if (dataEpocher.addData(tsrd) == false) {
+                                    lastEpoch = dataEpocher.getEpoch();
+                                    dataEpocher.reset();
+                                    dataEpocher.addData(tsrd);
+                                    notifyObservers();
+
+                                }
                             }
-
+                            index = 0;
                         }
                     }
 
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                if(streamingOn)
+                    notifyObserversConnectionError();
             }
+            synchronized (lockStreaming) {
+                streamingOn = false;
+            }
+            return null;
         }
 
+        private boolean isValid(byte[] data) {
+            if( data[0] == DATA_HEADER && data[data.length-1] == DATA_FOOT)
+                return true;
+            else
+                return false;
+        }
+
+
+        /**
+         * Gets volt values of all channels
+         * @param bytes OpenBCI data packet
+         * @param len Length of data packet in bytes
+         * @return An array of volt values ordered by channel number
+         */
         private double[] convertData(byte[] bytes, int len) {
             int sampleNumber = ((int) bytes[0]) & 0x00FF;
 
@@ -271,6 +330,11 @@ public class SensorListenerEEG extends SensorListener {
             return doubleData;
         }
 
+        /**
+         * Converts 24 bit integers to 32 bit integers.
+         * @param byteArray bytes to be converted. First 3 bytes are used if there is more than 3 in the array.
+         * @return 32 bit representation of the given integer
+         */
         private int interpret24bitAsInt32(byte[] byteArray) {
             int newInt = (((0xFF & byteArray[0]) << 16)
                     | ((0xFF & byteArray[1]) << 8)
@@ -283,6 +347,11 @@ public class SensorListenerEEG extends SensorListener {
             return newInt;
         }
 
+        /**
+         * Converts 16 bit integers to 32 bit integers.
+         * @param byteArray bytes to be converted. First 2 bytes are used if there is more than 3 in the array.
+         * @return 32 bit representation of the given integer
+         */
         int interpret16bitAsInt32(byte[] byteArray) {
             int newInt = (((0xFF & byteArray[0]) << 8)
                     | (0xFF & byteArray[1]));
@@ -295,104 +364,72 @@ public class SensorListenerEEG extends SensorListener {
         }
     }
 
-    private class SerialReader implements Runnable {
 
-        private InputStream inputStream;
-
-        public SerialReader(InputStream inputStream) throws IOException {
-
-            this.inputStream = inputStream;
-
+    private class ConnectionInitiator implements Callable<Void> {
+        @Override
+        public Void call() {
             byte[] buffer = new byte[BUFFER_SIZE];
-            int len = 0;
-            identificationString = "";
-            int bytesread = 0;
+            int len;
 
-            while (identificationString.endsWith("$$$") == false) {
+            int waitingCount;
+            String responseString = "";
 
+            waitingCount = 0;
+            try {
+                while ((len = inputStream.read(buffer)) > -1) {
+                    if (len == 0) {
+                        break;
+                    } else {
+                        waitingCount++;
+                    }
+                    if (waitingCount > 4) {
+                        notifyObserversConnectionFailed();
+                        return null;
+                    }
 
-                len = inputStream.read(buffer);
-
-                if (len == 0 || bytesread > 500) {
-                    throw new IOException();
                 }
-                bytesread += len;
-                for (int i = 0; i < len; i++) {
-                    identificationString += String.valueOf((char) buffer[i]);
+
+                outputStream.write(CODE_RESET);
+                while ((len = inputStream.read(buffer)) > -1) {
+                    if(len < 1)
+                        break;
+                    for (int i = 0; i < len; i++) {
+                        responseString += (char)buffer[i];
+                    }
+                    if(responseString.endsWith("$$$")) {
+                        setAndNotifyConnectionEstablished();
+                        return null;
+                    }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-
-            if (identificationString.endsWith("$$$")) {
-                System.out.println(identificationString);
-                //send reset signal
-            } else {
-                throw new IOException("Identification does not match with expected ->" + identificationString);
-            }
-
+            notifyObserversConnectionFailed();
+            return null;
         }
+
+    }
+
+    private class ResponseReader implements Callable<Void> {
 
         @Override
-        public void run() {
-            byte[] buffer = new byte[MESSAGE_LENGTH];
-            int len = -1;
-            System.out.println("runnnnn");
-            try {
-                while ( (len = inputStream.read(buffer)) > -1 ) {
-
-                    if(streamingOn && len == 0) {
-                        throw new IOException();
-                    }
-
-                    //disconnection routine
-                    if (!threadsActive) {
-                        return;
-                    }
-
-                    for (int i = 0; i < len; i++) {
-                        readQueue.put(buffer[i]);
+        public Void call() throws Exception {
+            int len;
+            String response = "";
+            byte[] buffer = new byte[BUFFER_SIZE];
+            while( (len=inputStream.read(buffer)) > -1 ) {
+                for (int i = 0; i < len; i++) {
+                    response += (char)buffer[i];
+                    if(response.endsWith("$$$")) {
+                        return null;
                     }
                 }
-            } catch (IOException e) {
-                notifyObserversConnectionError();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                notifyObserversConnectionError();
             }
+            setAndNotifyConnectionError();
+            return null;
         }
     }
 
-    private class SerialWriter {
 
-        private OutputStream outputStream;
-        private long lastSentTime;
 
-        public SerialWriter(OutputStream outputStream) {
-            this.outputStream = outputStream;
-        }
-
-        public void writeByte(byte bytes) {
-            if (!connectionEstablished) {
-                return;
-            }
-            try {
-                if (System.currentTimeMillis() - lastSentTime - CONTINUOUS_COMMAND_DELAY < 0) {
-                    Thread.sleep(Math.max(CONTINUOUS_COMMAND_DELAY - System.currentTimeMillis() + lastSentTime, 0));
-                }
-                lastSentTime = System.currentTimeMillis();
-                outputStream.write(bytes);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    @Override
-    public String toString(){
-        
-        return "OpenBCI EEG";
-    }
 }
