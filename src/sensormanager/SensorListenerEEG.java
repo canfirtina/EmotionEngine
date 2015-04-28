@@ -60,7 +60,6 @@ public class SensorListenerEEG extends SensorListener {
      * To instantl reflect changes made by different threads this should strictly be volatile
      */
     private volatile long lastCommandSendTime;
-    private volatile boolean attemptToStopStreaming;
 
     public SensorListenerEEG(String comPort) {
         this.comPortString = comPort;
@@ -95,18 +94,12 @@ public class SensorListenerEEG extends SensorListener {
             return false;
         }
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                readerActive = true;
-                interpreterActive = true;
-            }
-        }).start();
 
         return true;
     }
 
     public void startStreaming() {
+        //TODO sendcommand
         executorReceiver.submit(new DataInterpreter());
     }
 
@@ -194,57 +187,87 @@ public class SensorListenerEEG extends SensorListener {
 
         @Override
         public Void call() {
-
-            byte[] buffer = new byte[BUFFER_SIZE];
-            byte[] data = new byte[MESSAGE_LENGTH - 2];
-            int len;
             try {
+                byte[] buffer = new byte[BUFFER_SIZE];
+                byte[] data = new byte[MESSAGE_LENGTH];
+                int index = 0;
+                int len;
+
                 outputStream.write(CODE_START_STREAMING);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            while (true) {
-                //Read raw packet header from thread safe queue
-                try {
-                    len = inputStream.read(buffer, 0, MESSAGE_LENGTH);
-                    System.out.println(len);
+
+
+                while ((len = inputStream.read(buffer)) > -1) { //TODO -1 / 0
+                    //Read raw packet header from thread safe queue
+                    for (int i = 0; i < len; i++) {
+                        data[index++] = buffer[i];
+                        if(index==MESSAGE_LENGTH) {
+                            if (isValid(data)) {
+                                System.out.println(Arrays.toString(convertData(data,MESSAGE_LENGTH-2)));
+                                TimestampedRawData tsrd = new TimestampedRawData(convertData(buffer, MESSAGE_LENGTH - 2));
+
+                                if (dataEpocher.addData(tsrd) == false) {
+                                    lastEpoch = dataEpocher.getEpoch();
+                                    dataEpocher.reset();
+                                    dataEpocher.addData(tsrd);
+                                    notifyObservers();
+
+                                }
+                            }
+                            index = 0;
+                        }
+                    }
+                    /*
                     if (len < 1) {
+                        //TODO
                         System.out.println("message broken");
                         break;
 
                     }
-                    //make sure packet is not broken
-                    if (buffer[0] == DATA_HEADER) {
+                    for (int bufferIndex = 0; bufferIndex < len; bufferIndex++) {
 
-                        //make sure footer is valid
+                        //make sure packet is not broken
+                        if (buffer[bufferIndex] == DATA_HEADER) {
+                            data[index++] = buffer[bufferIndex];
 
-                        if (buffer[MESSAGE_LENGTH - 1] == DATA_FOOT) {
-                            //System.out.println(Arrays.toString(convertData(data,MESSAGE_LENGTH-2)));
-                            //we are sure that packet is not damaged.
-                            //interpret it and put it into epoch
 
-                            //debug
-                            System.out.println(Arrays.toString(convertData(buffer, MESSAGE_LENGTH - 2)));
+                            //make sure footer is valid
+                            if (buffer[MESSAGE_LENGTH - 1] == DATA_FOOT) {
+                                //System.out.println(Arrays.toString(convertData(data,MESSAGE_LENGTH-2)));
+                                //we are sure that packet is not damaged.
+                                //interpret it and put it into epoch
 
-                            TimestampedRawData tsrd = new TimestampedRawData(convertData(buffer, MESSAGE_LENGTH - 2));
+                                //debug
+                                System.out.println(Arrays.toString(convertData(buffer, MESSAGE_LENGTH - 2)));
 
-                            if (dataEpocher.addData(tsrd) == false) {
-                                lastEpoch = dataEpocher.getEpoch();
-                                dataEpocher.reset();
-                                dataEpocher.addData(tsrd);
-                                notifyObservers();
+                                TimestampedRawData tsrd = new TimestampedRawData(convertData(buffer, MESSAGE_LENGTH - 2));
+
+                                if (dataEpocher.addData(tsrd) == false) {
+                                    lastEpoch = dataEpocher.getEpoch();
+                                    dataEpocher.reset();
+                                    dataEpocher.addData(tsrd);
+                                    notifyObservers();
+
+                                }
+
 
                             }
-
-
                         }
                     }
-                } catch (Exception e) {
-                    System.out.println(readQueue);
-                    e.printStackTrace();
+                 */
+
                 }
+            } catch (Exception e) {
+                System.out.println(readQueue);
+                e.printStackTrace();
             }
             return null;
+        }
+
+        private boolean isValid(byte[] data) {
+            if( data[0] == DATA_HEADER && data[data.length-1] == DATA_FOOT)
+                return true;
+            else
+                return false;
         }
 
 
