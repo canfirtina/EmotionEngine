@@ -6,7 +6,6 @@ import shared.TimestampedRawData;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
@@ -44,6 +43,7 @@ public class SensorListenerEEG extends SensorListener {
     private String comPortString;
 
     private ExecutorService executorSender = Executors.newSingleThreadExecutor();
+    private ExecutorService executorReceiver = Executors.newSingleThreadExecutor();
     private BlockingQueue<Byte> readQueue;
     private volatile boolean interpreterActive;
     private volatile boolean readerActive;
@@ -88,6 +88,7 @@ public class SensorListenerEEG extends SensorListener {
             outputStream = serialPort.getOutputStream();
             serialPort.enableReceiveTimeout(RECEIVE_TIMEOUT);
 
+            executorSender.submit(new ConnectionInitiator());
 
         } catch (Exception e) {
             notifyObserversConnectionFailed();
@@ -98,9 +99,7 @@ public class SensorListenerEEG extends SensorListener {
             @Override
             public void run() {
                 readerActive = true;
-                new Thread(new SerialReader(inputStream)).start();
                 interpreterActive = true;
-                new Thread(new DataInterpreter()).start();
             }
         }).start();
 
@@ -108,7 +107,7 @@ public class SensorListenerEEG extends SensorListener {
     }
 
     public void startStreaming() {
-        writeBytes(CODE_START_STREAMING);
+        executorReceiver.submit(new DataInterpreter());
     }
 
     public void stopStreaming() {
@@ -191,65 +190,63 @@ public class SensorListenerEEG extends SensorListener {
     /**
      * DataInterpreter interprets raw OpenBCI data packets.
      */
-    private class DataInterpreter implements Runnable {
+    private class DataInterpreter implements Callable<Void> {
 
         @Override
-        public void run() {
+        public Void call() {
+
+            byte[] buffer = new byte[BUFFER_SIZE];
+            byte[] data = new byte[MESSAGE_LENGTH - 2];
+            int len;
             try {
-                byte[] data = new byte[MESSAGE_LENGTH - 2];
-                Byte b;
-                Byte insideByte;
-                while (true) {
-                    //this thread terminates itself if requested by the object
-                    if (!interpreterActive)
-                        return;
-
-                    //Read raw packet header from thread safe queue
-                    b = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
-
-                    if(b==null) {
-                        continue;
-                    }
-                    try {
-                        //make sure packet is not broken
-                        if (b != null && b.compareTo(DATA_HEADER) == 0) {
-
-                            //header is valid, so read the rest of the packet
-                            for (int i = 0; i < MESSAGE_LENGTH - 2; i++) {
-                                data[i] = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
-                            }
-                            //make sure footer is valid
-                            insideByte = readQueue.poll(COMM_PORT_TIMEOUT, TimeUnit.MILLISECONDS);
-                            if (insideByte != null && insideByte.compareTo(DATA_FOOT) == 0) {
-                                //System.out.println(Arrays.toString(convertData(data,MESSAGE_LENGTH-2)));
-                                //we are sure that packet is not damaged.
-                                //interpret it and put it into epoch
-
-                                //debug
-                                //System.out.println(Arrays.toString(convertData(data,MESSAGE_LENGTH-2)));
-
-                                TimestampedRawData tsrd = new TimestampedRawData(convertData(data, MESSAGE_LENGTH - 2));
-
-                                if (dataEpocher.addData(tsrd) == false) {
-                                    lastEpoch = dataEpocher.getEpoch();
-                                    dataEpocher.reset();
-                                    dataEpocher.addData(tsrd);
-                                    notifyObservers();
-
-                                }
-
-
-                            }
-                        }
-                    } catch (Exception e) {
-                        System.out.println(readQueue);
-                        e.printStackTrace();
-                    }
-                }
-            } catch (InterruptedException e) {
+                outputStream.write(CODE_START_STREAMING);
+            } catch (IOException e) {
                 e.printStackTrace();
             }
+            while (true) {
+                //Read raw packet header from thread safe queue
+                try {
+                    len = inputStream.read(buffer, 0, MESSAGE_LENGTH);
+                    System.out.println(len);
+                    if (len < 1) {
+                        System.out.println("message broken");
+                        break;
+
+                    }
+                    //make sure packet is not broken
+                    if (buffer[0] == DATA_HEADER) {
+
+                        //make sure footer is valid
+
+                        if (buffer[MESSAGE_LENGTH - 1] == DATA_FOOT) {
+                            //System.out.println(Arrays.toString(convertData(data,MESSAGE_LENGTH-2)));
+                            //we are sure that packet is not damaged.
+                            //interpret it and put it into epoch
+
+                            //debug
+                            System.out.println(Arrays.toString(convertData(buffer, MESSAGE_LENGTH - 2)));
+
+                            TimestampedRawData tsrd = new TimestampedRawData(convertData(buffer, MESSAGE_LENGTH - 2));
+
+                            if (dataEpocher.addData(tsrd) == false) {
+                                lastEpoch = dataEpocher.getEpoch();
+                                dataEpocher.reset();
+                                dataEpocher.addData(tsrd);
+                                notifyObservers();
+
+                            }
+
+
+                        }
+                    }
+                } catch (Exception e) {
+                    System.out.println(readQueue);
+                    e.printStackTrace();
+                }
+            }
+            return null;
         }
+
 
         /**
          * Gets volt values of all channels
@@ -313,77 +310,51 @@ public class SensorListenerEEG extends SensorListener {
         }
     }
 
-    private class SerialReader implements Runnable {
-
-        private InputStream inputStream;
-
-        /**
-         * Constructor listens for identification string.
-         * @param inputStream Input stream where sensor puts data onto
-         * @throws IOException If identification string sent by sensor does not match OpenBCI identification string
-         * this method throws.
-         */
-        public SerialReader(InputStream inputStream) {
-
-            this.inputStream = inputStream;
-
-        }
-
+    private class ConnectionInitiator implements Callable<Void> {
         @Override
-        public void run() {
+        public Void call() {
             byte[] buffer = new byte[MESSAGE_LENGTH];
             boolean expectClearIndication = false;
             int len;
+
+            int waitingCount;
             int notRespondingCount = 0;
             String responseString = "";
 
+            waitingCount = 0;
             try {
-                while ( (len = inputStream.read(buffer)) > -1 ) {
-
-                    //this thread destroys itself if requested by object
-                    if (!readerActive) {
-                        connectionEstablished = false;
-                        return;
+                while ((len = inputStream.read(buffer)) > -1) {
+                    if (len == 0) {
+                        break;
+                    } else {
+                        waitingCount++;
+                    }
+                    if (waitingCount > 4) {
+                        notifyObserversConnectionFailed();
+                        return null;
                     }
 
-                    if(len < 1 ) {
-                        streamingMode = false;
-                        expectClearIndication = true;
-                        notRespondingCount++;
-                        System.out.println("try " + notRespondingCount);
-                        if(notRespondingCount > 1)
-                            throw new IOException();
-                        if(isConnected())
-                            sendQuerySettings();
-                        else
-                            sendReset();
-                    } else {
-                        notRespondingCount = 0;
-                        for (int i = 0; i < len; i++) {
-                            if(expectClearIndication) {
-                                responseString += (char)buffer[i];
-                                if(responseString.endsWith("$$$")) {
-                                    setAndNotifyConnectionEstablished();
-                                    responseString = "";
-                                    expectClearIndication = false;
-                                }
-                            } else {
-                                streamingMode = true;
-                                readQueue.put(buffer[i]);
-                            }
-                        }
+                }
 
+                outputStream.write(CODE_RESET);
+                while ((len = inputStream.read(buffer)) > -1) {
+                    if(len < 1)
+                        break;
+                    for (int i = 0; i < len; i++) {
+                        responseString += (char)buffer[i];
+                    }
+                    if(responseString.endsWith("$$$")) {
+                        setAndNotifyConnectionEstablished();
+                        return null;
                     }
                 }
             } catch (IOException e) {
-                disconnect();
-                notifyObserversConnectionError();
-            } catch (InterruptedException e) {
                 e.printStackTrace();
-                disconnect();
-                notifyObserversConnectionError();
             }
+            notifyObserversConnectionFailed();
+            return null;
         }
+
     }
 
     public void sendQuerySettings() {
