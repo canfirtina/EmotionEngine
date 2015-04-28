@@ -30,20 +30,27 @@ public class CaseDataManager {
 
     public static void testDataManager() {
         UserManager usr = UserManager.getInstance();
-        System.out.println(usr.login("ayhun", "93"));
-        /*
+        System.out.println("logging in? = " +usr.login("ayhun", "1993"));
+        
         DataManager dm = DataManager.getInstance();
         System.out.println(dm.getCurrentUser().getName());
         dm.setCurrentUser("ayhun");        
         User u = dm.getCurrentUser();
+        if(u.getName().equals("ayhun"))
+            System.out.println("Set current user and get current user works.");
         u.enableSensor("GSR");
         dm.saveUser(u);
-        System.out.println("çalıştımı?=" + dm.getCurrentUser().getEnabledSensors().containsKey("GSR"));
+        if(dm.getCurrentUser().getEnabledSensors().containsKey("GSR"))
+            System.out.println("save user works");
+        
         u = dm.getUser("emcail");
+        if(u!=null && u.getName().equals("emcail"))
+            System.out.println("get user works");
+        
         ArrayList<User> us = dm.getAllUsers();
         if(dm.checkUserExist("ayhun")){
-            dm.setCurrentUser("emcail");
+            System.out.println("check user exists works");
         }
-        u=dm.getCurrentUser();*/
+        
     }
 }
