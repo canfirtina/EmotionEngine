@@ -6,27 +6,18 @@
 package test;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.util.Pair;
 import persistentdatamanagement.DataManager;
 import usermanager.User;
+import usermanager.UserManager;
 
 /**
  *
  * @author ayhun
  */
 public class CaseDataManager {
-
-    private static final String URL = "jdbc:mysql://localhost/emotion_db";
-    private static final String USER = "root";
-    private static final String PASSWORD = "emotionalpassword";
-
     static Connection con = null;
     static Statement st = null;
     static ResultSet rs = null;
@@ -38,15 +29,21 @@ public class CaseDataManager {
     }
 
     public static void testDataManager() {
+        UserManager usr = UserManager.getInstance();
+        System.out.println(usr.login("ayhun", "93"));
+        /*
         DataManager dm = DataManager.getInstance();
         System.out.println(dm.getCurrentUser().getName());
         dm.setCurrentUser("ayhun");        
         User u = dm.getCurrentUser();
+        u.enableSensor("GSR");
+        dm.saveUser(u);
+        System.out.println("çalıştımı?=" + dm.getCurrentUser().getEnabledSensors().containsKey("GSR"));
         u = dm.getUser("emcail");
         ArrayList<User> us = dm.getAllUsers();
         if(dm.checkUserExist("ayhun")){
             dm.setCurrentUser("emcail");
         }
-        u=dm.getCurrentUser();
+        u=dm.getCurrentUser();*/
     }
 }

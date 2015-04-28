@@ -49,9 +49,9 @@ public class DatabaseService {
 
     private Connection getConnection() {
         try {
-            String url = "jdbc:mysql://localhost/emotion_db";
+            String url = "jdbc:mysql://104.131.97.74/emotion_db";
             String user = "root";
-            String password = "emotionalpassword";
+            String password = "ayhuntekat93";
             return DriverManager.getConnection(url, user, password);
         } catch (SQLException ex) {
             System.out.println(ex.toString());
@@ -83,7 +83,7 @@ public class DatabaseService {
                 currUser = new User(rs.getString("email"), rs.getString("password"));
 
                 st = con.createStatement();
-                rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = 'true';");
+                rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = '1';");
                 while (rs.next()) {
                     currUser.enableSensor(rs.getString("sensor"));
                 }
@@ -103,7 +103,7 @@ public class DatabaseService {
                 }
             }
         } catch (SQLException ex) {
-
+            System.out.println(ex.toString());
         } finally {
             attemptClose(con, st, rs);
         }
@@ -125,7 +125,7 @@ public class DatabaseService {
                 currUser = new User(rs.getString("email"), rs.getString("password"));
 
                 st = con.createStatement();
-                rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = 'true';");
+                rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = '1';");
                 while (rs.next()) {
                     currUser.enableSensor(rs.getString("sensor"));
                 }
@@ -210,12 +210,15 @@ public class DatabaseService {
 
             st = con.createStatement();
             // deletion will be cascaded to other tables
-            st.executeUpdate("delete from users where email = '" + u.getName() + "';");
+            st.executeUpdate("delete from `emotion_db`.`users` where email = '" + u.getName() + "';");
             currentUser = "insert into users values ('" + u.getName() + "','" + u.getPass() + "');";
 
             if (!u.getEnabledSensors().isEmpty()) {
                 for (String key : u.getEnabledSensors().keySet()) {
-                    st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','" + u.getEnabledSensors().get(key) + "');");
+                    if(u.getEnabledSensors().get(key))
+                        st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','1');");
+                    else
+                        st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','0');");
                 }
             }
 
