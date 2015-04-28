@@ -36,6 +36,8 @@ public abstract class SensorListener {
 	 */
 	protected int freq;
         
+        protected String serialPortString;
+        
 	/**
 	 * Tries to connect with the sensor
 	 * @return true if the connection is established
@@ -95,5 +97,10 @@ public abstract class SensorListener {
 	public void setDataEpocher(DataEpocher dataEpocher) {
 		this.dataEpocher = dataEpocher;
 	}
+        
+        public String getSerialPort(){
+            
+            return serialPortString;
+        }
         
 }

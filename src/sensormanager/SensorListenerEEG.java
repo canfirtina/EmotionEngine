@@ -40,7 +40,6 @@ public class SensorListenerEEG extends SensorListener {
     private SerialPort serialPort;
     private InputStream inputStream;
     private OutputStream outputStream;
-    private String comPortString;
 
     private ExecutorService executorWriter = Executors.newSingleThreadExecutor();
     private ExecutorService executorReader = Executors.newSingleThreadExecutor();
@@ -60,7 +59,7 @@ public class SensorListenerEEG extends SensorListener {
     private volatile boolean streamingOn;
 
     public SensorListenerEEG(String comPort) {
-        this.comPortString = comPort;
+        this.serialPortString = comPort;
     }
 
     /**
@@ -70,7 +69,7 @@ public class SensorListenerEEG extends SensorListener {
     @Override
     public boolean connect() {
         try {
-            CommPortIdentifier commPortIdentifier = CommPortIdentifier.getPortIdentifier(comPortString);
+            CommPortIdentifier commPortIdentifier = CommPortIdentifier.getPortIdentifier(serialPortString);
             if (commPortIdentifier.isCurrentlyOwned()) {
                 throw new Exception("EEG port is currently owned");
             }

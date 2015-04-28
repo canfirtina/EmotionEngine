@@ -27,7 +27,6 @@ public class SensorListenerGSR extends SensorListener {
     private CommPort commPort;
     private SerialPort serialPort;
     private InputStream inputStream;
-    private String comPortString;
 
     private boolean threadsActive;
     private boolean connectionEstablished;
@@ -36,13 +35,13 @@ public class SensorListenerGSR extends SensorListener {
 
     public SensorListenerGSR(String comPort) {
 
-        this.comPortString = comPort;
+        this.serialPortString = comPort;
     }
 
     @Override
     public boolean connect() {
         try {
-            this.commPortIdentifier = CommPortIdentifier.getPortIdentifier(comPortString);
+            this.commPortIdentifier = CommPortIdentifier.getPortIdentifier(serialPortString);
             if (commPortIdentifier.isCurrentlyOwned()) {
                 throw new Exception("EEG port is currently owned");
             }

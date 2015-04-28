@@ -58,17 +58,17 @@ public class LoginScreenController implements Initializable, PresentedScreen {
         
         warningLabel.setText("");
         
-        if( SecurityControl.isValidEmailAddress( emailField.getText())){
-            
-            if(passwordField.getText().length() > 0 && UserManager.getInstance().login( emailField.getText(), SecurityControl.getCipherText(passwordField.getText()))){
+//        if( SecurityControl.isValidEmailAddress( emailField.getText())){
+//            
+//            if(passwordField.getText().length() > 0 && UserManager.getInstance().login( emailField.getText(), SecurityControl.getCipherText(passwordField.getText()))){
                 emailField.clear();
                 passwordField.clear();
                 warningLabel.setText("");
                 presentingController.displayScreen(ScreenInfo.ProfileScreen.screenId());
-            }else
-                warningLabel.setText("Username or password is wrong");
-        }else
-            warningLabel.setText("Please enter a valid e-mail address");
+//            }else
+//                warningLabel.setText("Username or password is wrong");
+//        }else
+//            warningLabel.setText("Please enter a valid e-mail address");
     }
     
     @FXML

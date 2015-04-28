@@ -98,12 +98,14 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @FXML
     private void refreshButtonPressed( ActionEvent event){
         
-        availableSerialPorts = new ArrayList<String>();
-        availableSerialPorts.add("COM1");
-        availableSerialPorts.add("COM3");
+//        availableSerialPorts = new ArrayList<String>();
+//        availableSerialPorts.add("COM1");
+//        availableSerialPorts.add("COM3");
         
-        ObservableList<String> sensors = FXCollections.observableArrayList(availableSerialPorts);
-        sensorList.setItems(sensors);
+        String[] availablePorts = sensormanager.COMPortListener.getConnectedPorts();
+        for(int i = 0; i < availablePorts.length; i++)
+            System.out.println(availablePorts[i]);
+        
 //        updateSensorList();
         if( sensorList.getItems().size() > 0)
             connectButton.setDisable(false);
@@ -139,7 +141,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
             
     private void updateSensorList(){
         
-        HashMap<String, Class> availablePorts = sensormanager.COMPortListener.getConnectedPorts();
+        String[] availablePorts = sensormanager.COMPortListener.getConnectedPorts();
         
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
         
@@ -156,21 +158,20 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         
         sensorList.setItems(sensors);
         
-        for(String key : availablePorts.keySet()){
-            Class c = availablePorts.get(key);
+        for(String key : availablePorts){
             boolean found = false;
             for(SensorListener l : connectedSensors)
-                if(l.getClass() == c){
+                if(l.getSerialPort() == key){
                     found = true;
                     break;
                 }
             for(SensorListener l : pendingSensors)
-                if(l.getClass() == c){
+                if(l.getSerialPort() == key){
                     found = true;
                     break;
                 }
-            if( !found)
-                engine.createSensorListener(key, c);
+//            if( !found)
+//                engine.createSensorListener(key, c);
         }
     }
     
