@@ -137,4 +137,16 @@ public class User implements Serializable {
 
         return hours + "h " + minutes + "m";
     }
+    
+    public HashMap<String, Boolean> getEnabledSensors() {
+        return enabledSensors;
+    }
+
+    public HashMap<Pair<String, String>, Integer> getPlayCount() {
+        return playCount;
+    }
+
+    public HashMap<String, Integer> getGamesPlayed() {
+        return gamesPlayed;
+    }
 }

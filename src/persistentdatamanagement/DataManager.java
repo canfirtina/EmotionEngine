@@ -7,11 +7,6 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -19,7 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.util.Pair;
 import javax.imageio.ImageIO;
 import shared.Emotion;
 import shared.FeatureList;
@@ -29,21 +23,10 @@ import sensormanager.*;
  * Responsible for providing other packages with file input output operations.
  */
 public class DataManager {
-
-    private static final String USER_OBJECT_NAME = "d";
-    private String CURRENT_USER;
-
     private static final String GAME_RECORDS_DIRECTORY = "User Data";
     private static final String PROFILE_PIC = "profile_picture";
-    private final String url = "jdbc:mysql://localhost/emotion_db";
-    private final String user = "root";
-    private final String password = "emotionalpassword";
 
     private static DataManager instance = null;
-
-    Connection con = null;
-    Statement st = null;
-    ResultSet rs = null;
 
     private ExecutorService executorService;
 
@@ -66,9 +49,6 @@ public class DataManager {
         // If data directory doesn't exist, create it
         if (!dir.exists()) {
             dir.mkdir();
-
-            // if directory is newly created, create a default user
-            // saveUser(new User("default", "default"));
         }
 
         executorService = Executors.newSingleThreadExecutor();
@@ -190,18 +170,8 @@ public class DataManager {
      */
     public boolean saveUser(User userData) {
         addUserDirectory(userData.getName());
-        FileOutputStream fout;
-        try {
-            fout = new FileOutputStream(getUserDirectory(userData.getName()) + "/" + USER_OBJECT_NAME);
-            ObjectOutputStream oos = new ObjectOutputStream(fout);
-            oos.writeObject(userData);
-            oos.flush();
-            oos.close();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+        DatabaseService ds = DatabaseService.sharedInstance();
+        return ds.saveUser(userData);
     }
 
     /**
@@ -210,7 +180,7 @@ public class DataManager {
      * @return array of objects
      */
     public ArrayList<User> getAllUsers() {
-        File file = new File(GAME_RECORDS_DIRECTORY);
+        /*File file = new File(GAME_RECORDS_DIRECTORY);
         String[] names = file.list();
         ArrayList<User> users = new ArrayList<User>();
 
@@ -218,9 +188,10 @@ public class DataManager {
             if (new File(GAME_RECORDS_DIRECTORY + "/" + name).isDirectory()) {
                 users.add(getUser(name));
             }
-        }
-
-        return users;
+        }*/
+        
+        DatabaseService ds = DatabaseService.sharedInstance();
+        return ds.getAllUsers();
     }
 
     /**
@@ -239,31 +210,8 @@ public class DataManager {
      * @return User object
      */
     public User getUser(String userName) {
-        User currUser = null;
-
-        // read current user
-        ObjectInputStream ois = null;
-        try {
-            if (new File(GAME_RECORDS_DIRECTORY + "/" + userName + "/" + USER_OBJECT_NAME).exists()) {
-                ois = new ObjectInputStream(new FileInputStream(GAME_RECORDS_DIRECTORY + "/" + userName + "/" + USER_OBJECT_NAME));
-            } else {
-                return null;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // start getting the objects out in the order in which they were written
-        try {
-            currUser = (User) ois.readObject();
-            ois.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return currUser;
+        DatabaseService ds = DatabaseService.sharedInstance();
+        return ds.getUser(userName);
     }
 
     /**
@@ -272,24 +220,8 @@ public class DataManager {
      * @param userName
      */
     public boolean setCurrentUser(String userName) {
-        User user = getUser(userName);
-        if (user == null) {
-            return false;
-        }
-
-        FileOutputStream fout;
-        try {
-            fout = new FileOutputStream(GAME_RECORDS_DIRECTORY + "/" + CURRENT_USER);
-            ObjectOutputStream oos = new ObjectOutputStream(fout);
-            oos.writeObject(user);
-            oos.flush();
-            oos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        return true;
+        DatabaseService ds = DatabaseService.sharedInstance();
+        return ds.setCurrentUser(userName);
     }
 
     /**

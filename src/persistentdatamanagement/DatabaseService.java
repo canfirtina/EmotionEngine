@@ -5,6 +5,7 @@
  */
 package persistentdatamanagement;
 
+import java.nio.file.FileVisitResult;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -26,7 +27,7 @@ import usermanager.User;
 public class DatabaseService {
 
     private static DatabaseService service = null;
-    
+
     static Connection con = null;
     static Statement st = null;
     static ResultSet rs = null;
@@ -45,8 +46,8 @@ public class DatabaseService {
         }
         return service;
     }
-    
-    private Connection getConnection(){
+
+    private Connection getConnection() {
         try {
             String url = "jdbc:mysql://localhost/emotion_db";
             String user = "root";
@@ -58,7 +59,7 @@ public class DatabaseService {
             return null;
         }
     }
-    
+
     public User getCurrentUser() {
         con = null;
         st = null;
@@ -92,12 +93,13 @@ public class DatabaseService {
                 while (rs.next()) {
                     currUser.playedGame(rs.getString("game"), rs.getInt("time"));
                 }
-                
+
                 st = con.createStatement();
                 rs = st.executeQuery("select * from play_count where email = '" + currentUser + "';");
                 while (rs.next()) {
-                    for(int i = 0; i < rs.getInt("count"); i++)
-                        currUser.playedTutorial(new Pair<String,String>(rs.getString("sensor"),rs.getString("tutorial")));
+                    for (int i = 0; i < rs.getInt("count"); i++) {
+                        currUser.playedTutorial(new Pair<String, String>(rs.getString("sensor"), rs.getString("tutorial")));
+                    }
                 }
             }
         } catch (SQLException ex) {
@@ -107,13 +109,13 @@ public class DatabaseService {
         }
         return currUser;
     }
-    
+
     public User getUser(String currentUser) {
         con = null;
         st = null;
         rs = null;
         User currUser = null;
-        
+
         try {
             con = getConnection();
 
@@ -133,68 +135,70 @@ public class DatabaseService {
                 while (rs.next()) {
                     currUser.playedGame(rs.getString("game"), rs.getInt("time"));
                 }
-                
+
                 st = con.createStatement();
                 rs = st.executeQuery("select * from play_count where email = '" + currentUser + "';");
                 while (rs.next()) {
-                    for(int i = 0; i < rs.getInt("count"); i++)
-                        currUser.playedTutorial(new Pair<String,String>(rs.getString("sensor"),rs.getString("tutorial")));
+                    for (int i = 0; i < rs.getInt("count"); i++) {
+                        currUser.playedTutorial(new Pair<String, String>(rs.getString("sensor"), rs.getString("tutorial")));
+                    }
                 }
             }
         } catch (SQLException ex) {
-
+            return null;
         } finally {
             attemptClose(con, st, rs);
         }
         return currUser;
     }
-    
+
     public ArrayList<User> getAllUsers() {
         con = null;
         st = null;
         rs = null;
-        User currUser = null;
         ArrayList<User> all = new ArrayList<>();
-        
+        ArrayList<String> userNames = new ArrayList<>();
+
         try {
             con = getConnection();
 
             st = con.createStatement();
             rs = st.executeQuery("select email from users;");
             while (rs.next()) {
-                String currentUser = rs.getString("email");
-                currUser = new User(currentUser, rs.getString("password"));
-
-                st = con.createStatement();
-                rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = 'true';");
-                while (rs.next()) {
-                    currUser.enableSensor(rs.getString("sensor"));
-                }
-
-                st = con.createStatement();
-                rs = st.executeQuery("select * from games_played where email = '" + currentUser + "';");
-                while (rs.next()) {
-                    currUser.playedGame(rs.getString("game"), rs.getInt("time"));
-                }
-                
-                st = con.createStatement();
-                rs = st.executeQuery("select * from play_count where email = '" + currentUser + "';");
-                while (rs.next()) {
-                    for(int i = 0; i < rs.getInt("count"); i++)
-                        currUser.playedTutorial(new Pair<String,String>(rs.getString("sensor"),rs.getString("tutorial")));
-                }
-                all.add(currUser);
+                userNames.add(rs.getString("email"));
             }
         } catch (SQLException ex) {
-            System.out.println(ex);
+            System.out.println(ex.toString());
+            return null;
         } finally {
             attemptClose(con, st, rs);
         }
-        
+
+        for (String user : userNames) {
+            all.add(getUser(user));
+        }
+
         return all;
     }
-    
-    public boolean saveUser(User u){
+
+    boolean setCurrentUser(String userName) {
+        con = null;
+        st = null;
+        rs = null;
+
+        try {
+            con = getConnection();
+            st = con.createStatement();
+            st.executeUpdate("UPDATE `emotion_db`.`app_state` SET `state_name` = 'current_user', `state_value` = '"+userName+"' WHERE `state_name` = 'current_user'");
+        } catch (SQLException ex) {
+            return false;
+        } finally {
+            attemptClose(con, st, rs);
+        }
+        return true;
+    }
+
+    public boolean saveUser(User u) {
         con = null;
         st = null;
         rs = null;
@@ -202,202 +206,197 @@ public class DatabaseService {
         String currentUser = "";
         try {
             con = getConnection();
+            con.setAutoCommit(false); //transaction block start            
+
             st = con.createStatement();
-            rs = st.executeQuery("select * from users where email = '"+u.getName()+"';");
+            // deletion will be cascaded to other tables
+            st.executeUpdate("delete from users where email = '" + u.getName() + "';");
+            currentUser = "insert into users values ('" + u.getName() + "','" + u.getPass() + "');";
 
-            if (rs.next()) {
-                currentUser = rs.getString("state_value");
-            } else {
-                currentUser = "insert into users values ('"+ u.getName() +"','"+ u.getPass() +"');";
-            }
-            //TODO: devamını getir
-            st = con.createStatement();
-            rs = st.executeQuery("select * from users where email = '" + currentUser + "';");
-            if (rs.next()) {
-                currUser = new User(rs.getString("email"), rs.getString("password"));
-
-                st = con.createStatement();
-                rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = 'true';");
-                while (rs.next()) {
-                    currUser.enableSensor(rs.getString("sensor"));
-                }
-
-                st = con.createStatement();
-                rs = st.executeQuery("select * from games_played where email = '" + currentUser + "';");
-                while (rs.next()) {
-                    currUser.playedGame(rs.getString("game"), rs.getInt("time"));
-                }
-                
-                st = con.createStatement();
-                rs = st.executeQuery("select * from play_count where email = '" + currentUser + "';");
-                while (rs.next()) {
-                    for(int i = 0; i < rs.getInt("count"); i++)
-                        currUser.playedTutorial(new Pair<String,String>(rs.getString("sensor"),rs.getString("tutorial")));
+            if (!u.getEnabledSensors().isEmpty()) {
+                for (String key : u.getEnabledSensors().keySet()) {
+                    st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','" + u.getEnabledSensors().get(key) + "');");
                 }
             }
+
+            if (!u.getGamesPlayed().isEmpty()) {
+                for (String key : u.getEnabledSensors().keySet()) {
+                    st.executeUpdate("INSERT INTO `emotion_db`.`games_played` VALUES('" + u.getName() + "','" + key + "','" + u.getGamesPlayed().get(key) + "');");
+                }
+            }
+
+            if (!u.getPlayCount().isEmpty()) {
+                for (Pair<String, String> key : u.getPlayCount().keySet()) {
+                    st.executeUpdate("INSERT INTO `emotion_db`.`play_count` VALUES('" + u.getName() + "','" + key.getKey() + "','" + key.getValue() + "','" + u.getPlayCount().get(key) + "');");
+                }
+            }
+
+            con.commit();
+            con.setAutoCommit(true); //transaction block end
         } catch (SQLException ex) {
-
+            System.out.println(ex.toString());
+            return false;
         } finally {
             attemptClose(con, st, rs);
         }
-        return false;
-    }
-/*
-    public Accept getAcceptWithAcceptIdAndUserId(int acceptId, int personId) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Accept accept = null;
-        try {
-            conn = dataSource.getConnection();
-            stmt = conn.prepareStatement("SELECT Accept.id, Accept.post_id, Post.name AS post_name, Accept.person_id, p.user_name AS person_user_name, Post.person_id AS post_person_id, pp.user_name AS post_person_user_name, Accept.create_date, Accept.active FROM Accept "
-                    + "JOIN Post ON Accept.post_id = Post.id "
-                    + "JOIN Person p ON Accept.person_id = p.id "
-                    + "JOIN Person pp ON Post.person_id = pp.id "
-                    + "WHERE Accept.id=? AND (Accept.person_id=?  OR Post.person_id=?) AND Post.finish_date > NOW()");
-
-            stmt.setInt(1, acceptId);
-            stmt.setInt(2, personId);
-            stmt.setInt(3, personId);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                Post post = new Post(rs.getInt("post_id"), rs.getString("post_name"), rs.getInt("post_person_id"), rs.getString("post_person_user_name"));
-                accept = new Accept(rs.getInt("id"), post, rs.getInt("person_id"), rs.getString("person_user_name"), rs.getInt("active"), rs.getTimestamp("create_date"));
-            }
-        } catch (SQLException ex) {
-        } finally {
-            attemptClose(conn, stmt, rs);
-        }
-        return accept;
+        return true;
     }
 
-    public boolean addMessage(Message message) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        boolean success = false;
-        try {
-            conn = dataSource.getConnection();
-            stmt = conn.prepareStatement("INSERT INTO `Message` (`accept_id`, `from_id`, `to_id`, `text`, `read`, `create_date`) VALUES(?,?,?,?,?,?)");
+    /*
+     public Accept getAcceptWithAcceptIdAndUserId(int acceptId, int personId) {
+     Connection conn = null;
+     PreparedStatement stmt = null;
+     ResultSet rs = null;
+     Accept accept = null;
+     try {
+     conn = dataSource.getConnection();
+     stmt = conn.prepareStatement("SELECT Accept.id, Accept.post_id, Post.name AS post_name, Accept.person_id, p.user_name AS person_user_name, Post.person_id AS post_person_id, pp.user_name AS post_person_user_name, Accept.create_date, Accept.active FROM Accept "
+     + "JOIN Post ON Accept.post_id = Post.id "
+     + "JOIN Person p ON Accept.person_id = p.id "
+     + "JOIN Person pp ON Post.person_id = pp.id "
+     + "WHERE Accept.id=? AND (Accept.person_id=?  OR Post.person_id=?) AND Post.finish_date > NOW()");
 
-            stmt.setInt(1, message.getAcceptId());
-            stmt.setInt(2, message.getFromId());
-            stmt.setInt(3, message.getToId());
-            stmt.setString(4, message.getText());
-            stmt.setBoolean(5, message.isRead());
-            stmt.setTimestamp(6, message.getCreateDate());
-            int msgId = stmt.executeUpdate();
-            if (msgId != 0) {
-                success = true;
-                message.setId(msgId);
-            }
-        } catch (SQLException ex) {
+     stmt.setInt(1, acceptId);
+     stmt.setInt(2, personId);
+     stmt.setInt(3, personId);
+     rs = stmt.executeQuery();
+     if (rs.next()) {
+     Post post = new Post(rs.getInt("post_id"), rs.getString("post_name"), rs.getInt("post_person_id"), rs.getString("post_person_user_name"));
+     accept = new Accept(rs.getInt("id"), post, rs.getInt("person_id"), rs.getString("person_user_name"), rs.getInt("active"), rs.getTimestamp("create_date"));
+     }
+     } catch (SQLException ex) {
+     } finally {
+     attemptClose(conn, stmt, rs);
+     }
+     return accept;
+     }
 
-        } finally {
-            attemptClose(stmt);
-            attemptClose(conn);
-        }
-        return success;
-    }
+     public boolean addMessage(Message message) {
+     Connection conn = null;
+     PreparedStatement stmt = null;
+     boolean success = false;
+     try {
+     conn = dataSource.getConnection();
+     stmt = conn.prepareStatement("INSERT INTO `Message` (`accept_id`, `from_id`, `to_id`, `text`, `read`, `create_date`) VALUES(?,?,?,?,?,?)");
 
-    public ArrayList<Post> getExpiredActivePosts() {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        ArrayList<Post> posts = null;
-        try {
-            conn = dataSource.getConnection();
-            //change finish_date property
-            stmt = conn.prepareStatement("SELECT id FROM `Post` WHERE active=1 AND finish_date < NOW()");
+     stmt.setInt(1, message.getAcceptId());
+     stmt.setInt(2, message.getFromId());
+     stmt.setInt(3, message.getToId());
+     stmt.setString(4, message.getText());
+     stmt.setBoolean(5, message.isRead());
+     stmt.setTimestamp(6, message.getCreateDate());
+     int msgId = stmt.executeUpdate();
+     if (msgId != 0) {
+     success = true;
+     message.setId(msgId);
+     }
+     } catch (SQLException ex) {
 
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                posts = new ArrayList<Post>();
-                do {
-                    Post p = new Post(rs.getInt("id"), null, 0, null);
-                    posts.add(p);
-                } while (rs.next());
-            }
-        } catch (SQLException ex) {
+     } finally {
+     attemptClose(stmt);
+     attemptClose(conn);
+     }
+     return success;
+     }
 
-        } finally {
-            attemptClose(conn, stmt, rs);
-        }
-        return posts;
-    }
+     public ArrayList<Post> getExpiredActivePosts() {
+     Connection conn = null;
+     PreparedStatement stmt = null;
+     ResultSet rs = null;
+     ArrayList<Post> posts = null;
+     try {
+     conn = dataSource.getConnection();
+     //change finish_date property
+     stmt = conn.prepareStatement("SELECT id FROM `Post` WHERE active=1 AND finish_date < NOW()");
 
-    public ArrayList<Accept> getAcceptsOfPost(Post post) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        ArrayList<Accept> accepts = null;
-        try {
-            conn = dataSource.getConnection();
-            //change finish_date property
-            stmt = conn.prepareStatement("SELECT Accept.id AS accept_id, Person.id AS person_id "
-                    + "FROM Accept "
-                    + "JOIN Post ON Accept.post_id = Post.id "
-                    + "JOIN Person ON Accept.person_id = Person.id "
-                    + "WHERE Post.id =?");
-            stmt.setInt(1, post.getId());
+     rs = stmt.executeQuery();
+     if (rs.next()) {
+     posts = new ArrayList<Post>();
+     do {
+     Post p = new Post(rs.getInt("id"), null, 0, null);
+     posts.add(p);
+     } while (rs.next());
+     }
+     } catch (SQLException ex) {
 
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                accepts = new ArrayList<Accept>();
-                do {
-                    Accept a = new Accept(rs.getInt("accept_id"), post, rs.getInt("person_id"), null, 1, null);
-                    accepts.add(a);
-                } while (rs.next());
-            }
-        } catch (SQLException ex) {
+     } finally {
+     attemptClose(conn, stmt, rs);
+     }
+     return posts;
+     }
 
-        } finally {
-            attemptClose(conn, stmt, rs);
-        }
-        return accepts;
-    }
+     public ArrayList<Accept> getAcceptsOfPost(Post post) {
+     Connection conn = null;
+     PreparedStatement stmt = null;
+     ResultSet rs = null;
+     ArrayList<Accept> accepts = null;
+     try {
+     conn = dataSource.getConnection();
+     //change finish_date property
+     stmt = conn.prepareStatement("SELECT Accept.id AS accept_id, Person.id AS person_id "
+     + "FROM Accept "
+     + "JOIN Post ON Accept.post_id = Post.id "
+     + "JOIN Person ON Accept.person_id = Person.id "
+     + "WHERE Post.id =?");
+     stmt.setInt(1, post.getId());
 
-    public void addActivity(int personId, int acceptId, int postId, int type, int active) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        try {
-            conn = dataSource.getConnection();
-            //change finish_date property
-            stmt = conn.prepareStatement("INSERT INTO Activity2 (`person_id`, `accept_id`, `post_id`, `type`, `active`, `create_date`) "
-                    + "VALUES(?,?,?,?,?,NOW())");
-            stmt.setInt(1, personId);
-            stmt.setInt(2, acceptId);
-            stmt.setInt(3, postId);
-            stmt.setInt(4, type);
-            stmt.setInt(5, active);
+     rs = stmt.executeQuery();
+     if (rs.next()) {
+     accepts = new ArrayList<Accept>();
+     do {
+     Accept a = new Accept(rs.getInt("accept_id"), post, rs.getInt("person_id"), null, 1, null);
+     accepts.add(a);
+     } while (rs.next());
+     }
+     } catch (SQLException ex) {
 
-            stmt.execute();
+     } finally {
+     attemptClose(conn, stmt, rs);
+     }
+     return accepts;
+     }
 
-        } catch (SQLException ex) {
-        } finally {
-            attemptClose(stmt);
-            attemptClose(conn);
-        }
-    }
+     public void addActivity(int personId, int acceptId, int postId, int type, int active) {
+     Connection conn = null;
+     PreparedStatement stmt = null;
+     try {
+     conn = dataSource.getConnection();
+     //change finish_date property
+     stmt = conn.prepareStatement("INSERT INTO Activity2 (`person_id`, `accept_id`, `post_id`, `type`, `active`, `create_date`) "
+     + "VALUES(?,?,?,?,?,NOW())");
+     stmt.setInt(1, personId);
+     stmt.setInt(2, acceptId);
+     stmt.setInt(3, postId);
+     stmt.setInt(4, type);
+     stmt.setInt(5, active);
 
-    public void deactivatePost(Post p) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        try {
-            conn = dataSource.getConnection();
-            //change finish_date property
-            stmt = conn.prepareStatement("UPDATE Post SET active = 0 WHERE id = ?");
-            stmt.setInt(1, p.getId());
+     stmt.execute();
 
-            stmt.execute();
+     } catch (SQLException ex) {
+     } finally {
+     attemptClose(stmt);
+     attemptClose(conn);
+     }
+     }
 
-        } catch (SQLException ex) {
-        } finally {
-            attemptClose(stmt);
-            attemptClose(conn);
-        }
-    }
-*/
+     public void deactivatePost(Post p) {
+     Connection conn = null;
+     PreparedStatement stmt = null;
+     try {
+     conn = dataSource.getConnection();
+     //change finish_date property
+     stmt = conn.prepareStatement("UPDATE Post SET active = 0 WHERE id = ?");
+     stmt.setInt(1, p.getId());
 
+     stmt.execute();
+
+     } catch (SQLException ex) {
+     } finally {
+     attemptClose(stmt);
+     attemptClose(conn);
+     }
+     }
+     */
     static void attemptClose(Connection c, Statement s, ResultSet r) {
         attemptClose(r);
         attemptClose(s);
@@ -410,7 +409,7 @@ public class DatabaseService {
                 o.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.toString());
         }
     }
 
@@ -420,7 +419,7 @@ public class DatabaseService {
                 o.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.toString());
         }
     }
 
@@ -430,7 +429,7 @@ public class DatabaseService {
                 o.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.toString());
         }
     }
 }

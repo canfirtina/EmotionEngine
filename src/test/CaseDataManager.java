@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
@@ -32,7 +33,6 @@ public class CaseDataManager {
     static String currentUser;
 
     public static void main(String[] args) {
-        System.out.println("current=");
         testDataManager();
 
     }
@@ -40,7 +40,13 @@ public class CaseDataManager {
     public static void testDataManager() {
         DataManager dm = DataManager.getInstance();
         System.out.println(dm.getCurrentUser().getName());
-        //dm.addUserDirectory("ayhuntekat@gmail.com");
+        dm.setCurrentUser("ayhun");        
         User u = dm.getCurrentUser();
+        u = dm.getUser("emcail");
+        ArrayList<User> us = dm.getAllUsers();
+        if(dm.checkUserExist("ayhun")){
+            dm.setCurrentUser("emcail");
+        }
+        u=dm.getCurrentUser();
     }
 }
