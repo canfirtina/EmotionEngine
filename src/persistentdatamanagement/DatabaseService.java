@@ -209,11 +209,10 @@ public class DatabaseService {
             con.setAutoCommit(false); //transaction block start            
 
             st = con.createStatement();
-            // deletion will be cascaded to other tables
-            st.executeUpdate("delete from `emotion_db`.`users` where email = '" + u.getName() + "';");
-            currentUser = "insert into users values ('" + u.getName() + "','" + u.getPass() + "');";
+            st.executeUpdate("INSERT INTO users (email, password) VALUES ('"+u.getName()+"', '"+u.getPass()+"') ON DUPLICATE KEY UPDATE password = '"+u.getPass()+"';");
 
             if (!u.getEnabledSensors().isEmpty()) {
+                st.executeUpdate("DELETE FROM `emotion_db`.`enabled_sensors` WHERE email = '"+u.getName()+"';");
                 for (String key : u.getEnabledSensors().keySet()) {
                     if(u.getEnabledSensors().get(key))
                         st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','1');");
@@ -223,12 +222,14 @@ public class DatabaseService {
             }
 
             if (!u.getGamesPlayed().isEmpty()) {
-                for (String key : u.getEnabledSensors().keySet()) {
-                    st.executeUpdate("INSERT INTO `emotion_db`.`games_played` VALUES('" + u.getName() + "','" + key + "','" + u.getGamesPlayed().get(key) + "');");
+                st.executeUpdate("DELETE FROM `emotion_db`.`games_played` WHERE email = '"+u.getName()+"';");
+                for (String key : u.getGamesPlayed().keySet()) {
+                    st.executeUpdate("INSERT INTO `emotion_db`.`games_played` VALUES('" + u.getName() + "','" + key + "'," + u.getGamesPlayed().get(key) + ");");
                 }
             }
 
             if (!u.getPlayCount().isEmpty()) {
+                st.executeUpdate("DELETE FROM `emotion_db`.`play_count` WHERE email = '"+u.getName()+"';");
                 for (Pair<String, String> key : u.getPlayCount().keySet()) {
                     st.executeUpdate("INSERT INTO `emotion_db`.`play_count` VALUES('" + u.getName() + "','" + key.getKey() + "','" + key.getValue() + "','" + u.getPlayCount().get(key) + "');");
                 }
