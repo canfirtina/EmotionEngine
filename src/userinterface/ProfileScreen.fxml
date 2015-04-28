@@ -29,6 +29,7 @@
                      </font>
                   </Label>
                   <Button fx:id="refreshButton" layoutX="670.0" layoutY="8.0" mnemonicParsing="false" onAction="#refreshButtonPressed" text="Refresh" />
+                  <Button fx:id="connectButton" layoutX="595.0" layoutY="8.0" mnemonicParsing="false" onAction="#connectButtonPressed" text="Connect" />
                </children>
             </Pane>
             <HBox VBox.vgrow="ALWAYS">
@@ -37,14 +38,14 @@
                      <content>
                         <VBox>
                            <children>
-                              <ListView fx:id="sensorList" editable="true" onEditStart="#editTriggered" />
+                              <ListView fx:id="sensorList" editable="true" onEditCommit="#sensorListEditTriggered" />
                            </children>
                         </VBox>
                      </content>
                   </ScrollPane>
                   <ScrollPane HBox.hgrow="ALWAYS">
                      <content>
-                        <ListView fx:id="tutorialList" />
+                        <ListView fx:id="tutorialList" editable="true" onEditStart="#tutorialEditTriggered" />
                      </content>
                   </ScrollPane>
                   <ScrollPane HBox.hgrow="ALWAYS">
