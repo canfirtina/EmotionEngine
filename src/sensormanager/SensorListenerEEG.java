@@ -1,7 +1,6 @@
 package sensormanager;
 
 import gnu.io.*;
-import jdk.nashorn.internal.codegen.CompilerConstants;
 import shared.TimestampedRawData;
 
 import java.io.IOException;
@@ -89,7 +88,7 @@ public class SensorListenerEEG extends SensorListener {
             outputStream = serialPort.getOutputStream();
             serialPort.enableReceiveTimeout(RECEIVE_TIMEOUT);
 
-            executorReader.submit(new ConnectionInitiator());
+            sendReset();
 
         } catch (Exception e) {
             notifyObserversConnectionFailed();
@@ -138,7 +137,7 @@ public class SensorListenerEEG extends SensorListener {
      * Resets OpenBCI board to default state
      */
     public void sendReset() {
-        writeBytes(CODE_RESET);
+        executorReader.submit(new ConnectionInitiator());
     }
 
     /**
@@ -172,21 +171,18 @@ public class SensorListenerEEG extends SensorListener {
     }
 
     protected void notifyObserversConnectionEstablished() {
-        System.out.println("connection established");
         for (SensorObserver observer : observerCollection) {
             observer.connectionEstablished(this);
         }
     }
 
     protected void notifyObserversConnectionFailed() {
-        System.out.println("connection fail");
         for (SensorObserver observer : observerCollection) {
             observer.connectionFailed(this);
         }
     }
 
     protected void notifyObserversConnectionError() {
-        System.out.println("connection error");
         for (SensorObserver observer : observerCollection) {
             observer.connectionError(this);
         }
@@ -239,7 +235,6 @@ public class SensorListenerEEG extends SensorListener {
                     }
                     lastCommandSendTime = System.currentTimeMillis();
                     outputStream.write(bytes);
-                    System.out.println("written bytes: " + Arrays.toString(bytes));
                     return null;
                 }
             });
@@ -260,7 +255,6 @@ public class SensorListenerEEG extends SensorListener {
 
         @Override
         public Void call() {
-            System.out.println("interpreter enter");
             try {
                 byte[] buffer = new byte[BUFFER_SIZE];
                 byte[] packet = new byte[MESSAGE_LENGTH];
@@ -268,7 +262,7 @@ public class SensorListenerEEG extends SensorListener {
                 int index = 0;
                 int len;
 
-                while ((len = inputStream.read(buffer)) > -1) { //TODO -1 / 0
+                while ((len = inputStream.read(buffer)) > -1) {
 
                     if(len == 0)
                         throw new IOException();
@@ -286,9 +280,6 @@ public class SensorListenerEEG extends SensorListener {
                                 TimestampedRawData tsrd = new TimestampedRawData(convertData(rawdata, MESSAGE_LENGTH - 2));
 
                                 if (dataEpocher.addData(tsrd) == false) {
-                                    // print last received data for debug debug
-                                    System.out.println("last data of this epoch: " + Arrays.toString(convertData(rawdata,MESSAGE_LENGTH-2)));
-                                    System.out.println(System.currentTimeMillis());
                                     lastEpoch = dataEpocher.getEpoch();
                                     dataEpocher.reset();
                                     dataEpocher.addData(tsrd);
@@ -308,7 +299,6 @@ public class SensorListenerEEG extends SensorListener {
             synchronized (lockStreaming) {
                 streamingOn = false;
             }
-            System.out.println("interpreter exit");
             return null;
         }
 
@@ -379,7 +369,6 @@ public class SensorListenerEEG extends SensorListener {
     private class ConnectionInitiator implements Callable<Void> {
         @Override
         public Void call() {
-            System.out.println("initiator enter");
             byte[] buffer = new byte[BUFFER_SIZE];
             int len;
 
@@ -396,7 +385,6 @@ public class SensorListenerEEG extends SensorListener {
                     }
                     if (waitingCount > 4) {
                         notifyObserversConnectionFailed();
-                        System.out.println("initiator exit");
                         return null;
                     }
 
@@ -411,7 +399,6 @@ public class SensorListenerEEG extends SensorListener {
                     }
                     if(responseString.endsWith("$$$")) {
                         setAndNotifyConnectionEstablished();
-                        System.out.println("initiator exit");
                         return null;
                     }
                 }
@@ -419,7 +406,6 @@ public class SensorListenerEEG extends SensorListener {
                 e.printStackTrace();
             }
             notifyObserversConnectionFailed();
-            System.out.println("initiator exit");
             return null;
         }
 
@@ -430,7 +416,7 @@ public class SensorListenerEEG extends SensorListener {
         @Override
         public Void call() throws Exception {
             int len;
-            String response = ""
+            String response = "";
             byte[] buffer = new byte[BUFFER_SIZE];
             while( (len=inputStream.read(buffer)) > -1 ) {
                 for (int i = 0; i < len; i++) {
