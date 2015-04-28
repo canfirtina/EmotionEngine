@@ -363,7 +363,7 @@ public class CaseEEG {
 	
 	public void testMustafa(){
 		String classifierClassPath = "weka.classifiers.functions.SMO";
-		String[] options = {"-N", "2"};
+		String[] options =  {"-N", "1"};
 		
 		String arffPath = "test/mustafa/ARFF/";
 		String all = "mustafatrainingall.arff";
@@ -437,8 +437,8 @@ public class CaseEEG {
 		
 		
 		//new CaseEEG().testAli();
-		new CaseEEG().testCan();
-		//new CaseEEG().testMustafa();
+		//new CaseEEG().testCan();
+		new CaseEEG().testMustafa();
 		//new CaseEEG().testAyhun();
 	}
 }
