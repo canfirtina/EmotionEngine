@@ -34,12 +34,6 @@ public class SensorListenerHR extends SensorListener {
     }
 
     @Override
-    public int getFrequency() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
     public boolean isConnected() {
         // TODO Auto-generated method stub
         return false;
