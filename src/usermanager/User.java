@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import javafx.util.Pair;
-import shared.Tutorial;
 
 /**
  * Class that is used for storing User related data. Implements "Serializable"
@@ -15,7 +14,7 @@ public class User implements Serializable {
     private String userName;
     private String password;
     private HashMap<String, Boolean> enabledSensors;
-    private HashMap<Pair<String, Tutorial>, Integer> playCount;
+    private HashMap<Pair<String, String>, Integer> playCount;
     private HashMap<String, Integer> gamesPlayed;
 
     /**
@@ -28,7 +27,7 @@ public class User implements Serializable {
         this.userName = userName;
         this.password = password;
         enabledSensors = new HashMap<>();
-        playCount = new HashMap<Pair<String, Tutorial>, Integer>();
+        playCount = new HashMap<Pair<String, String>, Integer>();
         gamesPlayed = new HashMap<>();
     }
 
@@ -52,6 +51,10 @@ public class User implements Serializable {
      */
     public String getName() {
         return this.userName;
+    }
+    
+    public String getPass(){
+        return password;
     }
 
     /**
@@ -102,7 +105,7 @@ public class User implements Serializable {
         return false;
     }
 
-    public void playedTutorial(Pair<String, Tutorial> sen_tut) {
+    public void playedTutorial(Pair<String, String> sen_tut) {
         if (playCount.containsKey(sen_tut)) {
             playCount.replace(sen_tut, 1 + playCount.get(sen_tut));
         } else {
@@ -110,7 +113,7 @@ public class User implements Serializable {
         }
     }
 
-    public int getTutorialPlayCount(Pair<String, Tutorial> sen_tut) {
+    public int getTutorialPlayCount(Pair<String, String> sen_tut) {
         return playCount.get(sen_tut);
     }
 
@@ -133,5 +136,17 @@ public class User implements Serializable {
         }
 
         return hours + "h " + minutes + "m";
+    }
+    
+    public HashMap<String, Boolean> getEnabledSensors() {
+        return enabledSensors;
+    }
+
+    public HashMap<Pair<String, String>, Integer> getPlayCount() {
+        return playCount;
+    }
+
+    public HashMap<String, Integer> getGamesPlayed() {
+        return gamesPlayed;
     }
 }
