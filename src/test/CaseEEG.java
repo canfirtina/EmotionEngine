@@ -35,6 +35,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffLoader.ArffReader;
+import emotionlearner.classifier.EEGClassifier;
+import weka.classifiers.functions.SMO;
+import weka.classifiers.meta.CVParameterSelection;
+import weka.core.Utils;
 
 public class CaseEEG {
 	private String testFolderPath = "test/Test/";
@@ -70,6 +74,7 @@ public class CaseEEG {
 	/**
 	 * concurrency test
 	 */
+	/*
 	public void runtest5() {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		Callable<Integer> callable = new Callable<Integer>(){
@@ -95,6 +100,7 @@ public class CaseEEG {
 	 * same with runtest3 but demonstrates time based epocher
 	 * @throws Exception
 	 */
+	/*
 	public void runtest4() throws Exception{
 		String fullPath = csvPath+csvFileNamesWithoutExtension[0]+".csv";
 		File outFile = new File(projectCSVPath+"time"+csvFileNamesWithoutExtension[0]+".csv");
@@ -140,6 +146,7 @@ public class CaseEEG {
 	 * reads csv file, epochs, extracts features, writes to csv file (without feature selection) (length based epoc)
 	 * @throws Exception
 	 */
+	/*
 	public void runtest3() throws Exception {
 		String fullPath = csvPath+csvFileNamesWithoutExtension[0]+".csv";
 		File outFile = new File(projectCSVPath+csvFileNamesWithoutExtension[0]+".csv");
@@ -172,11 +179,12 @@ public class CaseEEG {
 		}
 		pw.close();
 	}
-	
+	*/
 	/**
 	 * Training a dataset and test instances one by one
 	 * @throws Exception
 	 */
+	/*
 	public void runtest2() throws Exception{
 		ArffLoader trainLoader= new ArffLoader();
 		trainLoader.setFile(new File(trainFolderPath + trainFolderPath + "cantrainingFrustrated2Out.arff"));
@@ -199,11 +207,12 @@ public class CaseEEG {
 			System.out.println("Prediction:" + prediction + " Actual:" + instance.classValue());
 		}
 	}
-	
+	*/
 	/**
 	 * Training a dataset and test instances as a whole and getting accuracy
 	 * @throws Exception
 	 */
+	/*
 	public void runtest1() throws Exception {
 //		String fileName = "can - frustrated2 - cat mario 2.csv";
 //		CSVParser.write( "f" + fileName, EEGFeatureExtractor.extractFeatures(CSVParser.read(fileName)));
@@ -277,7 +286,7 @@ public class CaseEEG {
 		user = um.getCurrentUser();
 
 	}
-	
+	*/
 	public void crossVal(String path, String classPath, String[] options){
 		try {
 			EEGClassifier svmClassifier = new EEGClassifier();
@@ -333,9 +342,9 @@ public class CaseEEG {
 		}
 	}
 	
-	public void testCan(){
+	public void testCan(String[] options){
 		String classifierClassPath = "weka.classifiers.functions.SMO";
-		String[] options = {"-N", "2"};
+		//String[] options = {"-N", "2"};
 		
 		String arffPath = "test/can/ARFF/";
 		String all = "cantrainingall.arff";
@@ -344,8 +353,8 @@ public class CaseEEG {
 									"fcan - disgusting3 - 8.arff",
 									"fcan - disgusting4 - 9.arff",
 									"fcan - disgusting5 - 10.arff",
-									"fcan - disgusting6 - 9.arff",
-									"fcan - disgusting7 - 10.arff",
+									//"fcan - disgusting6 - 9.arff",
+									//"fcan - disgusting7 - 10.arff",
 									"fcan - frustrated1 - cat mario.arff",
 									"fcan - frustrated2 - cat mario 2.arff",
 									"fcan - peaceful1 - 9.arff",
@@ -429,6 +438,28 @@ public class CaseEEG {
 	
 	public static void main(String[] args) throws Exception{
 		/**
+		 * parameter selection
+		 */
+		/*
+		ArffLoader loader = new ArffLoader();
+		loader.setFile(new File("test/can/ARFF/cantrainingall.arff"));
+		Instances instances = loader.getDataSet();
+		instances.setClassIndex(instances.numAttributes()-1);
+		
+		Classifier base = new SMO();
+		base.setOptions(new String[]{"-N", "2"});
+		
+		//String[] opts = {"C 2 8 4"};
+		CVParameterSelection parameters = new CVParameterSelection();
+		parameters.setClassifier(base);
+		parameters.addCVParameter("C 2 8 4");
+		parameters.setNumFolds(10);
+		parameters.buildClassifier(instances);
+		System.out.println(Utils.joinOptions(parameters.getBestClassifierOptions()));
+		*/
+		
+		
+		/**
 		 * Can different day
 		 */
 		/*
@@ -440,10 +471,10 @@ public class CaseEEG {
 		svmClassifier.test( "test/can/ARFF/fcan - disgusting7 - 10.arff");
 		*/
 		
-		
+		//
 		//new CaseEEG().testAli();
-		//new CaseEEG().testCan();
-		new CaseEEG().testMustafa();
+		//new CaseEEG().testCan(new String[]{"-C", "4", "-N","2"});
+		//new CaseEEG().testMustafa();
 		//new CaseEEG().testAyhun();
 	}
 }

@@ -12,6 +12,7 @@ nb-configuration.xml
 *.aird
 *.uml
 .project
+src/emotionlearner/classifier/EEGClassifier.java
 
 src/test/TestMain.java
 lib/gsr/gsr.ino
