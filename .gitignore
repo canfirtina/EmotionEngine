@@ -36,3 +36,7 @@ hs_err_pid*
 /.settings/
 /.idea/
 /User Data/
+
+#intellij
+EmotionEngine.iml
+
