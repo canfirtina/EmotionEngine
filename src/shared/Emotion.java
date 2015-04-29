@@ -29,7 +29,7 @@ public enum Emotion {
 		return labels;
 	}
 	
-	Emotion(int val){
+	private Emotion(int val){
 		value = val;
 	}
 	

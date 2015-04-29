@@ -285,14 +285,14 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					SensorListener listener = null;
 					
 					if(sensorType.equals(SensorListenerEEG.class))
-						listener = new SensorListenerEEG("COM4");
+						listener = new SensorListenerEEG(comPort);
 					
 					listener.registerObserver(engine);
 					
 					synchronized(sensorLocker){
 						pendingSensorListeners.add(listener);
 					}
-					//listener.connect();
+					listener.connect();
 
 					return null;
 				}
@@ -413,7 +413,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 						sessionTrainingFeatures.registerSensorListener(sensor);
 					}
 					
-					//sensor.startStreaming();
+					sensor.startStreaming();
 					
 					notifyEngineObservers();
 					

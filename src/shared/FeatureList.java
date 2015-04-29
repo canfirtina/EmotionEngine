@@ -46,10 +46,6 @@ public class FeatureList {
 			features.setValue(i, featuresArray[i]);
 		this.featureAttributes = featureAttributes;
 		
-//		for(int i=0;i<featuresArray.length;++i)
-//			System.out.print(features.value(i)+ " ");
-//		System.out.println("");
-		
 		this.timestamp = new Timestamp(0);
     }
 	
@@ -73,7 +69,6 @@ public class FeatureList {
     public FeatureList(double[] featuresArray, FastVector featureAttributes, Emotion emotion){
     	this(featuresArray, featureAttributes);
     	this.emotion = emotion;
-		//features.setValue((Attribute)featureAttributes.elementAt(featureAttributes.size()-1), emotion.name());
     }
     
     public int size(){
@@ -94,7 +89,6 @@ public class FeatureList {
     
     public void setEmotion(Emotion emotion){
     	this.emotion = emotion;
-		//features.setValue((Attribute)featureAttributes.elementAt(featureAttributes.size()-1), emotion.name());
     }
     
     public Emotion getEmotion(){

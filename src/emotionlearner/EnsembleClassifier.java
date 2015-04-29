@@ -100,7 +100,6 @@ public class EnsembleClassifier {
 
 								double[] dist =  classifier.distributionForInstance(instance);
 								double val = classifier.classifyInstance(instance);
-								System.out.println(instance.classAttribute().value((int)val));
 								if(resDist==null)
 									resDist = dist;
 								else {
@@ -116,7 +115,6 @@ public class EnsembleClassifier {
 						}
 					}
 
-					System.out.println("classified");
 					for(int i=0;i<resDist.length;++i)
 						System.out.println(resDist[i]+ " ");
 					System.out.println();
@@ -162,7 +160,6 @@ public class EnsembleClassifier {
 			executorService.execute(new Runnable() {
 				@Override
 				public void run() {
-					System.out.println("train");
 					trainController = featureController;
 					try {
 						if(!featureController.getSensorListeners().contains(sensorListener))
@@ -186,11 +183,9 @@ public class EnsembleClassifier {
 						if(features.isEmpty())
 							return;
 
-						System.out.println("train inside");
 						//create weka Instances
 						Instances instances = new Instances("instances "+sensorListener.toString(), features.get(0).getFeatureAttributes(), features.size());
 						instances.setClassIndex(instances.numAttributes()-1);
-						System.out.println("train inside class set");
 
 						//save instances for the testing
 						dataSets.put(sensorListener, instances);
@@ -203,13 +198,10 @@ public class EnsembleClassifier {
 							instance.setValue((Attribute)attributes.elementAt(attributes.size()-1), features.get(i).getEmotion().name());
 							instances.add(instance);
 						}
-						System.out.println("before built");
 						model.buildClassifier(instances);
-						System.out.println("built");
 
 					} catch (Exception ex) {
-						System.out.println("EX:" + ex.getMessage());
-						System.out.println("EX:" + ex.getLocalizedMessage());
+						ex.printStackTrace();
 					}
 				}
 			});
@@ -219,7 +211,7 @@ public class EnsembleClassifier {
 	}
 	
 	/**
-	 * removes classifier of a sensor. should be called before sensor listener is removed from featurelistcontroller
+	 * removes classifier of a sensor. should be called before sensor listener is removed from featureListController
 	 * @param listener
 	 * @return 
 	 */

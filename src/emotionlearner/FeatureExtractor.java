@@ -58,7 +58,7 @@ public abstract class FeatureExtractor {
 	protected abstract double[] selectFeatures(double[] features);
 	
 	/**
-	 * Clears raw data for reusage
+	 * Clears raw data for re-usage
 	 */
 	public void reset(){
 		rawData = new ArrayList<TimestampedRawData>();
