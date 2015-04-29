@@ -278,6 +278,8 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	@Override
 	public void createSensorListener(String comPort, 
 			final Class sensorType) {
+            
+            System.out.println(comPort + " " + sensorType.toString());
 		synchronized (executorLocker) {
 			executorService.submit(new Callable<Void>() {
 				@Override
@@ -442,7 +444,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 						pendingSensorListeners.remove(sensor);
 					}
 					notifyEngineObservers();
-					
+					                               System.out.println("failed");
 					return null;
 				}
 			});

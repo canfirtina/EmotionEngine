@@ -151,11 +151,6 @@ class TestSensorListener extends sensormanager.SensorListener{
 	}
 
 	@Override
-	public int getFrequency() {
-		return 0;
-	}
-
-	@Override
 	public boolean isConnected() {
 		return true;
 	}

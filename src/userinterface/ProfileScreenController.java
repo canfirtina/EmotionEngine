@@ -5,30 +5,30 @@
  */
 package userinterface;
 
+import emotionlearner.EmotionEngine;
+import emotionlearner.EmotionEngineObserver;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.image.ImageView;
-import emotionlearner.EmotionEngine;
-import emotionlearner.EmotionEngineObserver;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.ListView.EditEvent;
+import javafx.scene.control.cell.ComboBoxListCell;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import sensormanager.*;
@@ -53,22 +53,44 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     private ListView<String> activityList;
     @FXML
     private Button refreshButton;
+    @FXML
+    private Button connectButton;
     
     PresentingController presentingController;
+    
+    ArrayList<SensorListener> connectedSensors;
+    ArrayList<SensorListener> pendingSensors;
+    HashMap<String, Class> sensorsOnSerialPorts;
+    ArrayList<String> availableSerialPorts;
     
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        ObservableList<String> names = FXCollections.observableArrayList("");
-        sensorList.setItems(names);
-        tutorialList.setItems(names);
-        activityList.setItems(names);
+        
+        sensorsOnSerialPorts = new HashMap<String, Class>();
+        
+        ObservableList<String> sensorNames = FXCollections.observableArrayList(
+                new SensorListenerEEG(null).toString(),
+                new SensorListenerGSR(null).toString(),
+                new SensorListenerHR(null).toString());
+        
+        sensorList.setCellFactory(ComboBoxListCell.forListView(sensorNames));
+        
+        ObservableList<String> tutorials = FXCollections.observableArrayList("Disgusting1", "Disgusting2");
+        tutorialList.setItems(tutorials);
+        
+        ObservableList<String> activities = FXCollections.observableArrayList("");
+        activityList.setItems(activities);
+        
+        sensorList.setEditable( true);
+        tutorialList.setEditable(true);
+        
+        connectButton.setDisable(true);
         
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
         engine.registerObserver(this);
-        
     }
 
     @Override
@@ -80,15 +102,25 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @FXML
     private void refreshButtonPressed( ActionEvent event){
         
-        ObservableList<String> sensors = FXCollections.observableArrayList("Sensor1");
-        sensorList.setItems(sensors);
-//        updateSensorList();
+        availableSerialPorts = new ArrayList<String>();
+        availableSerialPorts.addAll(Arrays.asList(sensormanager.COMPortListener.getConnectedPorts()));
+        
+        sensorList.setItems(FXCollections.observableArrayList(availableSerialPorts));
+        
+        if( sensorList.getItems().size() == 0)
+            return;
+        
+        connectButton.setDisable(false);
     }
     
     @FXML
-    private void editTriggered( EditEvent event){
+    private void connectButtonPressed( ActionEvent event){
         
-        //System.out.println(sensorList.getItems().get(event.getIndex()));
+        updateSensorList();
+    }
+    
+    @FXML
+    private void tutorialEditTriggered( EditEvent event){
         
         Parent root;
         try {
@@ -103,47 +135,61 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         }
     }
     
+    @FXML
+    private void sensorListEditTriggered( EditEvent event){
+        
+        String key = availableSerialPorts.get(event.getIndex());
+        String value = event.getNewValue().toString();
+        
+        if( value.equalsIgnoreCase(new SensorListenerEEG(null).toString()))
+            sensorsOnSerialPorts.put(key, SensorListenerEEG.class);
+        else if( value.equalsIgnoreCase(new SensorListenerGSR(null).toString()))
+            sensorsOnSerialPorts.put(key, SensorListenerGSR.class);
+        else if( value.equalsIgnoreCase(new SensorListenerHR(null).toString()))
+            sensorsOnSerialPorts.put(key, SensorListenerHR.class);
+        
+        sensorList.getItems().set(event.getIndex(), key + " - " + value);
+    }
+            
     private void updateSensorList(){
-        
-        HashMap<String, Class> availablePorts = sensormanager.COMPortListener.getConnectedPorts();
-        
+                
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
         
-        ArrayList<SensorListener> connectedSensors = engine.getConnectedSensors();
-        ArrayList<SensorListener> pendingSensors = engine.getPendingSensors();
+        connectedSensors = engine.getConnectedSensors();
+        pendingSensors = engine.getPendingSensors();
         
         ObservableList<String> sensors = FXCollections.observableArrayList();
         
         for( SensorListener sensor : connectedSensors)
-            sensors.add(sensor.toString() + "-Connected");
+            sensors.add(sensor.getSerialPort() + "-" + sensor.toString() + "-Connected");
         
         for( SensorListener sensor : pendingSensors)
-            sensors.add(sensor.toString() + "-Pending");
+            sensors.add(sensor.getSerialPort() + "-" + sensor.toString() + "-Pending");
         
         sensorList.setItems(sensors);
         
-        for(String key : availablePorts.keySet()){
-            Class c = availablePorts.get(key);
+        for(String key : sensorsOnSerialPorts.keySet()){
             boolean found = false;
             for(SensorListener l : connectedSensors)
-                if(l.getClass() == c){
+                if(l.getSerialPort() == key){
                     found = true;
                     break;
                 }
             for(SensorListener l : pendingSensors)
-                if(l.getClass() == c){
+                if(l.getSerialPort() == key){
                     found = true;
                     break;
                 }
-            if( !found)
-                engine.createSensorListener(key, c);
+            if( !found){
+                engine.createSensorListener(key, sensorsOnSerialPorts.get(key));
+            }
         }
     }
     
     @Override
     public void notify(EmotionEngine engine) {
         
-        System.out.println("notified");
+        //System.out.println("notified");
         updateSensorList();
     }
 }

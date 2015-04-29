@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class SensorListenerHR extends SensorListener {
 
-    public SensorListenerHR(int portNumber) {
+    public SensorListenerHR(String comPort) {
         // TODO Auto-generated constructor stub
     }
 
@@ -31,12 +31,6 @@ public class SensorListenerHR extends SensorListener {
     public List<TimestampedRawData> getSensorData() {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public int getFrequency() {
-        // TODO Auto-generated method stub
-        return 0;
     }
 
     @Override
@@ -76,6 +70,6 @@ public class SensorListenerHR extends SensorListener {
     @Override
     public String toString(){
         
-        return "HR";
+        return "Heart Rate";
     }
 }

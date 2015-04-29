@@ -1,5 +1,6 @@
 package test;
 
+import emotionlearner.TimeBasedDataEpocher;
 import sensormanager.SensorListenerEEG;
 
 import java.util.Scanner;
@@ -11,9 +12,12 @@ public class EEGListenerTest {
 
     public static void main(String[] args) throws InterruptedException {
         SensorListenerEEG eeg = new SensorListenerEEG("COM4");
+        TimeBasedDataEpocher de = new TimeBasedDataEpocher(4000);
+        eeg.setDataEpocher(de);
         eeg.connect();
-
-        Scanner scanner = new Scanner(System.in);
+        while(!eeg.isConnected()) {
+            Thread.sleep(1000);
+        }
         eeg.startStreaming();
         Thread.sleep(2000);
         eeg.setChannelState(0, false);

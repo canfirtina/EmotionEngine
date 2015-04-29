@@ -158,7 +158,7 @@ public class UserManager {
      *
      * @param tutPair
      */
-    public void playedTutorial(Pair<String, Tutorial> tutPair) {
+    public void playedTutorial(Pair<String, String> tutPair) {
         getCurrentUser().playedTutorial(tutPair);
         DataManager.getInstance().saveUser(getCurrentUser());
     }
@@ -170,7 +170,7 @@ public class UserManager {
      * @param tutPair
      * @return
      */
-    public int getTutorialPlayCount(Pair<String, Tutorial> tutPair) {
+    public int getTutorialPlayCount(Pair<String, String> tutPair) {
         return getCurrentUser().getTutorialPlayCount(tutPair);
     }
 }

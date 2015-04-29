@@ -6,6 +6,7 @@
 package sensormanager;
 
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import gnu.io.*;
@@ -16,24 +17,19 @@ import gnu.io.*;
  */
 public class COMPortListener {
 
-    private static HashMap<String, Class> connectedPorts = new HashMap<>();
-
-    public static HashMap<String, Class> getConnectedPorts(){
+    /**
+     * Finds a list of serial ports in computer.
+     * @return Access names of ports
+     */
+    public static String[] getConnectedPorts(){
         Enumeration identifiers = CommPortIdentifier.getPortIdentifiers();
-
+        ArrayList<String> serialPortList = new ArrayList<>();
         while(identifiers.hasMoreElements()) {
             CommPortIdentifier port = (CommPortIdentifier)identifiers.nextElement();
             if(port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-                //Class types does not mean anything, they are here just for if we could add this functionality later
-                if(port.getName().equals("COM3"))
-                    connectedPorts.put(port.getName(), SensorListenerGSR.class);
-                else
-                    connectedPorts.put(port.getName(), SensorListenerEEG.class);
-
+                serialPortList.add(port.getName());
             }
         }
-
-
-        return connectedPorts;
+        return serialPortList.toArray(new String[serialPortList.size()]);
     }
 }
