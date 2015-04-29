@@ -9,10 +9,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sensormanager.SensorListener;
-import sensormanager.SensorObserver;
+import sensormanager.listener.SensorListener;
+import sensormanager.listener.SensorObserver;
 import shared.FeatureList;
-import shared.TimestampedRawData;
+import sensormanager.data.TimestampedRawData;
 import shared.FeatureListController;
 
 /**
@@ -133,7 +133,7 @@ public class CaseFeatureListController {
 }
 
 
-class TestSensorListener extends sensormanager.SensorListener{
+class TestSensorListener extends sensormanager.listener.SensorListener{
 
 	@Override
 	public boolean connect() {

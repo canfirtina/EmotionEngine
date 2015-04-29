@@ -5,8 +5,12 @@
  */
 package userinterface;
 
-import emotionlearner.EmotionEngine;
-import emotionlearner.EmotionEngineObserver;
+import sensormanager.listener.SensorListener;
+import sensormanager.listener.SensorListenerGSR;
+import sensormanager.listener.SensorListenerEEG;
+import sensormanager.listener.SensorListenerHR;
+import emotionlearner.engine.EmotionEngine;
+import emotionlearner.engine.EmotionEngineObserver;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,8 +35,6 @@ import javafx.scene.control.cell.ComboBoxListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
-import sensormanager.*;
-import shared.ScreenInfo;
 
 /**
  * FXML Controller class
@@ -103,7 +105,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     private void refreshButtonPressed( ActionEvent event){
         
         availableSerialPorts = new ArrayList<String>();
-        availableSerialPorts.addAll(Arrays.asList(sensormanager.COMPortListener.getConnectedPorts()));
+        availableSerialPorts.addAll(Arrays.asList(sensormanager.util.SerialPortUtilities.getConnectedPorts()));
         
         sensorList.setItems(FXCollections.observableArrayList(availableSerialPorts));
         

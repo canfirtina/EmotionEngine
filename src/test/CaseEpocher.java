@@ -4,8 +4,8 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
-import shared.TimestampedRawData;
-import emotionlearner.SlidingWindowDataEpocher;
+import sensormanager.data.TimestampedRawData;
+import sensormanager.data.SlidingWindowDataEpocher;
 
 public class CaseEpocher {
 	

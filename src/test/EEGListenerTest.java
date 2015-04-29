@@ -1,7 +1,7 @@
 package test;
 
-import emotionlearner.TimeBasedDataEpocher;
-import sensormanager.SensorListenerEEG;
+import sensormanager.data.TimeBasedDataEpocher;
+import sensormanager.listener.SensorListenerEEG;
 
 import java.util.Scanner;
 

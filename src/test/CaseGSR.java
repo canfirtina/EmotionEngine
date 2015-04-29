@@ -1,9 +1,9 @@
 package test;
 
-import emotionlearner.DataEpocher;
-import emotionlearner.TimeBasedDataEpocher;
-import sensormanager.SensorListener;
-import sensormanager.SensorListenerGSR;
+import sensormanager.data.DataEpocher;
+import sensormanager.data.TimeBasedDataEpocher;
+import sensormanager.listener.SensorListener;
+import sensormanager.listener.SensorListenerGSR;
 
 /**
  * Created by Mustafa on 17.4.2015.

@@ -14,9 +14,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import shared.ScreenInfo;
-import shared.SecurityControl;
-import usermanager.UserManager;
+import user.util.SecurityControl;
+import user.manager.UserManager;
 
 /**
  * FXML Controller class
