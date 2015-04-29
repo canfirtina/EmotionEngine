@@ -157,6 +157,10 @@ public class SensorListenerEEG extends SensorListener {
         return true;
     }
 
+	public void setSensorData(List<TimestampedRawData> data){
+		lastEpoch = data;
+	}
+	
     @Override
     public List<TimestampedRawData> getSensorData() {
         return lastEpoch;

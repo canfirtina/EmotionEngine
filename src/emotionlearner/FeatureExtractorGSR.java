@@ -2,14 +2,21 @@ package emotionlearner;
 import features.linear.timeDomain.*;
 
 import shared.FeatureList;
+import weka.core.Attribute;
 /**
  * Extracts features from EEG signals
  *
  */
 public class FeatureExtractorGSR extends FeatureExtractor{
-
+	
+	/**
+	 * Constructor
+	 */
 	public  FeatureExtractorGSR() {
 		reset();	
+		totalFeatureCount = 4;
+		for(int i=0;i<totalFeatureCount;++i)
+			featureAttributes.addElement(new Attribute("att_eeg_" + i));
 	}
 	
 
@@ -20,7 +27,7 @@ public class FeatureExtractorGSR extends FeatureExtractor{
 	 */
 	@Override
 	public FeatureList getFeatures() {
-		final int numFeatures = 20;
+		final int numFeatures = totalFeatureCount;
 		
 		double[][] rawDataTransposed = new double[rawData.get(0).getData().length][rawData.size()];
 		for(int i=0;i<rawDataTransposed.length;++i)
@@ -41,7 +48,7 @@ public class FeatureExtractorGSR extends FeatureExtractor{
 				res[i * numFeatures + j] = currentFeatures[j];
 		}
 		
-		return new FeatureList(selectFeatures(res));
+		return new FeatureList(selectFeatures(res), featureAttributes);
 	}
 
 

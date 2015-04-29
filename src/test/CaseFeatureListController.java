@@ -25,7 +25,7 @@ public class CaseFeatureListController {
 	 * test last n milliseconds featureListController
 	 */
 	public void runLastTime(){
-		try {
+		/*try {
 			long timeDiff = 100;
 			
 			FeatureListController controller = new FeatureListController(timeDiff);
@@ -123,7 +123,7 @@ public class CaseFeatureListController {
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getLocalizedMessage());
 //Logger.getLogger(CaseFeatureListController.class.getName()).log(Level.SEVERE, new double[10], ex);
-		}
+		}*/
 		
 	}
 	
