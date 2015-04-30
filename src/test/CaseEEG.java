@@ -36,11 +36,17 @@ import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffLoader.ArffReader;
 import emotionlearner.classifier.EEGClassifier;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.Arrays;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.meta.CVParameterSelection;
 import weka.core.Utils;
 
 public class CaseEEG {
+	private Writer writer;
 	private String testFolderPath = "test/Test/";
 	private String trainFolderPath = "test/Training/";
 	private String csvPath = "test/CSV/";
@@ -290,28 +296,30 @@ public class CaseEEG {
 	public void crossVal(String path, String classPath, String[] options){
 		try {
 			EEGClassifier svmClassifier = new EEGClassifier();
-			svmClassifier.trainWithCrossValidation( path, classPath, options, 10);
+			if(writer!=null)
+				writer.write(svmClassifier.trainWithCrossValidation( path, classPath, options.clone(), 10) + ", ");
 		} catch (Exception ex) {
 			Logger.getLogger(CaseEEG.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 	//+"-out.arff"
-	public void testOneOut(String path, String classPath, String[] options ){
+	public double testOneOut(String path, String classPath, String[] options ){
 		try {
 			String canTrainPath = "test/can/ARFF/cantrainingall.arff";
 			String aliTrainPath = "test/ali/ARFF/alitrainingall.arff";
 			String trainPath = path + "-out.arff";
 			EEGClassifier svmClassifier = new EEGClassifier();
-			svmClassifier.train(trainPath , classPath, options);
-			svmClassifier.test( path);
+			svmClassifier.train(trainPath , classPath, options.clone());
+			return svmClassifier.test( path);
 		} catch (Exception ex) {
 			Logger.getLogger(CaseEEG.class.getName()).log(Level.SEVERE, null, ex);
 		}
+		return -1000;
 	}
 	
-	public void testAli(){
+	public void testAli(String[] options) throws IOException{
 		String classifierClassPath = "weka.classifiers.functions.SMO";
-		String[] options = {"-N", "2"};
+		//String[] options = {"-N", "2"};
 		
 		
 		String arffPath = "test/ali/ARFF/";
@@ -333,16 +341,19 @@ public class CaseEEG {
 									"fali sexy 4 8.arff"};
 		
 		
-		System.out.println("CASE--------------\nCROSS VALIDATION\n---------------\n");
-		crossVal(arffPath + all, classifierClassPath, options);
-		
+//		System.out.println("CASE--------------\nCROSS VALIDATION\n---------------\n");
+		crossVal(arffPath + all, classifierClassPath, options.clone());
+		double total = 0;
 		for(int i=0;i<names.length;++i){
-			System.out.println("CASE--------------\n"+names[i]+"\n---------------\n");
-			testOneOut(arffPath + names[i], classifierClassPath, options);
+//			System.out.println("CASE--------------\n"+names[i]+"\n---------------\n");
+			total += testOneOut(arffPath + names[i], classifierClassPath, options.clone());
 		}
+		double rate = total/names.length;
+		writer.write(""+rate);
+		System.out.println(total/names.length);
 	}
 	
-	public void testCan(String[] options){
+	public void testCan(String[] options) throws IOException{
 		String classifierClassPath = "weka.classifiers.functions.SMO";
 		//String[] options = {"-N", "2"};
 		
@@ -365,19 +376,24 @@ public class CaseEEG {
 									"fcan - sexy2 - sonlari 10.arff",
 									"fcan - sexy3 - sonlari 9.arff",
 									"fcan - sexy4 - 8.arff"};
+//		System.out.println("CASE--------------\nCROSS VALIDATION\n---------------\n");
+		crossVal(arffPath + all, classifierClassPath, options.clone());
 		
-		System.out.println("CASE--------------\nCROSS VALIDATION\n---------------\n");
-		crossVal(arffPath + all, classifierClassPath, options);
 		
+		double total = 0;
 		for(int i=0;i<names.length;++i){
-			System.out.println("CASE--------------\n"+names[i]+"\n---------------\n");
-			testOneOut(arffPath + names[i], classifierClassPath, options);
+//			System.out.println("CASE--------------\n"+names[i]+"\n---------------\n");
+			total += testOneOut(arffPath + names[i], classifierClassPath, options.clone());
 		}
+		double rate = total/names.length;
+		writer.write(""+rate);
+		System.out.println(total/names.length);
 	}
 	
-	public void testMustafa(){
+	public void testMustafa(String[] options) throws IOException{
 		String classifierClassPath = "weka.classifiers.functions.SMO";
-		String[] options =  {"-N", "1"};
+		//String[] options = {"-N", "2"};
+		
 		
 		String arffPath = "test/mustafa/ARFF/";
 		String all = "mustafatrainingall.arff";
@@ -399,18 +415,23 @@ public class CaseEEG {
 									"fmustafa - peaceful3 - 4.arff",
 									"fmustafa - peaceful4 - 5.arff"};
 		
-		//System.out.println("CASE--------------\nCROSS VALIDATION\n---------------\n");
-		//crossVal(arffPath + all, classifierClassPath, options);
 		
+//		System.out.println("CASE--------------\nCROSS VALIDATION\n---------------\n");
+		crossVal(arffPath + all, classifierClassPath, options.clone());
+		double total = 0;
 		for(int i=0;i<names.length;++i){
-			System.out.println("CASE--------------\n"+names[i]+"\n---------------\n");
-			testOneOut(arffPath + names[i], classifierClassPath, options);
+//			System.out.println("CASE--------------\n"+names[i]+"\n---------------\n");
+			total += testOneOut(arffPath + names[i], classifierClassPath, options.clone());
 		}
+		double rate = total/names.length;
+		writer.write(""+rate);
+		System.out.println(total/names.length);
 	}
 	
-	public void testAyhun(){
+	public void testAyhun(String[] options) throws IOException{
 		String classifierClassPath = "weka.classifiers.functions.SMO";
-		String[] options = {"-N", "2"};
+		//String[] options = {"-N", "2"};
+		
 		
 		String arffPath = "test/ayhun/ARFF/";
 		String all = "ayhuntrainingall.arff";
@@ -427,19 +448,35 @@ public class CaseEEG {
 									"fayhun-s-3-7.arff",
 									"fayhun-s-4-7.arff"};
 		
-		System.out.println("CASE--------------\nCROSS VALIDATION\n---------------\n");
-		crossVal(arffPath + all, classifierClassPath, options);
 		
+//		System.out.println("CASE--------------\nCROSS VALIDATION\n---------------\n");
+		crossVal(arffPath + all, classifierClassPath, options.clone());
+		double total = 0;
 		for(int i=0;i<names.length;++i){
-			System.out.println("CASE--------------\n"+names[i]+"\n---------------\n");
-			testOneOut(arffPath + names[i], classifierClassPath, options);
+//			System.out.println("CASE--------------\n"+names[i]+"\n---------------\n");
+			total += testOneOut(arffPath + names[i], classifierClassPath, options.clone());
 		}
+		double rate = total/names.length;
+		writer.write(""+rate);
+		System.out.println(total/names.length);
 	}
 	
-	public static void main(String[] args) throws Exception{
+	public void getResults() throws FileNotFoundException, IOException{
 		/**
 		 * parameter selection
 		 */
+		
+		String[] kernels = new String[]{"weka.classifiers.functions.supportVector.PolyKernel", "weka.classifiers.functions.supportVector.NormalizedPolyKernel"};
+		
+		writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File("test/mustafa/result/results.csv"))));
+		writer.write("Kernel, E, N, C, cross, leave");
+		writer.write("\n");
+		for(String kernel:kernels){
+		for(int e = 1; e<4;++e){
+		for(int n=0;n<2;++n){
+		for(int c=1;c<=8;c*=2){
+			
+		String[] bestOptions = new String[]{"-N", ""+n, "-C", ""+c, "-K", kernel + " -E " + e};
 		/*
 		ArffLoader loader = new ArffLoader();
 		loader.setFile(new File("test/can/ARFF/cantrainingall.arff"));
@@ -447,34 +484,57 @@ public class CaseEEG {
 		instances.setClassIndex(instances.numAttributes()-1);
 		
 		Classifier base = new SMO();
-		base.setOptions(new String[]{"-N", "2"});
+		base.setOptions(bestOptions);
 		
 		//String[] opts = {"C 2 8 4"};
 		CVParameterSelection parameters = new CVParameterSelection();
 		parameters.setClassifier(base);
-		parameters.addCVParameter("C 2 8 4");
+		parameters.addCVParameter("E 1 4 4");
 		parameters.setNumFolds(10);
 		parameters.buildClassifier(instances);
 		System.out.println(Utils.joinOptions(parameters.getBestClassifierOptions()));
 		*/
 		
 		
+		
+		
+		writer.write(kernel+ ", " + e + ", " + n + ", "+ c +", ");
+		
+		//testAli(bestOptions);
+		
+		//testCan(bestOptions);
+		
+		testMustafa(bestOptions);
+		//testAyhun(bestOptions);
+		writer.write("\n");
+		}
+		}
+		}
+		}
+		writer.close();
+	}
+	
+	private void canDiff() throws Exception{
 		/**
 		 * Can different day
 		 */
-		/*
-		String classifierClassPath = "weka.classifiers.functions.SMO";
-		String[] options = {"-N", "2"};
-		EEGClassifier svmClassifier = new EEGClassifier();
-		svmClassifier.train("test/can/ARFF/cantrainingall.arff" , classifierClassPath, options);
-		svmClassifier.test( "test/can/ARFF/fcan - disgusting6 - 9.arff");
-		svmClassifier.test( "test/can/ARFF/fcan - disgusting7 - 10.arff");
-		*/
 		
-		//
-		//new CaseEEG().testAli();
-		//new CaseEEG().testCan(new String[]{"-C", "4", "-N","2"});
-		//new CaseEEG().testMustafa();
-		//new CaseEEG().testAyhun();
+		String[] kernels = new String[]{"weka.classifiers.functions.supportVector.PolyKernel", "weka.classifiers.functions.supportVector.NormalizedPolyKernel"};
+
+		int e=3,n=2,c=8;
+		
+		String classifierClassPath = "weka.classifiers.functions.SMO";
+		String[] options = new String[]{"-N", ""+n, "-C", ""+c, "-K", kernels[1] + " -E " + e};		
+		EEGClassifier svmClassifier = new EEGClassifier();
+		svmClassifier.train("test/can/ARFF/cantrainingall.arff" , classifierClassPath, options.clone());
+		new CaseEEG().crossVal("test/can/ARFF/cantrainingall.arff", classifierClassPath, options.clone());
+		System.out.println(svmClassifier.test( "test/can/ARFF/fcan - disgusting6 - 9.arff"));
+		System.out.println(svmClassifier.test( "test/can/ARFF/fcan - disgusting7 - 10.arff"));
+	}
+	
+	public static void main(String[] args) throws Exception{
+		new CaseEEG().getResults();
+		//new CaseEEG().canDiff();
+		
 	}
 }
