@@ -133,9 +133,6 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		this.trainingFeatures = new FeatureListController();
 		this.emotionClassifier = new EnsembleClassifier();
 		
-		//20 seconds for now
-		this.testFeatures = new FeatureListController(20000);
-		
         this.sessionEmotion = null;
 		
 		persistentDataManager = DataManager.getInstance();		
@@ -224,11 +221,19 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 			executorService.submit(new Callable<Void>() {
 				@Override
 				public Void call(){
+					if(testFeatures !=null || sessionTrainingFeatures!=null)
+						return null;
+					
 					synchronized(trainSessionLocker){
 						sessionEmotion = emotion;
 						sessionTrainingFeatures = new FeatureListController();
 						for(SensorListener listener : sensorListeners)
 							sessionTrainingFeatures.registerSensorListener(listener);
+					}
+					
+					synchronized(sensorLocker){
+						for(SensorListener sensor : sensorListeners)
+							sensor.startStreaming();
 					}
 					
 					return null;
@@ -248,10 +253,13 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 			executorService.submit(new Callable<Void>() {
 				@Override
 				public Void call(){
+					synchronized(sensorLocker){
+						for(SensorListener sensor : sensorListeners)
+							sensor.stopStreaming();
+					}
 					synchronized(trainSessionLocker){
-						for(SensorListener listener : sessionTrainingFeatures.getSensorListeners()){
+						for(SensorListener listener : sessionTrainingFeatures.getSensorListeners())
 							persistentDataManager.saveMultipleSamples(sessionTrainingFeatures.getLastNFeatureList(listener, -1), listener);
-						}
 
 						trainAll(sessionTrainingFeatures);
 						sessionTrainingFeatures = null;
@@ -267,16 +275,46 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Starts to classify the physiological data session
 	 * @return
 	 */
-	public boolean openClassifySession(){
-		return true;
+	public void openClassifySession(){
+		synchronized (executorLocker) {
+			executorService.submit(new Callable<Void>() {
+				@Override
+				public Void call(){
+					if(testFeatures !=null || sessionTrainingFeatures!=null)
+						return null;
+					
+					//20 seconds for now
+					testFeatures = new FeatureListController(20000);
+					
+					synchronized(sensorLocker){
+						for(SensorListener sensor : sensorListeners)
+							sensor.startStreaming();
+					}
+					
+					return null;
+				}
+			});
+		}
 	}
 	
 	/**
 	 * Stops classifying session
 	 * @return
 	 */
-	public boolean stopClassifySession(){
-		return true;
+	public void stopClassifySession(){
+		synchronized (executorLocker) {
+			executorService.submit(new Callable<Void>() {
+				@Override
+				public Void call(){
+					synchronized(sensorLocker){
+						for(SensorListener sensor : sensorListeners)
+							sensor.stopStreaming();
+					}
+					testFeatures = null;
+					return null;
+				}
+			});
+		}
 	}
 	
 	/**
@@ -348,18 +386,25 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					List<TimestampedRawData> rawDataArray = sensor.getSensorData();
 					extractor.appendRawData(rawDataArray);
 					
-					//get list and add it to test feature list controller
-					FeatureList list = extractor.getFeatures();
-					list.setTimestamp(new Timestamp(new Date().getTime()));
-					testFeatures.addFeatureList(sensor, list);
+					
+					
 
 					synchronized(trainSessionLocker){
-						if(sessionTrainingFeatures!=null){							
+						if(sessionTrainingFeatures == null && trainingFeatures == null)
+							return null;
+						
+						//get list and add it to test feature list controller
+						FeatureList list = extractor.getFeatures();
+						list.setTimestamp(new Timestamp(new Date().getTime()));
+						
+						if(sessionTrainingFeatures!=null){
+							System.out.println("train");
 							sessionTrainingFeatures.addFeatureList(sensor, list);
 							list.setEmotion(sessionEmotion);
 						}
-						else {
+						else if(trainingFeatures!=null){
 							System.out.println("classify");
+							testFeatures.addFeatureList(sensor, list);
 							emotionClassifier.classify(testFeatures);
 						}
 					}
@@ -396,8 +441,6 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					if(sessionTrainingFeatures!=null)
 						sessionTrainingFeatures.unregisterSensorListener(sensor);
 						
-					
-					
 					notifyEngineObservers();
 					
 					return null;
@@ -442,8 +485,6 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					if(sessionTrainingFeatures!=null){
 						sessionTrainingFeatures.registerSensorListener(sensor);
 					}
-					
-					sensor.startStreaming();
 					
 					notifyEngineObservers();
 					
