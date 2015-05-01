@@ -5,18 +5,14 @@
  */
 package persistentdatamanagement;
 
-import java.nio.file.FileVisitResult;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import javax.sql.DataSource;
 import java.sql.Statement;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.util.Pair;
 import user.manager.User;
 
@@ -55,7 +51,6 @@ public class DatabaseService {
             return DriverManager.getConnection(url, user, password);
         } catch (SQLException ex) {
             System.out.println(ex.toString());
-            Logger.getLogger(DatabaseService.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
@@ -82,11 +77,11 @@ public class DatabaseService {
             if (rs.next()) {
                 currUser = new User(rs.getString("email"), rs.getString("password"));
 
-                st = con.createStatement();
+                /*st = con.createStatement();
                 rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = '1';");
                 while (rs.next()) {
                     currUser.enableSensor(rs.getString("sensor"));
-                }
+                }*/
 
                 st = con.createStatement();
                 rs = st.executeQuery("select * from games_played where email = '" + currentUser + "';");
@@ -124,11 +119,11 @@ public class DatabaseService {
             if (rs.next()) {
                 currUser = new User(rs.getString("email"), rs.getString("password"));
 
-                st = con.createStatement();
+                /*st = con.createStatement();
                 rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = '1';");
                 while (rs.next()) {
                     currUser.enableSensor(rs.getString("sensor"));
-                }
+                }*/
 
                 st = con.createStatement();
                 rs = st.executeQuery("select * from games_played where email = '" + currentUser + "';");
@@ -211,7 +206,7 @@ public class DatabaseService {
             st = con.createStatement();
             st.executeUpdate("INSERT INTO users (email, password) VALUES ('"+u.getName()+"', '"+u.getPass()+"') ON DUPLICATE KEY UPDATE password = '"+u.getPass()+"';");
 
-            if (!u.getEnabledSensors().isEmpty()) {
+            /*if (!u.getEnabledSensors().isEmpty()) {
                 st.executeUpdate("DELETE FROM `emotion_db`.`enabled_sensors` WHERE email = '"+u.getName()+"';");
                 for (String key : u.getEnabledSensors().keySet()) {
                     if(u.getEnabledSensors().get(key))
@@ -219,7 +214,7 @@ public class DatabaseService {
                     else
                         st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','0');");
                 }
-            }
+            }*/
 
             if (!u.getGamesPlayed().isEmpty()) {
                 st.executeUpdate("DELETE FROM `emotion_db`.`games_played` WHERE email = '"+u.getName()+"';");
