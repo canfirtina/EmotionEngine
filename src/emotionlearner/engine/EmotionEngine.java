@@ -360,6 +360,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 						pendingSensorListeners.add(listener);
 					}
 					listener.connect();
+                                        notifyEngineObservers();
 
 					return null;
 				}
@@ -402,7 +403,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 							sessionTrainingFeatures.addFeatureList(sensor, list);
 							list.setEmotion(sessionEmotion);
 						}
-						else if(trainingFeatures!=null){
+						else if(testFeatures!=null){
 							System.out.println("classify");
 							testFeatures.addFeatureList(sensor, list);
 							emotionClassifier.classify(testFeatures);
@@ -436,11 +437,14 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					
 					//unregister sensor listener from both training and test feature list controllers
 					trainingFeatures.unregisterSensorListener(sensor);
-					testFeatures.unregisterSensorListener(sensor);
+					if(testFeatures != null)
+                                            testFeatures.unregisterSensorListener(sensor);
 					
 					if(sessionTrainingFeatures!=null)
 						sessionTrainingFeatures.unregisterSensorListener(sensor);
-						
+					
+                                        trainFromDataManager();
+                                        
 					notifyEngineObservers();
 					
 					return null;
@@ -478,13 +482,14 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					}
 					
 					//register sensor listener to both training and test feature list controllers
-					trainingFeatures.registerSensorListener(sensor);
-					testFeatures.registerSensorListener(sensor);
+                                        trainingFeatures.registerSensorListener(sensor);
+                                        if(testFeatures!=null)
+                                            testFeatures.registerSensorListener(sensor);
 					trainFromDataManager();
 										
-					if(sessionTrainingFeatures!=null){
+					if(sessionTrainingFeatures!=null)
 						sessionTrainingFeatures.registerSensorListener(sensor);
-					}
+					
 					
 					notifyEngineObservers();
 					
