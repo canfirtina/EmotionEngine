@@ -105,6 +105,7 @@ public class SensorListenerEEG extends SensorListener {
      */
     public void startStreaming() {
         synchronized (lockStreaming) {
+            dataEpocher.reset();
             streamingOn = true;
             writeBytes(CODE_START_STREAMING);
             executorReader.submit(new DataInterpreter());
