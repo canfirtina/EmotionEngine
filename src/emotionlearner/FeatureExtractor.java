@@ -5,6 +5,7 @@ import java.util.List;
 
 import shared.FeatureList;
 import shared.TimestampedRawData;
+import weka.core.FastVector;
 
 /**
  * Blueprint of feature extracting classes. Extracts features from rawData
@@ -15,6 +16,17 @@ public abstract class FeatureExtractor {
 	 * Raw data window that keeps last N byte[] data
 	 */
 	protected List<TimestampedRawData> rawData;
+	
+	/**
+	 * total feature count
+	 */
+	protected int totalFeatureCount;
+	
+	/**
+	 * Fast vector of feature attributes informations
+	 */
+	protected FastVector featureAttributes;
+	
 	/**
 	 * Sets raw data to be extracted feature from
 	 * @param data

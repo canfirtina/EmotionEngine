@@ -19,7 +19,7 @@ public class FeatureListController {
 	/**
 	 * registered sensor listeners
 	 */
-	public ArrayList<SensorListener> sensorListeners;
+	private ArrayList<SensorListener> sensorListeners;
 	
 	/**
 	 * all feature lists that are saved

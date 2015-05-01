@@ -158,7 +158,7 @@ public class DataManager {
                 features[i - 1] = Double.parseDouble(current[i]);
             }
 
-            featureLabelPairs.add(new FeatureList(features, label));
+            featureLabelPairs.add(new FeatureList(features, null, label));
         }
         return featureLabelPairs;
     }

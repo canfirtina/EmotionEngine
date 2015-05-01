@@ -70,6 +70,7 @@ public class SensorListenerEEG extends SensorListener {
     public boolean connect() {
         try {
             CommPortIdentifier commPortIdentifier = CommPortIdentifier.getPortIdentifier(serialPortString);
+            
             if (commPortIdentifier.isCurrentlyOwned()) {
                 throw new Exception("EEG port is currently owned");
             }
@@ -90,6 +91,7 @@ public class SensorListenerEEG extends SensorListener {
             sendReset();
 
         } catch (Exception e) {
+            e.printStackTrace();
             notifyObserversConnectionFailed();
             return false;
         }
@@ -143,6 +145,10 @@ public class SensorListenerEEG extends SensorListener {
      * Gets last recorded epoch
      * @return A list of raw sensor data ordered by time of arrival
      */
+	public void setSensorData(List<TimestampedRawData> data){
+		lastEpoch = data;
+	}
+	
     @Override
     public List<TimestampedRawData> getSensorData() {
         return lastEpoch;
