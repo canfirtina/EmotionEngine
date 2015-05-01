@@ -236,7 +236,11 @@ public class DataManager {
      */
     public User getUser(String userName) {
         DatabaseService ds = DatabaseService.sharedInstance();
-        return ds.getUser(userName);
+        User u = ds.getUser(userName);
+        if(u != null){
+            addUserDirectory(userName);
+        }
+        return u;
     }
 
     /**
@@ -246,7 +250,12 @@ public class DataManager {
      */
     public boolean setCurrentUser(String userName) {
         DatabaseService ds = DatabaseService.sharedInstance();
-        return ds.setCurrentUser(userName);
+        if(ds.setCurrentUser(userName)){
+            addUserDirectory(userName);
+            return true;
+        }
+        
+        return false;
     }
 
     /**
@@ -256,6 +265,10 @@ public class DataManager {
      */
     public User getCurrentUser() {    
         DatabaseService ds = DatabaseService.sharedInstance();
-        return ds.getCurrentUser();
+        User u = ds.getCurrentUser();
+        if(u!= null){
+            addUserDirectory(u.getName());            
+        }
+        return u;
     }
 }
