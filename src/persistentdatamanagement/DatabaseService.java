@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.sql.Statement;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.util.Pair;
 import user.manager.User;
 
@@ -48,22 +49,38 @@ public class DatabaseService {
             String url = "jdbc:mysql://104.131.97.74/emotion_db";
             String user = "root";
             String password = "ayhuntekat93";
-            return DriverManager.getConnection(url, user, password);
+            if (!(con != null && con.isValid(1))) {
+                con = DriverManager.getConnection(url, user, password);
+            }
+            return con;
         } catch (SQLException ex) {
             System.out.println(ex.toString());
             return null;
         }
     }
 
+    private Statement getStatement() {
+        try {
+            if (con != null && con.isValid(1)) {
+                if(st != null && !st.isClosed())
+                    return st;
+                else
+                    return con.createStatement();
+            } else {
+                return getConnection().createStatement();
+            }            
+        } catch (SQLException ex) {
+            System.out.println("");
+        }
+        return null;
+    }
+
     public User getCurrentUser() {
-        con = null;
-        st = null;
         rs = null;
         User currUser = null;
         String currentUser = "";
         try {
-            con = getConnection();
-            st = con.createStatement();
+            st = getStatement();
             rs = st.executeQuery("select state_value from app_state where state_name = 'current_user';");
 
             if (rs.next()) {
@@ -72,24 +89,20 @@ public class DatabaseService {
                 currentUser = "";
             }
 
-            st = con.createStatement();
             rs = st.executeQuery("select * from users where email = '" + currentUser + "';");
             if (rs.next()) {
                 currUser = new User(rs.getString("email"), rs.getString("password"));
 
                 /*st = con.createStatement();
-                rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = '1';");
-                while (rs.next()) {
-                    currUser.enableSensor(rs.getString("sensor"));
-                }*/
-
-                st = con.createStatement();
+                 rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = '1';");
+                 while (rs.next()) {
+                 currUser.enableSensor(rs.getString("sensor"));
+                 }*/
                 rs = st.executeQuery("select * from games_played where email = '" + currentUser + "';");
                 while (rs.next()) {
                     currUser.playedGame(rs.getString("game"), rs.getInt("time"));
                 }
 
-                st = con.createStatement();
                 rs = st.executeQuery("select * from play_count where email = '" + currentUser + "';");
                 while (rs.next()) {
                     for (int i = 0; i < rs.getInt("count"); i++) {
@@ -106,32 +119,26 @@ public class DatabaseService {
     }
 
     public User getUser(String currentUser) {
-        con = null;
         st = null;
         rs = null;
         User currUser = null;
 
         try {
-            con = getConnection();
-
-            st = con.createStatement();
+            st = getStatement();
             rs = st.executeQuery("select * from users where email = '" + currentUser + "';");
             if (rs.next()) {
                 currUser = new User(rs.getString("email"), rs.getString("password"));
 
                 /*st = con.createStatement();
-                rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = '1';");
-                while (rs.next()) {
-                    currUser.enableSensor(rs.getString("sensor"));
-                }*/
-
-                st = con.createStatement();
+                 rs = st.executeQuery("select * from enabled_sensors where email = '" + currentUser + "' and is_enabled = '1';");
+                 while (rs.next()) {
+                 currUser.enableSensor(rs.getString("sensor"));
+                 }*/
                 rs = st.executeQuery("select * from games_played where email = '" + currentUser + "';");
                 while (rs.next()) {
                     currUser.playedGame(rs.getString("game"), rs.getInt("time"));
                 }
 
-                st = con.createStatement();
                 rs = st.executeQuery("select * from play_count where email = '" + currentUser + "';");
                 while (rs.next()) {
                     for (int i = 0; i < rs.getInt("count"); i++) {
@@ -148,16 +155,12 @@ public class DatabaseService {
     }
 
     public ArrayList<User> getAllUsers() {
-        con = null;
-        st = null;
         rs = null;
         ArrayList<User> all = new ArrayList<>();
         ArrayList<String> userNames = new ArrayList<>();
 
         try {
-            con = getConnection();
-
-            st = con.createStatement();
+            st = getStatement();
             rs = st.executeQuery("select email from users;");
             while (rs.next()) {
                 userNames.add(rs.getString("email"));
@@ -177,14 +180,11 @@ public class DatabaseService {
     }
 
     boolean setCurrentUser(String userName) {
-        con = null;
-        st = null;
         rs = null;
 
         try {
-            con = getConnection();
-            st = con.createStatement();
-            st.executeUpdate("UPDATE `emotion_db`.`app_state` SET `state_name` = 'current_user', `state_value` = '"+userName+"' WHERE `state_name` = 'current_user'");
+            st = getStatement();
+            st.executeUpdate("UPDATE `emotion_db`.`app_state` SET `state_name` = 'current_user', `state_value` = '" + userName + "' WHERE `state_name` = 'current_user'");
         } catch (SQLException ex) {
             return false;
         } finally {
@@ -194,8 +194,6 @@ public class DatabaseService {
     }
 
     public boolean saveUser(User u) {
-        con = null;
-        st = null;
         rs = null;
         User currUser = null;
         String currentUser = "";
@@ -204,27 +202,26 @@ public class DatabaseService {
             con.setAutoCommit(false); //transaction block start            
 
             st = con.createStatement();
-            st.executeUpdate("INSERT INTO users (email, password) VALUES ('"+u.getName()+"', '"+u.getPass()+"') ON DUPLICATE KEY UPDATE password = '"+u.getPass()+"';");
+            st.executeUpdate("INSERT INTO users (email, password) VALUES ('" + u.getName() + "', '" + u.getPass() + "') ON DUPLICATE KEY UPDATE password = '" + u.getPass() + "';");
 
             /*if (!u.getEnabledSensors().isEmpty()) {
-                st.executeUpdate("DELETE FROM `emotion_db`.`enabled_sensors` WHERE email = '"+u.getName()+"';");
-                for (String key : u.getEnabledSensors().keySet()) {
-                    if(u.getEnabledSensors().get(key))
-                        st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','1');");
-                    else
-                        st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','0');");
-                }
-            }*/
-
+             st.executeUpdate("DELETE FROM `emotion_db`.`enabled_sensors` WHERE email = '"+u.getName()+"';");
+             for (String key : u.getEnabledSensors().keySet()) {
+             if(u.getEnabledSensors().get(key))
+             st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','1');");
+             else
+             st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','0');");
+             }
+             }*/
             if (!u.getGamesPlayed().isEmpty()) {
-                st.executeUpdate("DELETE FROM `emotion_db`.`games_played` WHERE email = '"+u.getName()+"';");
+                st.executeUpdate("DELETE FROM `emotion_db`.`games_played` WHERE email = '" + u.getName() + "';");
                 for (String key : u.getGamesPlayed().keySet()) {
                     st.executeUpdate("INSERT INTO `emotion_db`.`games_played` VALUES('" + u.getName() + "','" + key + "'," + u.getGamesPlayed().get(key) + ");");
                 }
             }
 
             if (!u.getPlayCount().isEmpty()) {
-                st.executeUpdate("DELETE FROM `emotion_db`.`play_count` WHERE email = '"+u.getName()+"';");
+                st.executeUpdate("DELETE FROM `emotion_db`.`play_count` WHERE email = '" + u.getName() + "';");
                 for (Pair<String, String> key : u.getPlayCount().keySet()) {
                     st.executeUpdate("INSERT INTO `emotion_db`.`play_count` VALUES('" + u.getName() + "','" + key.getKey() + "','" + key.getValue() + "','" + u.getPlayCount().get(key) + "');");
                 }
@@ -398,8 +395,8 @@ public class DatabaseService {
      */
     static void attemptClose(Connection c, Statement s, ResultSet r) {
         attemptClose(r);
-        attemptClose(s);
-        attemptClose(c);
+         /*attemptClose(s);
+         attemptClose(c);*/
     }
 
     static void attemptClose(ResultSet o) {

@@ -30,25 +30,25 @@ public class CaseDataManager {
 
     public static void testDataManager() {
         UserManager usr = UserManager.getInstance();
-        System.out.println("logging in? = " +usr.login("ayhun", "1993"));
+        System.out.println("logging in? = " +usr.login("can@can.com", "b4bed6bc05b52277ef1341dfebca4b"));
         
         DataManager dm = DataManager.getInstance();
         System.out.println(dm.getCurrentUser().getName());
-        dm.setCurrentUser("ayhun");        
+        dm.setCurrentUser("ali@ali.com");        
         User u = dm.getCurrentUser();
-        if(u.getName().equals("ayhun"))
+        if(u.getName().equals("ali@ali.com"))
             System.out.println("Set current user and get current user works.");
-        u.enableSensor("GSR");
+        u.playedGame("Call of Duty", 456);
         dm.saveUser(u);
-        if(dm.getCurrentUser().getEnabledSensors().containsKey("GSR"))
+        if(dm.getCurrentUser().getGamesPlayed().containsKey("Call of Duty"))
             System.out.println("save user works");
         
-        u = dm.getUser("emcail");
-        if(u!=null && u.getName().equals("emcail"))
+        u = dm.getUser("can@can.com");
+        if(u!=null && u.getName().equals("can@can.com"))
             System.out.println("get user works");
         
         ArrayList<User> us = dm.getAllUsers();
-        if(dm.checkUserExist("ayhun")){
+        if(!dm.checkUserExist("ayhun")){
             System.out.println("check user exists works");
         }
         
