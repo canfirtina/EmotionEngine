@@ -18,16 +18,6 @@ public abstract class FeatureExtractor {
 	protected List<TimestampedRawData> rawData;
 	
 	/**
-	 * total feature count
-	 */
-	protected int totalFeatureCount;
-	
-	/**
-	 * Fast vector of feature attributes informations
-	 */
-	protected FastVector featureAttributes;
-	
-	/**
 	 * Sets raw data to be extracted feature from
 	 * @param data
 	 */
@@ -58,7 +48,7 @@ public abstract class FeatureExtractor {
 	protected abstract double[] selectFeatures(double[] features);
 	
 	/**
-	 * Clears raw data for re-usage
+	 * Clears raw data for reusage
 	 */
 	public void reset(){
 		rawData = new ArrayList<TimestampedRawData>();

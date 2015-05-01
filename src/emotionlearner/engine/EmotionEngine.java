@@ -138,7 +138,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		
         this.sessionEmotion = null;
 		
-		
+		persistentDataManager = DataManager.getInstance();		
 	}
 	
 	/**
@@ -171,6 +171,21 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	}
 	
 	/**
+	 * gets saved features from data manager and train them
+	 */
+	private void trainFromDataManager(){
+		FeatureListController fc = new FeatureListController();
+		for(SensorListener listener : sensorListeners){
+			fc.registerSensorListener(listener);
+			ArrayList<FeatureList> lists = persistentDataManager.getGameData(listener);
+			for(FeatureList list : lists)
+				fc.addFeatureList(listener, list);
+		}
+		
+		trainAll(fc);	
+	}
+	
+	/**
 	 * train whole feature list set
 	 * @param controller 
 	 */
@@ -187,12 +202,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 									trainingFeatures.addFeatureList(listener, list);
 						}
 					}
-					
-					
 
 					//training operation is missing
 					for(SensorListener l : controller.getSensorListeners())
-						emotionClassifier.trainOfSensor(testFeatures, l);
+						emotionClassifier.trainOfSensor(trainingFeatures, l);
 					
 					return null;
 				}
@@ -236,6 +249,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 				@Override
 				public Void call(){
 					synchronized(trainSessionLocker){
+						for(SensorListener listener : sessionTrainingFeatures.getSensorListeners()){
+							persistentDataManager.saveMultipleSamples(sessionTrainingFeatures.getLastNFeatureList(listener, -1), listener);
+						}
+
 						trainAll(sessionTrainingFeatures);
 						sessionTrainingFeatures = null;
 						sessionEmotion = null;
@@ -402,7 +419,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					//if sensor is not in pending sensors
 					if(!pendingSensorListeners.contains(sensor))
 						return null;
-					
+					                               System.out.println("connection established");
 					FeatureExtractor extractor = null;
 					DataEpocher epocher = null;
 					if(sensor.getClass().equals( SensorListenerEEG.class)){
@@ -420,6 +437,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					//register sensor listener to both training and test feature list controllers
 					trainingFeatures.registerSensorListener(sensor);
 					testFeatures.registerSensorListener(sensor);
+					trainFromDataManager();
 										
 					if(sessionTrainingFeatures!=null){
 						sessionTrainingFeatures.registerSensorListener(sensor);

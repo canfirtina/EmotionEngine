@@ -1,7 +1,7 @@
 package test;
 
-import sensormanager.listener.SensorListener;
-import sensormanager.listener.SensorListenerEEG;
+import emotionlearner.feature.*;
+import sensormanager.listener.*;
 import sensormanager.data.DataEpocher;
 import emotionlearner.engine.EmotionEngine;
 import emotionlearner.feature.FeatureExtractor;
@@ -19,6 +19,7 @@ import java.util.Scanner;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
+import sensormanager.*;
 import shared.Emotion;
 import shared.FeatureList;
 import shared.FeatureListController;
@@ -63,7 +64,7 @@ public class CaseEngine {
 				epocher.reset();
 				epocher.addData(trd);
 				
-				listener.setSensorData(list);
+				//listener.setSensorData(list);
 				engine.dataArrived(listener);
 			}
 			Thread.sleep(4);
@@ -98,7 +99,7 @@ public class CaseEngine {
 				epocher.reset();
 				epocher.addData(trd);
 				
-				listener.setSensorData(list);
+				//listener.setSensorData(list);
 				engine.dataArrived(listener);
 				if((sleeper++)%4 == 0){
 					//System.out.println("xxx");
@@ -208,7 +209,7 @@ public class CaseEngine {
 				epocher.reset();
 				epocher.addData(trd);
 				
-				listener.setSensorData(list);
+				//listener.setSensorData(list);
 				List<TimestampedRawData> rawData = listener.getSensorData();
 				fe.appendRawData(rawData);
 				FeatureList fl = fe.getFeatures();
@@ -251,7 +252,7 @@ public class CaseEngine {
 				epocher.reset();
 				epocher.addData(trd);
 				
-				listener.setSensorData(list);
+				//listener.setSensorData(list);
 				List<TimestampedRawData> rawData = listener.getSensorData();
 				fe.appendRawData(rawData);
 				FeatureList fl = fe.getFeatures();
@@ -384,9 +385,27 @@ public class CaseEngine {
 		
 	}
 	
+
+	private void testClassificationWithDataManager() throws Exception{
+		persistentdatamanagement.DataManager.getInstance().setCurrentUser("ali@ali.com");
+		EmotionEngine engine = EmotionEngine.sharedInstance(null);
+		engine.createSensorListener("COM4", SensorListenerEEG.class);
+		Thread.sleep(30);
+		List<SensorListener> listeners =  engine.getPendingSensors();
+		SensorListenerEEG listener = (SensorListenerEEG) listeners.get(0);
+		engine.connectionEstablished(listener);
+		Thread.sleep(5000);
+		System.out.println("Pending size:" + engine.getPendingSensors().size());
+		System.out.println("Established size:" + engine.getConnectedSensors().size());
+		
+		testEmotionFromOBCI(engine, "OBCI/ali disgusting 6 10.txt"  , listener);
+		
+		
+	}
+	
 	public static void main(String[] args) throws Exception{
 		//new CaseEngine().testClassifierFromOBCI();
-		new CaseEngine().testOpenTrainingSessionFromOBCI();
+		new CaseEngine().testClassificationWithDataManager();
 		
 	}
 	
