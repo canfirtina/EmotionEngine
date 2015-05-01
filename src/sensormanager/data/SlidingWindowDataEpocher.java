@@ -72,7 +72,6 @@ public class SlidingWindowDataEpocher extends DataEpocher {
 		
 		if(list.getLast().getTimestamp().getTime() - lastEpochTimestamp.getTime() >= this.period)
 			return true;
-		// TODO Auto-generated method stub
 		return false;
 	}
 	

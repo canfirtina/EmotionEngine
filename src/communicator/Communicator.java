@@ -13,174 +13,182 @@ import shared.Emotion;
  * Handles communication between client and server processes
  */
 public class Communicator {
-	public static final int port = 9999;
-	private static final int READ_TIMEOUT = 2000;
-	private static final String HEART_BEAT = "HB";
+    public static final int port = 9999;
+    private static final int READ_TIMEOUT = 2000;
+    private static final String HEART_BEAT = "HB";
 
-	/**
-	 * Executor for sending non-blocking message to client
-	 */
-	private static ExecutorService executorService = Executors.newSingleThreadExecutor();
+    /**
+     * Executor for sending non-blocking message to client
+     */
+    private static ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-	/**
-	 * Server socket
-	 */
-	private static ServerSocket server;
-
-	/**
-	 * Adapter connected to this EmotionEngine
-	 */
-	private static Socket adapter;
-
-
-	/**
-	 * InputStream from adapter to Communicator
-	 */
-	private static InputStream inputStream;
-
-	/**
-	 * BufferedReader to wrap InputStream object
-	 */
-	private static BufferedReader bufferedReader;
-
-	/**
-	 * Sends messages to adapter
-	 */
-	private static PrintStream os;
+    /**
+     * Server socket
+     */
+    private static ServerSocket server;
+    /**
+     * Adapter connected to this EmotionEngine
+     */
+    private static Socket adapter;
 
 
-	/**
-	 * EmotionEngine reference
-	 */
-	private static EmotionEngine ee;
+    /**
+     * InputStream from adapter to Communicator
+     */
+    private static InputStream inputStream;
 
-	/**
-	 * Starts a server that constantly listens for requests coming from clients
-	 */
-	public static void startServer() {
+    /**
+     * BufferedReader to wrap InputStream object
+     */
+    private static BufferedReader bufferedReader;
 
-		ee= EmotionEngine.sharedInstance(null);
+    /**
+     * Sends messages to adapter
+     */
+    private static PrintStream os;
 
-		// Try to open a server socket on port specified port
-		// Note that we can't choose a port less than 1023 if we are not
-		// privileged users (root)
-		try {
-			server = new ServerSocket(port);
-		} catch (IOException e) {
-			System.out.println(e);
-		}
-	}
 
-	public static void waitClient() {
-		// Create a socket object from the ServerSocket to listen and accept
-		// connections.
-		// Open input and output streams
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					System.out.println("Waiting for client");
+    /**
+     * EmotionEngine reference
+     */
+    private static EmotionEngine ee;
 
-					adapter = server.accept();
-					adapter.setKeepAlive(true);
+    /**
+     * Starts a server that constantly listens for requests coming from clients
+     */
+    public static void startServer() {
 
-					System.out.println("Client connected");
-					inputStream = adapter.getInputStream();
-					bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-					os = new PrintStream(adapter.getOutputStream());
+        ee = EmotionEngine.sharedInstance(null);
 
-					//Get message, parse it and do what it requires
-					while (true) {
+        // Try to open a server socket on port specified port
+        // Note that we can't choose a port less than 1023 if we are not
+        // privileged users (root)
+        try {
+            server = new ServerSocket(port);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
 
-						try {
-							String line = bufferedReader.readLine();
+    public static void waitClient() {
+        // Create a socket object from the ServerSocket to listen and accept
+        // connections.
+        // Open input and output streams
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("Waiting for client");
 
-							//if end of stream
-							if(line == null)
-								throw new IOException();
+                    adapter = server.accept();
+                    adapter.setKeepAlive(true);
 
-							//echo back what is told
-							os.println(line);
+                    System.out.println("Client connected");
+                    inputStream = adapter.getInputStream();
+                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    os = new PrintStream(adapter.getOutputStream());
 
-							parseAndExecuteRequest(line);
+                    //Get message, parse it and do what it requires
+                    while (true) {
 
-						} catch (IOException e) {
-							onClientDisconnected();
-							return;
-						}
-					}
-				} catch (IOException e) {
-					onClientDisconnected();
-				}
-			}
-		}).start();
-	}
+                        try {
+                            String line = bufferedReader.readLine();
 
-	/**
-	 * Parse the message
-	 * getemotion: adapter wants to know current emotion
-	 * train <Emotion>: adapter advises EmotionEngine to open training session for <Emotion>
-	 * stop: adapter advises to close current training session
-	 * cancel: adapter requests cancellation of current training session if there is any
-	 * ntrain <Emotion> <Milliseconds>: adapter indicates that <Emotion> should have been triggered <Milliseconds> ago
-	 * @param line
-	 */
-	private static void parseAndExecuteRequest(final String line) {
-		executorService.submit(new Callable<Object>() {
-			@Override
-			public Object call() throws Exception {
-				String request[] = line.split(" ");
+                            //if end of stream
+                            if (line == null)
+                                throw new IOException();
 
-				if (request[0].equals("getemotion")) {
-					sendMessage("emotion " + ee.currentEmotion().name());
-				} else if (request[0].equals("train")) {
-					//Find the emotion in request and start training with that
-					for (Emotion em : Emotion.values()) {
-						if (em.name().equals(request[1])) {
-							ee.openTrainingSession(em);
-							break;
-						}
-					}
-				} else if (request[0].equals("ntrain")) {
-					//find the emotion in enum
-					for (Emotion em : Emotion.values()) {
-						if (em.name().equals(request[1])) {
-							ee.trainLastNMilliseconds(Integer.parseInt(request[2]), em);
-						}
-					}
-				} else if (request[0].equals("cancel")) {
-					//TODO At the time, EmotioneEngine had no cancel method
-				}
-				return null;
-			}
-		});
+                            //echo back what is told
+                            os.println(line);
 
-	}
+                            parseAndExecuteRequest(line);
 
-	/**
-	 * Serializes and sends the given label to the client
-	 * @param emotion The label containing the information about the user
-	 */
-	public static void provideEmotionalState(final Emotion emotion){
-		executorService.submit(new Callable<Void>() {
-			@Override
-			public Void call() throws Exception {
-				sendMessage("emotion " + emotion.name());
-				return null;
-			}
-		});
 
-	}
+                        } catch (IOException e) {
+                            onClientDisconnected();
+                            return;
+                        }
+                    }
+                } catch (IOException e) {
+                    onClientDisconnected();
+                }
+            }
+        }).start();
+    }
 
-	private static void sendMessage(final String s) {
-		os.println(s);
-	}
+    /**
+     * Parse the message
+     * startclassification
+     * stopclassification
+     * getemotion: adapter wants to know current emotion
+     * train <Emotion>: adapter advises EmotionEngine to open training session for <Emotion>
+     * stop: adapter advises to close current training session
+     * cancel: adapter requests cancellation of current training session if there is any
+     * ntrain <Emotion> <Milliseconds>: adapter indicates that <Emotion> should have been triggered <Milliseconds> ago
+     *
+     * @param line
+     */
+    private static void parseAndExecuteRequest(final String line) {
+        executorService.submit(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                String request[] = line.split(" ");
 
-	/**
-	 * Makes thread wait for another client
-	 */
-	private static void onClientDisconnected() {
-		System.out.println("Client disconnected");
-		waitClient();
-	}
+                if (request[0].equals("getemotion")) {
+                    sendMessage("emotion " + ee.currentEmotion().name());
+                } else if (request[0].equals("train")) {
+                    //Find the emotion in request and start training with that
+                    for (Emotion em : Emotion.values()) {
+                        if (em.name().equals(request[1])) {
+                            ee.openTrainingSession(em);
+                            break;
+                        }
+                    }
+                } else if (request[0].equals("ntrain")) {
+                    //find the emotion in enum
+                    for (Emotion em : Emotion.values()) {
+                        if (em.name().equals(request[1])) {
+                            ee.trainLastNMilliseconds(Integer.parseInt(request[2]), em);
+                        }
+                    }
+                } else if (request[0].equals("cancel")) {
+                    //TODO At the time, EmotioneEngine had no cancel method
+                } else if (request[0].equals("startclassification")) {
+                    ee.openClassifySession();
+                } else if (request[0].equals("stopclassification")) {
+                    ee.stopClassifySession();
+                }
+                return null;
+            }
+        });
+
+    }
+
+    /**
+     * Serializes and sends the given label to the client
+     *
+     * @param emotion The label containing the information about the user
+     */
+    public static void provideEmotionalState(final Emotion emotion) {
+        executorService.submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                sendMessage("emotion " + emotion.name());
+                return null;
+            }
+        });
+
+    }
+
+    private static void sendMessage(final String s) {
+        os.println(s);
+    }
+
+    /**
+     * Makes thread wait for another client
+     */
+    private static void onClientDisconnected() {
+        System.out.println("Client disconnected");
+        waitClient();
+    }
 }

@@ -10,6 +10,7 @@ import user.manager.User;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -164,10 +165,10 @@ public class DataManager {
         try {
             lines = Files.readAllLines(Paths.get(fileName), Charset.defaultCharset());
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(DataManager.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(DataManager.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Couldnt find file: " + fileName);
         } catch (IOException ex) {
-            Logger.getLogger(DataManager.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(DataManager.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("IOException while reading: " + fileName);
         }
 

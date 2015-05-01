@@ -134,7 +134,6 @@ public class FeatureExtractorEEG extends FeatureExtractor {
 //            try {
 //                currentFeatures[7] = FanoFactor.calculateFanoFactorFromTimes(rawDataTransposed[i], rawDataTransposed[i].length / 256);
 //            } catch (Exception e) {
-//                // TODO Auto-generated catch block
 //                currentFeatures[7] = 0;
 //                System.err.println("FanoFactor exception");
 //            }
@@ -149,7 +148,6 @@ public class FeatureExtractorEEG extends FeatureExtractor {
             try {
                 currentFeatures[12] = AllanFactor.calculateAllanFactorFromTimes(rawDataTransposed[i], rawDataTransposed[i].length);
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 currentFeatures[12] = 0;
                 System.err.println("AllanFactor exception");
             }
