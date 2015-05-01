@@ -1,5 +1,6 @@
 package emotionlearner.classifier;
 
+import emotionlearner.feature.FeatureExtractorEEG;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

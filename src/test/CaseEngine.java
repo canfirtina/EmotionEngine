@@ -1,11 +1,13 @@
 package test;
 
-import emotionlearner.DataEpocher;
-import emotionlearner.EmotionEngine;
-import emotionlearner.FeatureExtractor;
-import emotionlearner.FeatureExtractorEEG;
-import emotionlearner.LengthBasedDataEpocher;
-import emotionlearner.TimeBasedDataEpocher;
+import emotionlearner.feature.*;
+import sensormanager.listener.*;
+import sensormanager.data.DataEpocher;
+import emotionlearner.engine.EmotionEngine;
+import emotionlearner.feature.FeatureExtractor;
+import emotionlearner.feature.FeatureExtractorEEG;
+import sensormanager.data.LengthBasedDataEpocher;
+import sensormanager.data.TimeBasedDataEpocher;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -21,7 +23,7 @@ import sensormanager.*;
 import shared.Emotion;
 import shared.FeatureList;
 import shared.FeatureListController;
-import shared.TimestampedRawData;
+import sensormanager.data.TimestampedRawData;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.SMO;
@@ -62,7 +64,7 @@ public class CaseEngine {
 				epocher.reset();
 				epocher.addData(trd);
 				
-				listener.setSensorData(list);
+				//listener.setSensorData(list);
 				engine.dataArrived(listener);
 			}
 			Thread.sleep(4);
@@ -97,7 +99,7 @@ public class CaseEngine {
 				epocher.reset();
 				epocher.addData(trd);
 				
-				listener.setSensorData(list);
+				//listener.setSensorData(list);
 				engine.dataArrived(listener);
 				if((sleeper++)%4 == 0){
 					//System.out.println("xxx");
@@ -207,7 +209,7 @@ public class CaseEngine {
 				epocher.reset();
 				epocher.addData(trd);
 				
-				listener.setSensorData(list);
+				//listener.setSensorData(list);
 				List<TimestampedRawData> rawData = listener.getSensorData();
 				fe.appendRawData(rawData);
 				FeatureList fl = fe.getFeatures();
@@ -250,7 +252,7 @@ public class CaseEngine {
 				epocher.reset();
 				epocher.addData(trd);
 				
-				listener.setSensorData(list);
+				//listener.setSensorData(list);
 				List<TimestampedRawData> rawData = listener.getSensorData();
 				fe.appendRawData(rawData);
 				FeatureList fl = fe.getFeatures();
@@ -385,6 +387,7 @@ public class CaseEngine {
 	
 
 	private void testClassificationWithDataManager() throws Exception{
+		persistentdatamanagement.DataManager.getInstance().setCurrentUser("ali@ali.com");
 		EmotionEngine engine = EmotionEngine.sharedInstance(null);
 		engine.createSensorListener("COM4", SensorListenerEEG.class);
 		Thread.sleep(30);

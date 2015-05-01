@@ -140,6 +140,15 @@ public class SensorListenerEEG extends SensorListener {
     public void sendReset() {
         executorReader.submit(new ConnectionInitiator());
     }
+	
+	/**
+	 * TODO: delete this method
+	 */
+	/*
+	public void setSensorData(List<TimestampedRawData> epoch){
+		lastEpoch = epoch;
+	}*/
+	
     /**
      * Gets last recorded epoch
      * @return A list of raw sensor data ordered by time of arrival
@@ -395,7 +404,8 @@ public class SensorListenerEEG extends SensorListener {
                     }
 
                 }
-
+                outputStream.write(CODE_STOP_STREAMING);
+                Thread.sleep(100);
                 outputStream.write(CODE_RESET);
                 while ((len = inputStream.read(buffer)) > -1) {
                     if(len < 1)
@@ -409,6 +419,8 @@ public class SensorListenerEEG extends SensorListener {
                     }
                 }
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             notifyObserversConnectionFailed();
