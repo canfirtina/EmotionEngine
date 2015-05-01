@@ -45,8 +45,6 @@ public class DataManager {
     /**
      * Keeps the current user information.
      */
-    private String currentUser;
-
     private DataManager() {
 
         File dir = new File(GAME_RECORDS_DIRECTORY);
@@ -103,7 +101,7 @@ public class DataManager {
         //Tasks are guaranteed to execute sequentially, and no more than one task will be active at any given time
         executorService.submit(new Callable() {
             public Object call() {
-                String fileName = getUserDirectory(currentUser) + "/" + sensor.toString() + "_features.ftr";
+                String fileName = getUserDirectory(getCurrentUser().getName()) + "/" + sensor.toString() + "_features.ftr";
                 try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)))) {
                     out.print(list.getEmotion().toString() + ",");
                     for (int i = 0; i < list.size() - 1; ++i) {
@@ -114,7 +112,7 @@ public class DataManager {
                     out.close();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    System.out.println("Couldn't write to file " + getUserDirectory(currentUser) + "/" + fileName);
+                    System.out.println("Couldn't write to file " + getUserDirectory(getCurrentUser().getName()) + "/" + fileName);
                 }
                 return null;
             }
@@ -141,7 +139,8 @@ public class DataManager {
      */
     public ArrayList<FeatureList> getGameData(SensorListener sensor) {
         ArrayList<FeatureList> featureLabelPairs = new ArrayList<FeatureList>();
-        String fileName = getUserDirectory(currentUser) + "/" + sensor.toString() + "_features.ftr";
+        String fileName = getUserDirectory(getCurrentUser().getName()) + "/" + sensor.toString() + "_features.ftr";
+		System.out.println("fileName:" + fileName);
         List<String> lines = new ArrayList<>();
 
         try {

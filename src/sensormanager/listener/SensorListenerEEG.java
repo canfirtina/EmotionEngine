@@ -140,6 +140,15 @@ public class SensorListenerEEG extends SensorListener {
     public void sendReset() {
         executorReader.submit(new ConnectionInitiator());
     }
+	
+	/**
+	 * TODO: delete this method
+	 */
+	/*
+	public void setSensorData(List<TimestampedRawData> epoch){
+		lastEpoch = epoch;
+	}*/
+	
     /**
      * Gets last recorded epoch
      * @return A list of raw sensor data ordered by time of arrival

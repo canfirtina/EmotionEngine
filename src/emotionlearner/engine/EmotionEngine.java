@@ -205,7 +205,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 
 					//training operation is missing
 					for(SensorListener l : controller.getSensorListeners())
-						emotionClassifier.trainOfSensor(testFeatures, l);
+						emotionClassifier.trainOfSensor(trainingFeatures, l);
 					
 					return null;
 				}
