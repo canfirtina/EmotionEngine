@@ -51,7 +51,7 @@ import shared.Emotion;
  *
  * @author CanFirtina
  */
-public class ProfileScreenController implements Initializable, PresentedScreen, EmotionEngineObserver, PresentingController {
+public class ProfileScreenController implements Initializable, PresentedScreen, EmotionEngineObserver {
 
     @FXML
     private ImageView profileImage;
@@ -143,6 +143,11 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
         
         File videoFile = new File("videos/boring1.mp4");
+        
+        if( !videoFile.exists()){
+            System.err.println("no such video file");
+            return;
+        }
         
         Stage stage = new Stage();
         stage.setTitle(tutorialList.getItems().get(event.getIndex()));
@@ -242,27 +247,5 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
                 updateSensorList();
             }
         });        
-    }
-
-    @Override
-    public boolean displayScreen(String screenName) {
-
-        return false;
-    }
-
-    @Override
-    public boolean addScreen(String screenName, String resource) {
-
-        return false;
-    }
-
-    @Override
-    public boolean removeScreen(String screenName) {
-
-        if (screenName == ScreenInfo.TutorialScreen.screenId()) {
-
-        }
-
-        return false;
     }
 }
