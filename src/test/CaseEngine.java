@@ -1,13 +1,11 @@
 package test;
 
-import sensormanager.listener.SensorListener;
-import sensormanager.listener.SensorListenerEEG;
-import sensormanager.data.DataEpocher;
-import emotionlearner.engine.EmotionEngine;
-import emotionlearner.feature.FeatureExtractor;
-import emotionlearner.feature.FeatureExtractorEEG;
-import sensormanager.data.LengthBasedDataEpocher;
-import sensormanager.data.TimeBasedDataEpocher;
+import emotionlearner.DataEpocher;
+import emotionlearner.EmotionEngine;
+import emotionlearner.FeatureExtractor;
+import emotionlearner.FeatureExtractorEEG;
+import emotionlearner.LengthBasedDataEpocher;
+import emotionlearner.TimeBasedDataEpocher;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,10 +17,11 @@ import java.util.Scanner;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
+import sensormanager.*;
 import shared.Emotion;
 import shared.FeatureList;
 import shared.FeatureListController;
-import sensormanager.data.TimestampedRawData;
+import shared.TimestampedRawData;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.SMO;
@@ -384,16 +383,27 @@ public class CaseEngine {
 		
 	}
 	
-        public void connectionTest(){
-            EmotionEngine engine = EmotionEngine.sharedInstance(null);
-            engine.createSensorListener("COM3", SensorListenerEEG.class);
-            
-        }
-        
+
+	private void testClassificationWithDataManager() throws Exception{
+		EmotionEngine engine = EmotionEngine.sharedInstance(null);
+		engine.createSensorListener("COM4", SensorListenerEEG.class);
+		Thread.sleep(30);
+		List<SensorListener> listeners =  engine.getPendingSensors();
+		SensorListenerEEG listener = (SensorListenerEEG) listeners.get(0);
+		engine.connectionEstablished(listener);
+		Thread.sleep(5000);
+		System.out.println("Pending size:" + engine.getPendingSensors().size());
+		System.out.println("Established size:" + engine.getConnectedSensors().size());
+		
+		testEmotionFromOBCI(engine, "OBCI/ali disgusting 6 10.txt"  , listener);
+		
+		
+	}
+	
 	public static void main(String[] args) throws Exception{
 		//new CaseEngine().testClassifierFromOBCI();
-		//new CaseEngine().testOpenTrainingSessionFromOBCI();
-		new CaseEngine().connectionTest();
+		new CaseEngine().testClassificationWithDataManager();
+		
 	}
 	
 }

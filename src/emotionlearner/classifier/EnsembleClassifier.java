@@ -120,9 +120,11 @@ public class EnsembleClassifier {
 						}
 					}
 
-					for(int i=0;i<resDist.length;++i)
-						System.out.println(resDist[i]+ " ");
-					System.out.println();
+					if(resDist != null){
+						for(int i=0;i<resDist.length;++i)
+							System.out.println(resDist[i]+ " ");
+						System.out.println();
+					}
 				}
 			});
 		}

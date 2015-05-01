@@ -1,5 +1,8 @@
 package persistentdatamanagement;
 
+import emotionlearner.feature.FeatureExtractorProperties;
+import emotionlearner.feature.FeatureExtractor;
+import emotionlearner.feature.FeatureExtractorEEG;
 import sensormanager.listener.SensorListener;
 import java.awt.image.BufferedImage;
 import user.manager.User;
@@ -16,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import sensormanager.listener.SensorListenerEEG;
 import shared.Emotion;
 import shared.FeatureList;
 
@@ -158,7 +162,11 @@ public class DataManager {
                 features[i - 1] = Double.parseDouble(current[i]);
             }
 
-            featureLabelPairs.add(new FeatureList(features, null, label));
+			FeatureExtractorProperties props=null;
+			if(sensor.getClass() == SensorListenerEEG.class)
+				props = FeatureExtractorEEG.getProperties();
+			
+            featureLabelPairs.add(new FeatureList(features, props.getFeatureAttributes(), label));
         }
         return featureLabelPairs;
     }
