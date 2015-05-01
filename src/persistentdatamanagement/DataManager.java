@@ -1,7 +1,8 @@
 package persistentdatamanagement;
 
+import sensormanager.listener.SensorListener;
 import java.awt.image.BufferedImage;
-import usermanager.User;
+import user.manager.User;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -17,7 +18,6 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import shared.Emotion;
 import shared.FeatureList;
-import sensormanager.*;
 
 /**
  * Responsible for providing other packages with file input output operations.

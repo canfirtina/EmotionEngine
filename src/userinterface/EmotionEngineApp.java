@@ -6,10 +6,11 @@
 package userinterface;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import shared.ScreenInfo;
+import javafx.stage.WindowEvent;
 
 /**
  *
@@ -33,6 +34,14 @@ public class EmotionEngineApp extends Application {
         Scene scene = new Scene(root, 750, 480);
         stage.setResizable(false);
         stage.setScene(scene);
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent we) {
+                
+                System.exit(0);
+            }
+        });
+        
         stage.show();
     }
 

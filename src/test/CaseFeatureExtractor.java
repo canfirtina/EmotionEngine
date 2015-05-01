@@ -6,14 +6,14 @@
 package test;
 
 import emotionlearner.EEGFeatureExtractor;
-import emotionlearner.TimeBasedDataEpocher;
+import sensormanager.data.TimeBasedDataEpocher;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
-import shared.TimestampedRawData;
+import sensormanager.data.TimestampedRawData;
 
 /**
  *

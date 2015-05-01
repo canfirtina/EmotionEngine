@@ -1,8 +1,13 @@
 package test;
 
-import emotionlearner.TimeBasedDataEpocher;
-import sensormanager.SensorListenerEEG;
+import sensormanager.data.TimeBasedDataEpocher;
+import sensormanager.data.TimestampedRawData;
+import sensormanager.listener.SensorListener;
+import sensormanager.listener.SensorListenerEEG;
+import sensormanager.listener.SensorObserver;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -10,27 +15,43 @@ import java.util.Scanner;
  */
 public class EEGListenerTest {
 
-    public static void main(String[] args) throws InterruptedException {
-        SensorListenerEEG eeg = new SensorListenerEEG("COM4");
-        TimeBasedDataEpocher de = new TimeBasedDataEpocher(4000);
-        eeg.setDataEpocher(de);
-        eeg.connect();
-        while(!eeg.isConnected()) {
-            Thread.sleep(1000);
+    public static void main(String[] args) {
+        try {
+            SensorListenerEEG eeg = new SensorListenerEEG("COM4");
+            TimeBasedDataEpocher de = new TimeBasedDataEpocher(4000);
+            eeg.setDataEpocher(de);
+            eeg.registerObserver(new SensorObserver() {
+                @Override
+                public void dataArrived(SensorListener sensor) {
+                    List<TimestampedRawData> s = sensor.getSensorData();
+                    for (TimestampedRawData t : s)
+                        System.out.println(Arrays.toString(t.getData()));
+                    System.out.println(s.size());
+                }
+
+                @Override
+                public void connectionError(SensorListener sensor) {
+                    System.out.println("connection error");
+                }
+
+                @Override
+                public void connectionEstablished(SensorListener sensor) {
+                    System.out.println("connection established");
+                }
+
+                @Override
+                public void connectionFailed(SensorListener sensor) {
+                    System.out.println("connection failed");
+                }
+            });
+            eeg.connect();
+            while (!eeg.isConnected()) {
+                Thread.sleep(1000);
+            }
+            eeg.startStreaming();
+        } catch(Exception e) {
+            e.printStackTrace();
         }
-        eeg.startStreaming();
-        Thread.sleep(2000);
-        eeg.setChannelState(0, false);
-        eeg.setChannelState(2, false);
-        eeg.setChannelState(4, false);
-        eeg.setChannelState(6, false);
-        Thread.sleep(4000);
-        eeg.setChannelState(0, true);
-        eeg.setChannelState(2, true);
-        eeg.setChannelState(4, true);
-        eeg.setChannelState(6, true);
-        Thread.sleep(4000);
-        eeg.stopStreaming();
 
 
     }

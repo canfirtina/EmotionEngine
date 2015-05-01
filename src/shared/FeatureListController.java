@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Date;
-import sensormanager.SensorListener;
+import sensormanager.listener.SensorListener;
 
 /**
  * Controls the feature list information flow and history

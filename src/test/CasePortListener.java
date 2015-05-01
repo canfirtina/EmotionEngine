@@ -1,7 +1,7 @@
 package test;
 
 import gnu.io.PortInUseException;
-import sensormanager.COMPortListener;
+import sensormanager.util.SerialPortUtilities;
 
 import java.util.HashMap;
 
@@ -11,7 +11,7 @@ import java.util.HashMap;
 public class CasePortListener {
 
     public void runtest1(){
-        String[] m = COMPortListener.getConnectedPorts();
+        String[] m = SerialPortUtilities.getConnectedPorts();
         for (String key : m)
             System.out.println(key);
     }

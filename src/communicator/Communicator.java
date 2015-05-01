@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import emotionlearner.EmotionEngine;
+import emotionlearner.engine.EmotionEngine;
 import shared.Emotion;
 
 /**

@@ -10,8 +10,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import persistentdatamanagement.DataManager;
-import usermanager.User;
-import usermanager.UserManager;
+import user.manager.User;
+import user.manager.UserManager;
 
 /**
  *
