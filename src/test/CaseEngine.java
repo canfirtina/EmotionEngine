@@ -383,6 +383,7 @@ public class CaseEngine {
 		
 	}
 	
+
 	private void testClassificationWithDataManager() throws Exception{
 		EmotionEngine engine = EmotionEngine.sharedInstance(null);
 		engine.createSensorListener("COM4", SensorListenerEEG.class);

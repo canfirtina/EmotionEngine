@@ -41,6 +41,7 @@ public class EmotionEngineApp extends Application {
                 System.exit(0);
             }
         });
+        
         stage.show();
     }
 

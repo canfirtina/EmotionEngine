@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -102,6 +103,8 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
         engine.registerObserver(this);
+        
+        tutorialList.setDisable(true);
     }
 
     @Override
@@ -223,13 +226,22 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
                 engine.createSensorListener(key, sensorsOnSerialPorts.get(key));
             }
         }
+        
+        if( connectedSensors.size() > 0)
+            tutorialList.setDisable(false);
+        else
+            tutorialList.setDisable(true);
     }
 
     @Override
     public void notify(EmotionEngine engine) {
+        Platform.runLater(new Runnable() {
 
-        //System.out.println("notified");
-        updateSensorList();
+            @Override
+            public void run() {
+                updateSensorList();
+            }
+        });        
     }
 
     @Override

@@ -70,6 +70,7 @@ public class SensorListenerEEG extends SensorListener {
     public boolean connect() {
         try {
             CommPortIdentifier commPortIdentifier = CommPortIdentifier.getPortIdentifier(serialPortString);
+            
             if (commPortIdentifier.isCurrentlyOwned()) {
                 throw new Exception("EEG port is currently owned");
             }
@@ -90,6 +91,7 @@ public class SensorListenerEEG extends SensorListener {
             sendReset();
 
         } catch (Exception e) {
+            e.printStackTrace();
             notifyObserversConnectionFailed();
             return false;
         }

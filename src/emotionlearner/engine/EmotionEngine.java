@@ -419,7 +419,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					//if sensor is not in pending sensors
 					if(!pendingSensorListeners.contains(sensor))
 						return null;
-					
+					                               System.out.println("connection established");
 					FeatureExtractor extractor = null;
 					DataEpocher epocher = null;
 					if(sensor.getClass().equals( SensorListenerEEG.class)){
