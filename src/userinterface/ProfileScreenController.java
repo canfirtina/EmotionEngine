@@ -85,7 +85,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
         sensorList.setCellFactory(ComboBoxListCell.forListView(sensorNames));
 
-        ObservableList<String> tutorials = FXCollections.observableArrayList("Boring1", "Disgusting1");
+        ObservableList<String> tutorials = FXCollections.observableArrayList("Boring1", "Happy1");
         tutorialList.setItems(tutorials);
 
         ObservableList<String> activities = FXCollections.observableArrayList("");
@@ -130,33 +130,51 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @FXML
     private void tutorialEditTriggered(EditEvent event) {
 
-        if( event.getIndex() != 0)
-            return;
-        
+        File videoFile = null;
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
-        File videoFile = new File("videos/boring1.mp4");
+        Emotion emotionLabel = null;
         
-        if( !videoFile.exists()){
-            System.err.println("no such video file");
-            return;
-        }
-        
-        Stage stage = new Stage();
-        stage.setTitle(tutorialList.getItems().get(event.getIndex()));
+        if( event.getIndex() == 0) {
+            videoFile = new File("videos/boring1.mp4");
 
+            if( !videoFile.exists()){
+                System.err.println("no such video file");
+                return;
+            }
+            
+            emotionLabel = Emotion.BORED;
+        }else if( event.getIndex() == 1){
+            
+            videoFile = new File("videos/happy1.mp4");
+
+            if( !videoFile.exists()){
+                System.err.println("no such video file");
+                return;
+            }
+            
+            emotionLabel = Emotion.PEACEFUL;
+            
+        }
+        final Emotion label = emotionLabel;
+        
         final MediaPlayer video = new MediaPlayer(new Media(videoFile.toURI().toString()));
         video.setOnReady(new Runnable() {
 
             @Override
             public void run() {
+                
                 video.play();
-                engine.openTrainingSession(Emotion.BORED);
+                
+                engine.openTrainingSession(label);
             }
         });
-        
+
         MediaView vidView = new MediaView(video);
         vidView.setFitWidth(750);
         vidView.setFitHeight(480);
+        
+        Stage stage = new Stage();
+        stage.setTitle(tutorialList.getItems().get(event.getIndex()));
         stage.setScene(new Scene(new Group(vidView), vidView.getFitWidth(), vidView.getFitHeight(), Color.BLACK));
         stage.setResizable(false);
         stage.show();
