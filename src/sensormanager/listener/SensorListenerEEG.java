@@ -393,7 +393,8 @@ public class SensorListenerEEG extends SensorListener {
                     }
 
                 }
-
+                outputStream.write(CODE_STOP_STREAMING);
+                Thread.sleep(100);
                 outputStream.write(CODE_RESET);
                 while ((len = inputStream.read(buffer)) > -1) {
                     if(len < 1)
@@ -407,6 +408,8 @@ public class SensorListenerEEG extends SensorListener {
                     }
                 }
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             notifyObserversConnectionFailed();
