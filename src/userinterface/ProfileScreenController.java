@@ -102,6 +102,8 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
         engine.registerObserver(this);
+        
+        tutorialList.setDisable(true);
     }
 
     @Override
@@ -223,12 +225,16 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
                 engine.createSensorListener(key, sensorsOnSerialPorts.get(key));
             }
         }
+        
+        if( connectedSensors.size() > 0)
+            tutorialList.setDisable(false);
+        else
+            tutorialList.setDisable(true);
     }
 
     @Override
     public void notify(EmotionEngine engine) {
 
-        //System.out.println("notified");
         updateSensorList();
     }
 
