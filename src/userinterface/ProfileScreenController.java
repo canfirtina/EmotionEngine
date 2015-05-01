@@ -5,31 +5,22 @@
  */
 package userinterface;
 
-import sensormanager.listener.SensorListener;
-import sensormanager.listener.SensorListenerGSR;
-import sensormanager.listener.SensorListenerEEG;
-import sensormanager.listener.SensorListenerHR;
 import emotionlearner.engine.EmotionEngine;
 import emotionlearner.engine.EmotionEngineObserver;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -37,13 +28,16 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ListView.EditEvent;
 import javafx.scene.control.cell.ComboBoxListCell;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import sensormanager.listener.SensorListener;
+import sensormanager.listener.SensorListenerEEG;
+import sensormanager.listener.SensorListenerGSR;
+import sensormanager.listener.SensorListenerHR;
 import shared.Emotion;
 
 /**
@@ -70,23 +64,24 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
     PresentingController presentingController;
 
-    ArrayList<SensorListener> connectedSensors;
-    ArrayList<SensorListener> pendingSensors;
-    HashMap<String, Class> sensorsOnSerialPorts;
-    ArrayList<String> availableSerialPorts;
-
+    private ArrayList<SensorListener> connectedSensors;
+    private ArrayList<SensorListener> pendingSensors;
+    private HashMap<String, Class> sensorsOnSerialPorts;
+    private ArrayList<String> availableSerialPorts;
+    
+    private final String NOSENSORLIST = "None";
+    
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
-        sensorsOnSerialPorts = new HashMap<String, Class>();
-
         ObservableList<String> sensorNames = FXCollections.observableArrayList(
                 new SensorListenerEEG(null).toString(),
                 new SensorListenerGSR(null).toString(),
-                new SensorListenerHR(null).toString());
+                new SensorListenerHR(null).toString(),
+                NOSENSORLIST);
 
         sensorList.setCellFactory(ComboBoxListCell.forListView(sensorNames));
 
@@ -116,16 +111,14 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @FXML
     private void refreshButtonPressed(ActionEvent event) {
 
+        sensorsOnSerialPorts = new HashMap<String, Class>();
+        
         availableSerialPorts = new ArrayList<String>();
         availableSerialPorts.addAll(Arrays.asList(sensormanager.util.SerialPortUtilities.getConnectedPorts()));
 
         sensorList.setItems(FXCollections.observableArrayList(availableSerialPorts));
 
-        if (sensorList.getItems().size() == 0) {
-            return;
-        }
-
-        connectButton.setDisable(false);
+        connectButton.setDisable(true);
     }
 
     @FXML
@@ -141,7 +134,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
             return;
         
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
-        
         File videoFile = new File("videos/boring1.mp4");
         
         if( !videoFile.exists()){
@@ -181,17 +173,25 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     private void sensorListEditTriggered(EditEvent event) {
 
         String key = availableSerialPorts.get(event.getIndex());
-        String value = event.getNewValue().toString();
+        String value = " - " + event.getNewValue().toString();
 
-        if (value.equalsIgnoreCase(new SensorListenerEEG(null).toString())) {
+        if (value.endsWith(new SensorListenerEEG(null).toString()))
             sensorsOnSerialPorts.put(key, SensorListenerEEG.class);
-        } else if (value.equalsIgnoreCase(new SensorListenerGSR(null).toString())) {
+        else if (value.endsWith(new SensorListenerGSR(null).toString()))
             sensorsOnSerialPorts.put(key, SensorListenerGSR.class);
-        } else if (value.equalsIgnoreCase(new SensorListenerHR(null).toString())) {
+        else if (value.endsWith(new SensorListenerHR(null).toString()))
             sensorsOnSerialPorts.put(key, SensorListenerHR.class);
+        else if( value.endsWith(NOSENSORLIST)){
+            sensorsOnSerialPorts.remove(key);
+            value = "";
         }
+        
+        sensorList.getItems().set(event.getIndex(), key + value);
 
-        sensorList.getItems().set(event.getIndex(), key + " - " + value);
+        if( sensorsOnSerialPorts.size() > 0)
+            connectButton.setDisable(false);
+        else
+            connectButton.setDisable(true);
     }
 
     private void updateSensorList() {
@@ -203,13 +203,11 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
         ObservableList<String> sensors = FXCollections.observableArrayList();
 
-        for (SensorListener sensor : connectedSensors) {
+        for (SensorListener sensor : connectedSensors)
             sensors.add(sensor.getSerialPort() + "-" + sensor.toString() + "-Connected");
-        }
 
-        for (SensorListener sensor : pendingSensors) {
+        for (SensorListener sensor : pendingSensors)
             sensors.add(sensor.getSerialPort() + "-" + sensor.toString() + "-Pending");
-        }
 
         sensorList.setItems(sensors);
 
@@ -234,8 +232,10 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         
         if( connectedSensors.size() > 0)
             tutorialList.setDisable(false);
-        else
+        else {
             tutorialList.setDisable(true);
+            connectButton.setDisable(true);
+        }
     }
 
     @Override
