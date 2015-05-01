@@ -1,5 +1,6 @@
 package persistentdatamanagement;
 
+import emotionlearner.FeatureExtractorEEG;
 import java.awt.image.BufferedImage;
 import usermanager.User;
 
@@ -174,8 +175,8 @@ public class DataManager {
             for (int i = 1; i < current.length; i++) {
                 features[i-1] = Double.parseDouble(current[i]);
             }
-
-            featureLabelPairs.add(new FeatureList(features, null, label));
+			
+            featureLabelPairs.add(new FeatureList(features, FeatureExtractorEEG.getProperties().getFeatureAttributes(), label));
         }
         return featureLabelPairs;
     }

@@ -18,16 +18,6 @@ public abstract class FeatureExtractor {
 	protected List<TimestampedRawData> rawData;
 	
 	/**
-	 * total feature count
-	 */
-	protected int totalFeatureCount;
-	
-	/**
-	 * Fast vector of feature attributes informations
-	 */
-	protected FastVector featureAttributes;
-	
-	/**
 	 * Sets raw data to be extracted feature from
 	 * @param data
 	 */

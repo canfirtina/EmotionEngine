@@ -23,27 +23,34 @@ import weka.core.FastVector;
  *
  */
 public class FeatureExtractorEEG extends FeatureExtractor {
-
-	/**
-	 * number of features of each channel
-	 */
-	private final int numFeaturesEachChannel;
 	
 	/**
-	 * number of channels
+	 * specific properties for eeg feature extractor
 	 */
-	private final int numChannels;
+	private static FeatureExtractorProperties properties = null;
 	
     public FeatureExtractorEEG() {
-        reset();
-		numChannels = 8;
-		numFeaturesEachChannel = 8;
-		totalFeatureCount = numChannels * numFeaturesEachChannel;
-		featureAttributes = new FastVector(totalFeatureCount+1);
-		for(int i=0;i<totalFeatureCount;++i)
-			featureAttributes.addElement(new Attribute("att_eeg_" + i));
-		featureAttributes.addElement(new Attribute("eeg_class", Emotion.classAttributes()));
+        int totalFeatureCount = getProperties().getNumChannels() * getProperties().getNumFeaturesEachChannel();
+		reset();
     }
+	
+	/**
+	 * gets properties of eeg feature extractor
+	 * @return 
+	 */
+	public static FeatureExtractorProperties getProperties(){
+		
+		if(properties == null){
+			properties = new FeatureExtractorProperties(8, 8, null);
+			int totalFeatureCount = properties.getNumChannels() * properties.getNumFeaturesEachChannel();
+			FastVector featureAttributes = new FastVector(totalFeatureCount+1);
+			for(int i=0;i<totalFeatureCount;++i)
+				featureAttributes.addElement(new Attribute("att_eeg_" + i));
+			featureAttributes.addElement(new Attribute("eeg_class", Emotion.classAttributes()));
+			properties.setFeatureAttributes(featureAttributes);
+		}
+		return properties;
+	}
 
     /**
      * Returns Features of the raw EEG data
@@ -52,7 +59,7 @@ public class FeatureExtractorEEG extends FeatureExtractor {
      */
     @Override
     public FeatureList getFeatures() {
-        final int numFeatures = numFeaturesEachChannel;
+        final int numFeatures = getProperties().getNumChannels();
 
         double[][] rawDataTransposed = new double[rawData.get(0).getData().length][rawData.size()];
         for (int i = 0; i < rawDataTransposed.length; ++i) {
@@ -83,7 +90,7 @@ public class FeatureExtractorEEG extends FeatureExtractor {
 			}
 		}
 
-        return new FeatureList(selectFeatures(res), featureAttributes);
+        return new FeatureList(selectFeatures(res), getProperties().getFeatureAttributes());
     }
 
     /**

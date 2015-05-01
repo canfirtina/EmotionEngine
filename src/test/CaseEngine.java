@@ -383,9 +383,25 @@ public class CaseEngine {
 		
 	}
 	
+	private void testClassificationWithDataManager() throws Exception{
+		EmotionEngine engine = EmotionEngine.sharedInstance(null);
+		engine.createSensorListener("COM4", SensorListenerEEG.class);
+		Thread.sleep(30);
+		List<SensorListener> listeners =  engine.getPendingSensors();
+		SensorListenerEEG listener = (SensorListenerEEG) listeners.get(0);
+		engine.connectionEstablished(listener);
+		Thread.sleep(5000);
+		System.out.println("Pending size:" + engine.getPendingSensors().size());
+		System.out.println("Established size:" + engine.getConnectedSensors().size());
+		
+		testEmotionFromOBCI(engine, "OBCI/ali disgusting 6 10.txt"  , listener);
+		
+		
+	}
+	
 	public static void main(String[] args) throws Exception{
 		//new CaseEngine().testClassifierFromOBCI();
-		new CaseEngine().testOpenTrainingSessionFromOBCI();
+		new CaseEngine().testClassificationWithDataManager();
 		
 	}
 	

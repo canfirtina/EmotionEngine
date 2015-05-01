@@ -128,7 +128,8 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		
         this.sessionEmotion = null;
 		
-		
+		persistentDataManager = DataManager.getInstance();
+		trainAll(testFeatures);
 	}
 	
 	/**
@@ -161,6 +162,21 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	}
 	
 	/**
+	 * gets saved features from data manager and train them
+	 */
+	private void trainFromDataManager(){
+		FeatureListController fc = new FeatureListController();
+		for(SensorListener listener : sensorListeners){
+			fc.registerSensorListener(listener);
+			ArrayList<FeatureList> lists = persistentDataManager.getGameData(listener);
+			for(FeatureList list : lists)
+				fc.addFeatureList(listener, list);
+		}
+		
+		trainAll(fc);	
+	}
+	
+	/**
 	 * train whole feature list set
 	 * @param controller 
 	 */
@@ -177,12 +193,12 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 									trainingFeatures.addFeatureList(listener, list);
 						}
 					}
-					
-					
 
 					//training operation is missing
-					for(SensorListener l : controller.getSensorListeners())
-						emotionClassifier.trainOfSensor(testFeatures, l);
+					for(SensorListener l : controller.getSensorListeners()){
+						System.out.println("sensor");
+						emotionClassifier.trainOfSensor(trainingFeatures, l);
+					}
 					
 					return null;
 				}
@@ -221,11 +237,20 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @return
 	 */
 	public void closeTrainingSession(){
+		System.out.println("close");
 		synchronized (executorLocker) {
 			executorService.submit(new Callable<Void>() {
 				@Override
 				public Void call(){
+					System.out.println("close in");
+					
 					synchronized(trainSessionLocker){
+						System.out.println(" before " + sessionTrainingFeatures.getSensorListeners().size());
+						for(SensorListener listener : sessionTrainingFeatures.getSensorListeners()){
+							System.out.println("save");
+							persistentDataManager.saveMultipleSamples(sessionTrainingFeatures.getLastNFeatureList(listener, -1), listener);
+						}
+
 						trainAll(sessionTrainingFeatures);
 						sessionTrainingFeatures = null;
 						sessionEmotion = null;
@@ -408,6 +433,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					//register sensor listener to both training and test feature list controllers
 					trainingFeatures.registerSensorListener(sensor);
 					testFeatures.registerSensorListener(sensor);
+					trainFromDataManager();
 										
 					if(sessionTrainingFeatures!=null){
 						sessionTrainingFeatures.registerSensorListener(sensor);
