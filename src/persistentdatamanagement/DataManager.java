@@ -125,10 +125,28 @@ public class DataManager {
      * @param list
      * @param sensor
      */
-    public void saveMultipleSamples(List<FeatureList> list, SensorListener sensor) {
-        for (FeatureList fl : list) {
-            saveSample(fl, sensor);
-        }
+    public void saveMultipleSamples(List<FeatureList> list_of_lists, SensorListener sensor) {
+		executorService.submit(new Callable() {
+            public Object call() {
+                String fileName = getUserDirectory(getCurrentUser().getName()) + "/" + sensor.toString() + "_features.ftr";
+				
+                try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)))) {
+					for (FeatureList list : list_of_lists) {
+						out.print(list.getEmotion().toString() + ",");
+						for (int i = 0; i < list.size() - 1; ++i) {
+							out.print(list.get(i) + ",");
+						}
+						out.println(list.get(list.size() - 1));
+					}
+                    out.flush();
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println("Couldn't write to file " + getUserDirectory(getCurrentUser().getName()) + "/" + fileName);
+                }
+                return null;
+            }
+        });
     }
 
     /**
