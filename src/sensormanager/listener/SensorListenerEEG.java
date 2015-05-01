@@ -2,11 +2,11 @@ package sensormanager.listener;
 
 import gnu.io.*;
 import sensormanager.data.TimestampedRawData;
+import sensormanager.util.Filter;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -275,7 +275,13 @@ public class SensorListenerEEG extends SensorListener {
                                 for (int j = 0; j < rawdata.length; j++) {
                                     rawdata[j] = packet[j+1];
                                 }
-                                TimestampedRawData tsrd = new TimestampedRawData(convertData(rawdata, MESSAGE_LENGTH - 2));
+
+                                double dat[] = convertData(rawdata, MESSAGE_LENGTH - 2);
+                                /*
+                                Filter.filterNotch50(dat);
+                                Filter.bandpass1_50(dat);
+*/
+                                TimestampedRawData tsrd = new TimestampedRawData(dat);
 
                                 if (dataEpocher.addData(tsrd) == false) {
                                     lastEpoch = dataEpocher.getEpoch();
