@@ -300,14 +300,19 @@ public class SensorListenerEEG extends SensorListener {
 */
                                 TimestampedRawData tsrd = new TimestampedRawData(dat);
 
-                                if (dataEpocher.readyForEpoch() ) {
-                                    lastEpoch = dataEpocher.getEpoch();
-                                    System.out.println(lastEpoch.size());
-                                    dataEpocher.reset();
-                                    notifyObservers();
+                                if(dataEpocher.isNewDataSuitable(tsrd))
+                                    dataEpocher.addData(tsrd);
+                                else {
+                                    if(dataEpocher.readyForEpoch()) {
+                                        lastEpoch = dataEpocher.getEpoch();
+                                        System.out.println(lastEpoch.size());
+                                        dataEpocher.reset();
+                                        notifyObservers();
+                                    }
 
+                                    dataEpocher.addData(tsrd);
                                 }
-                                dataEpocher.addData(tsrd);
+
                             }
                             index = 0;
                         }
