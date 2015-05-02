@@ -297,6 +297,7 @@ public class SensorListenerEEG extends SensorListener {
 
                                 if (dataEpocher.addData(tsrd) == false) {
                                     lastEpoch = dataEpocher.getEpoch();
+                                    System.out.println(lastEpoch.size());
                                     dataEpocher.reset();
                                     dataEpocher.addData(tsrd);
                                     notifyObservers();

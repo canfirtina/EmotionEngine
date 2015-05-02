@@ -300,6 +300,8 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					testFeatures = new FeatureListController(20000);
 					
 					synchronized(sensorLocker){
+						for(SensorListener sensor:sensorListeners)
+							testFeatures.registerSensorListener(sensor);
 						for(SensorListener sensor : sensorListeners)
 							sensor.startStreaming();
 					}
