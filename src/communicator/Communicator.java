@@ -119,8 +119,8 @@ public class Communicator {
     /**
      * Parse the message
      * type <name>: adapter provides its type
-     * startclassification
-     * stopclassification
+     * startclassification adapter wants to know emotional state starting from now
+     * stopclassification adapter no longer wants to know emotional state
      * getemotion: adapter wants to know current emotion
      * train <Emotion>: adapter advises EmotionEngine to open training session for <Emotion>
      * stop: adapter advises to close current training session
@@ -136,7 +136,9 @@ public class Communicator {
                 String request[] = line.split(" ");
 
                 if (request[0].equals("getemotion")) {
-                   //TODO
+                    Emotion em = ee.currentEmotion();
+                    if (em != null)
+                        provideEmotionalState(em);
                 } else if (request[0].equals("train")) {
                     //Find the emotion in request and start training with that
                     for (Emotion em : Emotion.values()) {
@@ -155,7 +157,7 @@ public class Communicator {
                         }
                     }
                 } else if (request[0].equals("cancel")) {
-                    //TODO At the time, EmotioneEngine had no cancel method
+                    ee.cancelTrainingSession();
                 } else if (request[0].equals("startclassification")) {
                     ee.openClassifySession();
                 } else if (request[0].equals("stopclassification")) {
