@@ -7,31 +7,36 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.SignUpScreenController">
+<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" styleClass="background" stylesheets="@JMetroLightTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.SignUpScreenController">
    <children>
-      <TextField fx:id="emailField" layoutX="300.0" layoutY="129.0" promptText="E-mail Address">
+      <TextField fx:id="emailField" layoutX="285.0" layoutY="180.0" prefHeight="30.0" prefWidth="180.0" promptText="E-mail Address">
          <font>
-            <Font size="12.0" />
+            <Font size="14.0" />
          </font>
       </TextField>
-      <PasswordField fx:id="passwordField" layoutX="300.0" layoutY="170.0" promptText="Password">
+      <PasswordField fx:id="passwordField" layoutX="285.0" layoutY="215.0" prefHeight="30.0" prefWidth="180.0" promptText="Password">
          <font>
-            <Font size="12.0" />
+            <Font size="14.0" />
          </font>
       </PasswordField>
-      <Button layoutX="346.0" layoutY="210.0" mnemonicParsing="false" onAction="#signUpPressed" text="Sign Up">
+      <Button layoutX="285.0" layoutY="250.0" mnemonicParsing="false" onAction="#signUpPressed" prefHeight="30.0" prefWidth="89.0" style="-fx-font-size: 11;" stylesheets="@JMetroLightTheme.css" text="Sign Up">
          <font>
-            <Font size="12.0" />
+            <Font size="11.0" />
          </font></Button>
-      <Label fx:id="warningLabel" alignment="CENTER" layoutX="150.0" layoutY="92.0" prefHeight="15.0" prefWidth="450.0" textFill="RED" AnchorPane.topAnchor="100.0">
+      <Label fx:id="warningLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="150.0" layoutY="130.0" prefHeight="15.0" prefWidth="450.0" textFill="RED" AnchorPane.topAnchor="130.0">
          <font>
             <Font size="12.0" />
          </font>
       </Label>
-      <Hyperlink fx:id="cancelButton" layoutX="353.0" layoutY="244.0" onAction="#cancelButtonPressed" text="Cancel" underline="true">
+      <Button layoutX="375.0" layoutY="250.0" mnemonicParsing="false" onAction="#cancelButtonPressed" prefHeight="30.0" prefWidth="89.0" style="-fx-font-size: 11;" text="Cancel">
          <font>
-            <Font size="12.0" />
+            <Font size="11.0" />
          </font>
-      </Hyperlink>
+      </Button>
+      <Label layoutX="40.0" layoutY="40.0" styleClass="header" stylesheets="@JMetroLightTheme.css" text="Sign Up">
+         <font>
+            <Font name="Segoe UI" size="30.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>
