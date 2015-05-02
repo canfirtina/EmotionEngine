@@ -118,6 +118,7 @@ public class Communicator {
 
     /**
      * Parse the message
+     * type <name>: adapter provides its type
      * startclassification
      * stopclassification
      * getemotion: adapter wants to know current emotion
@@ -144,6 +145,8 @@ public class Communicator {
                             break;
                         }
                     }
+                } else if( request[0].equals("stop")) {
+                    ee.closeTrainingSession();
                 } else if (request[0].equals("ntrain")) {
                     //find the emotion in enum
                     for (Emotion em : Emotion.values()) {
@@ -157,6 +160,8 @@ public class Communicator {
                     ee.openClassifySession();
                 } else if (request[0].equals("stopclassification")) {
                     ee.stopClassifySession();
+                } else if (request[0].equals("type")) {
+                    //TODO there is no method provided in emotion engine for this
                 }
                 return null;
             }
