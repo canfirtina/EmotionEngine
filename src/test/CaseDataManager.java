@@ -38,6 +38,16 @@ public class CaseDataManager {
         User u = dm.getCurrentUser();
         if(u.getName().equals("ali@ali.com"))
             System.out.println("Set current user and get current user works.");
+        
+        dm.rateTutorial(u.getName(), "asd", 3);
+        dm.rateTutorial("can@can.com", "asd", 4);
+        if(dm.getAverageRating("asd") == 3.5){
+            System.out.println("rateTutorial works");
+        }
+        
+        if(dm.getUserRating(u.getName(), "asd")==3)
+            System.out.println("getUserRating works");
+        
         u.playedGame("Call of Duty", 456);
         dm.saveUser(u);
         if(dm.getCurrentUser().getGamesPlayed().containsKey("Call of Duty"))

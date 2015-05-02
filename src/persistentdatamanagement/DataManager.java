@@ -272,4 +272,24 @@ public class DataManager {
         }
         return u;
     }
+
+    public boolean rateTutorial(String currentUser, String tutorial, int rating) {
+        DatabaseService ds = DatabaseService.sharedInstance();
+        return ds.rateTutorial(currentUser, tutorial, rating);
+    }
+    
+    public boolean updateRating(String currentUser, String tutorial, int rating) {
+        DatabaseService ds = DatabaseService.sharedInstance();
+        return ds.updateRating(currentUser, tutorial, rating);
+    }
+
+    public double getAverageRating(String tutorial) {
+        DatabaseService ds = DatabaseService.sharedInstance();
+        return ds.getAverageRating(tutorial);
+    }
+
+    public double getUserRating(String user, String tutorial) {
+        DatabaseService ds = DatabaseService.sharedInstance();
+        return ds.getUserRating(user, tutorial);
+    }
 }
