@@ -1,4 +1,5 @@
 package emotionlearner.engine;
+import communicator.Communicator;
 import emotionlearner.classifier.ClassifierObserver;
 import sensormanager.data.TimestampedRawData;
 import sensormanager.listener.SensorObserver;
@@ -112,8 +113,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @return
 	 */
 	public static EmotionEngine sharedInstance(DataManager persistentDataManager){
-		if(engine==null)
+		if(engine==null){
 			engine = new EmotionEngine();
+			engine.startEngine();
+		}
 		
 		return engine;
 	}
@@ -132,10 +135,20 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		this.engineObservers = new ArrayList<>();
 		this.trainingFeatures = new FeatureListController();
 		this.emotionClassifier = new EnsembleClassifier();
+		this.emotionClassifier.registerObserver(this);
 		
         this.sessionEmotion = null;
 		
+		
+	}
+	
+	/**
+	 * starts engine and call related components
+	 */
+	private void startEngine(){
 		persistentDataManager = DataManager.getInstance();		
+		Communicator.startServer();
+		Communicator.waitClient();
 	}
 	
 	/**
@@ -582,6 +595,16 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 
 	@Override
 	public void classifyNotification(EnsembleClassifier classifier) {
+		synchronized(executorLocker){
+			executorService.submit(new Callable<Void>(){
+				@Override
+				public Void call(){
+					if(testFeatures!=null)
+						Communicator.provideEmotionalState(classifier.emotion());
+					return null;
+				}
+			});
+		}
 	}
 
 	@Override
