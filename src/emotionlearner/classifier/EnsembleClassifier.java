@@ -124,7 +124,7 @@ public class EnsembleClassifier {
 								else {
 									for(int i=0;i<resDist.length;++i)
 										//coefficient must be changed to weight
-										resDist[i] += 1*dist[i];
+										resDist[i] += listener.weight()*dist[i];
 								}
 							} catch (Exception ex) {
 								System.out.println(ex.getMessage());

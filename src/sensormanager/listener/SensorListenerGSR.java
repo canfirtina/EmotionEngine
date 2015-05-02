@@ -135,6 +135,11 @@ public class SensorListenerGSR extends SensorListener {
         }
     }
 
+	@Override
+	public double weight() {
+		return 0.1;
+	}
+
     private class SerialReader implements Runnable {
 
         private InputStream inputStream;

@@ -258,6 +258,11 @@ public class SensorListenerEEG extends SensorListener {
         return "OpenBCI EEG";
     }
 
+	@Override
+	public double weight() {
+		return 1.0;
+	}
+
     /**
      * DataInterpreter interprets raw OpenBCI data packets.
      */
