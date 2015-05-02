@@ -158,16 +158,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         final Emotion label = emotionLabel;
         
         final MediaPlayer video = new MediaPlayer(new Media(videoFile.toURI().toString()));
-        video.setOnReady(new Runnable() {
-
-            @Override
-            public void run() {
-                
-                video.play();
-                
-                engine.openTrainingSession(label);
-            }
-        });
 
         MediaView vidView = new MediaView(video);
         vidView.setFitWidth(750);
@@ -183,6 +173,45 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
             public void handle(WindowEvent we) {
                 video.stop();
                 engine.closeTrainingSession();
+            }
+        });
+        
+        video.setOnReady(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                video.play();
+                engine.openTrainingSession(label);
+            }
+        });
+        
+        video.setOnPaused(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                engine.closeTrainingSession();
+                stage.close();
+            }
+        });
+        
+        video.setOnPlaying(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                System.out.println("playing");
+            }
+        });
+        
+        video.setOnStopped(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                engine.closeTrainingSession();
+                stage.close();
             }
         });
     }
