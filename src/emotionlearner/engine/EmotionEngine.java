@@ -143,7 +143,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		this.emotionClassifier.registerObserver(this);
 		
         this.sessionEmotion = null;
-		
+		this.testFeatures = new FeatureListController(50000);
 		
 	}
 	
@@ -259,7 +259,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	
 	/**
 	 * Starts a training session with a label
-	 * @param label
+	 * @param emotion
 	 */
 	public boolean openTrainingSession(final Emotion emotion){
 		synchronized (executorLocker) {
@@ -317,7 +317,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 			executorService.submit(new Callable<Void>() {
 				@Override
 				public Void call(){
-					if(testFeatures !=null || sessionTrainingFeatures!=null)
+					if(sessionTrainingFeatures!=null)
 						return null;
 					isClassifySessionOpen = true;
 					
@@ -509,6 +509,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					
 					
 					notifyEngineObservers();
+					sensor.startStreaming();
 					
 					return null;
 				}

@@ -136,7 +136,7 @@ public class Communicator {
                 String request[] = line.split(" ");
 
                 if (request[0].equals("getemotion")) {
-                    sendMessage("emotion " + ee.currentEmotion().name());
+                   //TODO
                 } else if (request[0].equals("train")) {
                     //Find the emotion in request and start training with that
                     for (Emotion em : Emotion.values()) {
