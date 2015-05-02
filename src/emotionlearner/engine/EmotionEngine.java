@@ -368,6 +368,14 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	}
 	
 	/**
+	 * Gets lastly predicted emotion
+	 * @return 
+	 */
+	public Emotion currentEmotion(){
+		return emotionClassifier.emotion();
+	}
+	
+	/**
 	 * Creates a sensor listener of a type which uses a certain port number
 	 * @param portNumber
 	 * @param sensorType
@@ -622,7 +630,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	}	
 
 	@Override
-	public void classifyNotification(EnsembleClassifier classifier) {
+	public void classifyNotification(final EnsembleClassifier classifier) {
 		synchronized(executorLocker){
 			executorService.submit(new Callable<Void>(){
 				@Override
@@ -636,7 +644,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	}
 
 	@Override
-	public void trainNotification(EnsembleClassifier classifier) {
+	public void trainNotification(final EnsembleClassifier classifier) {
 	}
 	
 }
