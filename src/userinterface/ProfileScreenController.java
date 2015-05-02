@@ -194,6 +194,15 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
             }
         });
         
+        video.setOnPaused(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                engine.closeTrainingSession();
+            }
+        });
+        
         video.setOnEndOfMedia(new Runnable() {
 
             @Override

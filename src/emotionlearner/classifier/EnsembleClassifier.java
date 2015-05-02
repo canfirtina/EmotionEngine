@@ -230,7 +230,7 @@ public class EnsembleClassifier {
 							instances.add(instance);
 						}
 						model.buildClassifier(instances);
-						
+						System.out.println("built");
 						for(ClassifierObserver o:observers)
 							o.trainNotification(that);
 						
