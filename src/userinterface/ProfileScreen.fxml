@@ -9,7 +9,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.ProfileScreenController">
+<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" stylesheets="@JMetroLightTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.ProfileScreenController">
    <children>
       <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -28,8 +28,8 @@
                         <Font size="12.0" />
                      </font>
                   </Label>
-                  <Button fx:id="refreshButton" layoutX="670.0" layoutY="8.0" mnemonicParsing="false" onAction="#refreshButtonPressed" text="Refresh" />
-                  <Button fx:id="connectButton" layoutX="595.0" layoutY="8.0" mnemonicParsing="false" onAction="#connectButtonPressed" text="Connect" />
+                  <Button fx:id="refreshButton" layoutX="636.0" layoutY="8.0" mnemonicParsing="false" onAction="#refreshButtonPressed" text="Refresh" />
+                  <Button fx:id="connectButton" layoutX="521.0" layoutY="8.0" mnemonicParsing="false" onAction="#connectButtonPressed" text="Connect" />
                </children>
             </Pane>
             <HBox VBox.vgrow="ALWAYS">

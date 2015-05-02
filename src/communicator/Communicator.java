@@ -13,7 +13,7 @@ import shared.Emotion;
  * Handles communication between client and server processes
  */
 public class Communicator {
-    public static final int port = 9999;
+    public static final int port = 9997;
     private static final int READ_TIMEOUT = 2000;
     private static final String HEART_BEAT = "HB";
 
