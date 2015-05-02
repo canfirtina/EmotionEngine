@@ -187,10 +187,9 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         });
         
         video.setOnPaused(new Runnable() {
-
             @Override
             public void run() {
-                
+                System.out.println("video on pause");
                 engine.closeTrainingSession();
                 stage.close();
             }
@@ -209,7 +208,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
             @Override
             public void run() {
-                
+                System.out.println("video onstopped");
                 engine.closeTrainingSession();
                 stage.close();
             }
