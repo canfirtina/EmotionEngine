@@ -63,6 +63,16 @@ public class EnsembleClassifier {
 	private ArrayList<ClassifierObserver> observers;
 	
 	/**
+	 * lastly classified emotion
+	 */
+	private Emotion lastEmotion;
+	
+	/**
+	 * locker used for lastEmotion synchronization
+	 */
+	private final Object lastEmotionLocker;
+	
+	/**
 	 * Classifier constructor
 	 */
 	public EnsembleClassifier(){
@@ -70,6 +80,8 @@ public class EnsembleClassifier {
 		dataSets = new HashMap<>();
 		executorLocker = new Object();
 		executorService = Executors.newSingleThreadExecutor();
+		observers = new ArrayList<>();
+		lastEmotionLocker = new Object();
 	}
 	
 	
@@ -80,6 +92,7 @@ public class EnsembleClassifier {
 	 * @return 
 	 */
 	public void classify(FeatureListController featureController){
+		final EnsembleClassifier that = this;
 		synchronized(executorLocker){
 			executorService.execute(new Runnable() {
 				@Override
@@ -122,16 +135,25 @@ public class EnsembleClassifier {
 					}
 
 					if(resDist != null){
-						for(int i=0;i<resDist.length;++i)
-							System.out.println(resDist[i]+ " ");
-						System.out.println();
+						int maxInd = 0;
+						for(int i=1;i<resDist.length;++i)
+							if(resDist[i] > maxInd)
+								maxInd = i;
+						synchronized(lastEmotionLocker){
+							lastEmotion = Emotion.emotionWithValue(maxInd);
+						}
+						for(ClassifierObserver o : observers)
+							o.classifyNotification(that);
 					}
 				}
 			});
 		}
-		
-		
-		
+	}
+	
+	public Emotion emotion(){
+		synchronized(lastEmotionLocker){
+			return lastEmotion;
+		}
 	}
 	
 	/**
@@ -164,6 +186,7 @@ public class EnsembleClassifier {
 	 * @return  
 	 */
 	public void trainOfSensor(FeatureListController featureController, SensorListener sensorListener){
+		final EnsembleClassifier that = this; 
 		synchronized(executorLocker){
 			executorService.execute(new Runnable() {
 				@Override
@@ -207,7 +230,10 @@ public class EnsembleClassifier {
 							instances.add(instance);
 						}
 						model.buildClassifier(instances);
-
+						
+						for(ClassifierObserver o:observers)
+							o.trainNotification(that);
+						
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
@@ -235,7 +261,7 @@ public class EnsembleClassifier {
 					dataSets.remove(listener);
 				}
 			});
-		}		
+		}	
 	}
 	
 	/**
@@ -243,7 +269,14 @@ public class EnsembleClassifier {
 	 * @param observer 
 	 */
 	public void registerObserver(ClassifierObserver observer){
-		
+		synchronized(executorLocker){
+			executorService.execute(new Runnable() {
+				@Override
+				public void run() {
+					observers.add(observer);
+				}
+			});
+		}
 	}
 	
 	/**
@@ -251,7 +284,14 @@ public class EnsembleClassifier {
 	 * @param observer 
 	 */
 	public void unregisterObserver(ClassifierObserver observer){
-		
+		synchronized(executorLocker){
+			executorService.execute(new Runnable() {
+				@Override
+				public void run() {
+					observers.remove(observer);
+				}
+			});
+		}
 	}
 	
 	

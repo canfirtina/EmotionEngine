@@ -29,11 +29,17 @@ public enum Emotion {
 		return labels;
 	}
 	
+	
+	
 	private Emotion(int val){
 		value = val;
 	}
 	
 	public int getValue(){
 		return value;
+	}
+	
+	public static Emotion emotionWithValue(int value){
+		return Emotion.valueOf((String)labels.elementAt(value));
 	}
 }

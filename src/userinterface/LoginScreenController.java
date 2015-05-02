@@ -27,9 +27,9 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     @FXML
     private Label warningLabel;
     @FXML
-    private Hyperlink signUpButton;
+    private Button signUpButton;
     @FXML
-    private Hyperlink forgotPasswordButton;
+    private Button forgotPasswordButton;
     @FXML
     private Button loginButton;
     @FXML

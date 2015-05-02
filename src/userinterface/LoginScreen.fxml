@@ -8,33 +8,37 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.LoginScreenController">
+<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" styleClass="background" stylesheets="@JMetroLightTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.LoginScreenController">
    <children>
-      <Label fx:id="warningLabel" alignment="CENTER" layoutX="135.0" layoutY="98.0" prefHeight="15.0" prefWidth="450.0" textAlignment="CENTER" textFill="RED" AnchorPane.topAnchor="100.0">
+      <Label fx:id="warningLabel" alignment="CENTER" layoutX="149.0" layoutY="155.0" prefHeight="15.0" prefWidth="450.0" textAlignment="CENTER" textFill="RED" AnchorPane.topAnchor="155.0">
          <font>
             <Font size="12.0" />
          </font></Label>
-      <TextField fx:id="emailField" layoutX="298.0" layoutY="131.0" promptText="E-mail address">
+      <TextField fx:id="emailField" layoutX="285.0" layoutY="180.0" prefHeight="30.0" prefWidth="180.0" promptText="E-mail address" stylesheets="@JMetroLightTheme.css">
          <font>
-            <Font size="12.0" />
+            <Font size="14.0" />
          </font></TextField>
-      <PasswordField fx:id="passwordField" layoutX="298.0" layoutY="165.0" promptText="Password">
+      <PasswordField fx:id="passwordField" layoutX="285.0" layoutY="215.0" prefHeight="30.0" prefWidth="180.0" promptText="Password" stylesheets="@JMetroLightTheme.css">
          <font>
-            <Font size="12.0" />
+            <Font size="14.0" />
          </font></PasswordField>
-      <Button fx:id="loginButton" layoutX="350.0" layoutY="203.0" mnemonicParsing="false" onAction="#loginPressed" text="Login">
+      <Button fx:id="loginButton" alignment="CENTER" layoutX="285.0" layoutY="250.0" mnemonicParsing="false" onAction="#loginPressed" prefHeight="30.0" prefWidth="180.0" styleClass="featured-button" stylesheets="@JMetroLightTheme.css" text="Login">
          <font>
             <Font size="12.0" />
          </font></Button>
-      <Hyperlink fx:id="signUpButton" layoutX="297.0" layoutY="238.0" onAction="#signUpPressed" text="Sign Up" underline="true">
+      <Label layoutX="40.0" layoutY="40.0" styleClass="header" stylesheets="@JMetroLightTheme.css" text="Emotion Engine">
          <font>
-            <Font size="12.0" />
+            <Font name="Segoe UI" size="30.0" />
          </font>
-      </Hyperlink>
-      <Hyperlink fx:id="forgotPasswordButton" layoutX="349.0" layoutY="238.0" onAction="#forgotPasswordPressed" text="Forgot Password" underline="true">
+      </Label>
+      <Button fx:id="signUpButton" alignment="CENTER" layoutX="285.0" layoutY="290.0" mnemonicParsing="false" onAction="#signUpPressed" prefHeight="30.0" prefWidth="89.0" style="-fx-font-size: 11;" text="Sign Up">
          <font>
-            <Font size="12.0" />
+            <Font size="11.0" />
          </font>
-      </Hyperlink>
+      </Button>
+      <Button fx:id="forgotPasswordButton" alignment="CENTER" layoutX="375.0" layoutY="290.0" mnemonicParsing="false" onAction="#forgotPasswordPressed" prefHeight="30.0" prefWidth="89.0" style="-fx-font-size: 11;" text="Forgot?">
+         <font>
+            <Font size="11.0" />
+         </font></Button>
    </children>
 </AnchorPane>
