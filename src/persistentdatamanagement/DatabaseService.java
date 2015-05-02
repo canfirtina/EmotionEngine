@@ -62,13 +62,14 @@ public class DatabaseService {
     private Statement getStatement() {
         try {
             if (con != null && con.isValid(1)) {
-                if(st != null && !st.isClosed())
+                if (st != null && !st.isClosed()) {
                     return st;
-                else
+                } else {
                     return con.createStatement();
+                }
             } else {
                 return getConnection().createStatement();
-            }            
+            }
         } catch (SQLException ex) {
             System.out.println("");
         }
@@ -177,6 +178,81 @@ public class DatabaseService {
         }
 
         return all;
+    }
+
+    boolean rateTutorial(String user, String tutorial, int rating) {
+        if (rating > 5) {
+            rating = 5;
+        } else if (rating < 0) {
+            rating = 0;
+        }
+
+        try {
+            st = getStatement();
+
+            st.executeUpdate("INSERT INTO `emotion_db`.`user_ratings` VALUES('" + user + "','" + tutorial + "','" + rating + "');");
+            return true;
+        } catch (SQLException ex) {
+            System.out.println(ex.toString());
+            return false;
+        } finally {
+            attemptClose(con, st, rs);
+
+        }
+    }
+
+    boolean updateRating(String user, String tutorial, int rating) {
+        if (rating > 5) {
+            rating = 5;
+        } else if (rating < 0) {
+            rating = 0;
+        }
+
+        try {
+            st = getStatement();
+
+            st.executeUpdate("UPDATE `emotion_db`.`user_ratings` SET `star` = '" + rating + "' WHERE `email` = '" + user + "' and tutorial = '" + tutorial + "';");
+            return true;
+        } catch (SQLException ex) {
+            System.out.println(ex.toString());
+            return false;
+        } finally {
+            attemptClose(con, st, rs);
+        }
+    }
+
+    double getAverageRating(String tutorial) {
+        try {
+            st = getStatement();
+
+            rs = st.executeQuery("SELECT AVG(`star`) as star FROM `emotion_db`.`user_ratings` WHERE `tutorial`='" + tutorial + "' GROUP BY `tutorial`;");
+            if (rs.next()) {
+                return rs.getDouble("star");
+            }
+            return -1;
+        } catch (SQLException ex) {
+            System.out.println(ex.toString());
+            return -1;
+        } finally {
+            attemptClose(con, st, rs);
+        }
+    }
+
+    double getUserRating(String user, String tutorial) {
+        try {
+            st = getStatement();
+
+            rs = st.executeQuery("SELECT `star` FROM `emotion_db`.`user_ratings` WHERE `email`='" + user + "' AND `tutorial` = '"+tutorial+"';");
+            if (rs.next()) {
+                return rs.getDouble("star");
+            }
+            return -1;
+        } catch (SQLException ex) {
+            System.out.println(ex.toString());
+            return -1;
+        } finally {
+            attemptClose(con, st, rs);
+        }
     }
 
     boolean setCurrentUser(String userName) {
@@ -395,7 +471,7 @@ public class DatabaseService {
      */
     static void attemptClose(Connection c, Statement s, ResultSet r) {
         attemptClose(r);
-         /*attemptClose(s);
+        /*attemptClose(s);
          attemptClose(c);*/
     }
 
@@ -428,4 +504,5 @@ public class DatabaseService {
             System.out.println(e.toString());
         }
     }
+
 }

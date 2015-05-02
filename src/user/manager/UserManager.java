@@ -34,6 +34,32 @@ public class UserManager {
         users = DataManager.getInstance().getAllUsers();
         currentUser = DataManager.getInstance().getCurrentUser().getName();
     }
+    
+    /**
+     * Allows user to rate a tutorial
+     * @param tutorial
+     */
+    public boolean rate(String tutorial, int rating){        
+        return DataManager.getInstance().rateTutorial(currentUser, tutorial, rating);
+    }
+    
+    /**
+     * Allows user to update his/her tutorial rating
+     * @param tutorial
+     */
+    public boolean updateRating(String tutorial, int rating){        
+        return DataManager.getInstance().updateRating(currentUser, tutorial, rating);
+    }
+    
+    public double getAverageRating(String tutorial){
+        return DataManager.getInstance().getAverageRating(tutorial);
+    }
+    
+    public double getUserRating(String user, String tutorial){
+        return DataManager.getInstance().getUserRating(user, tutorial);
+    }
+    
+    
 
     /**
      * Checks the validity of the given credentials and logs the user in
@@ -138,25 +164,25 @@ public class UserManager {
      *
      * @param sensorID
      */
-    public void enableSensor(String sensorID) {
+    /*public void enableSensor(String sensorID) {
         getCurrentUser().enableSensor(sensorID);
         DataManager.getInstance().saveUser(getCurrentUser());
-    }
+    }*/
 
     /**
      * Disables the given sensor for the current user.
      *
      * @param sensorID
      */
-    public void disableSensor(String sensorID) {
+    /*public void disableSensor(String sensorID) {
         getCurrentUser().disableSensor(sensorID);
         DataManager.getInstance().saveUser(getCurrentUser());
-    }
+    }*/
 
     /**
      * Updates which tutorials the user has played
      *
-     * @param tutPair
+     * @param tutPair Sensor-Tutorial pair
      */
     public void playedTutorial(Pair<String, String> tutPair) {
         getCurrentUser().playedTutorial(tutPair);
