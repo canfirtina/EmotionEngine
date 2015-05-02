@@ -261,7 +261,7 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * Starts a training session with a label
 	 * @param emotion
 	 */
-	public boolean openTrainingSession(final Emotion emotion){
+	public void openTrainingSession(final Emotion emotion){
 		synchronized (executorLocker) {
 			executorService.submit(new Callable<Void>() {
 				@Override
@@ -280,9 +280,32 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 				}
 			});
 		}
-					
-		return true;
 	}
+	
+	/**
+	 * Cancels a training session
+	 * @param emotion
+	 */
+	public void cancelTrainingSession(){
+		synchronized (executorLocker) {
+			executorService.submit(new Callable<Void>() {
+				@Override
+				public Void call(){
+					if(sessionTrainingFeatures==null)
+						return null;
+					
+					synchronized(trainSessionLocker){
+						sessionEmotion = null;
+						sessionTrainingFeatures = null;
+					}
+					
+					return null;
+				}
+			});
+		}
+	}
+	
+	
 	
 	/**
 	 * Finishes the current training session
