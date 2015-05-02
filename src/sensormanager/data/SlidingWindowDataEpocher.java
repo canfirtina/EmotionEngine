@@ -80,5 +80,10 @@ public class SlidingWindowDataEpocher extends DataEpocher {
 		this.lastEpochTimestamp = new Timestamp(new Date().getTime());
 		return super.getEpoch();
 	}
+	
+	@Override
+	public void reset(){
+		
+	}
 
 }
