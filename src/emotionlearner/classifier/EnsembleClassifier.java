@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import javafx.util.Pair;
 import sensormanager.listener.SensorListener;
 import sensormanager.listener.SensorListenerEEG;
+import sensormanager.listener.SensorListenerGSR;
 import shared.Emotion;
 import shared.FeatureList;
 import shared.FeatureListController;
@@ -168,6 +169,11 @@ public class EnsembleClassifier {
 			String[] options = null;
 			
 			if(sensorListener.getClass() == SensorListenerEEG.class){
+				classifierClassPath = "weka.classifiers.functions.SMO";
+				options = new String[]{"-N", "2"};
+			}
+			else if(sensorListener.getClass() == SensorListenerGSR.class){
+				//TODO
 				classifierClassPath = "weka.classifiers.functions.SMO";
 				options = new String[]{"-N", "2"};
 			}

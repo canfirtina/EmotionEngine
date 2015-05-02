@@ -42,7 +42,7 @@ public class FeatureExtractorGSR extends FeatureExtractor{
 	
 	@Override
 	public FeatureList getFeatures() {
-		final int numFeatures = getProperties().getNumChannels();
+		final int numFeatures = getProperties().getNumFeaturesEachChannel();
 
         double[][] rawDataTransposed = new double[rawData.get(0).getData().length][rawData.size()];
         for (int i = 0; i < rawDataTransposed.length; ++i) {

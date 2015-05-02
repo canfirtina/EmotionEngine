@@ -1,10 +1,13 @@
 package persistentdatamanagement;
 
+import emotionlearner.feature.FeatureExtractorGSR;
 import emotionlearner.feature.FeatureExtractorProperties;
 import emotionlearner.feature.FeatureExtractor;
 import emotionlearner.feature.FeatureExtractorEEG;
 import sensormanager.listener.SensorListener;
 import java.awt.image.BufferedImage;
+
+import sensormanager.listener.SensorListenerGSR;
 import user.manager.User;
 
 import java.io.*;
@@ -123,7 +126,7 @@ public class DataManager {
     /**
      * saves a batch of samples for a sensor. non-blocking.
      *
-     * @param list
+     * @param list_of_lists
      * @param sensor
      */
     public void saveMultipleSamples(List<FeatureList> list_of_lists, SensorListener sensor) {
@@ -183,6 +186,8 @@ public class DataManager {
 			FeatureExtractorProperties props=null;
 			if(sensor.getClass() == SensorListenerEEG.class)
 				props = FeatureExtractorEEG.getProperties();
+            else if (sensor.getClass() == SensorListenerGSR.class)
+                props = FeatureExtractorGSR.getProperties();
 			
             featureLabelPairs.add(new FeatureList(features, props.getFeatureAttributes(), label));
         }

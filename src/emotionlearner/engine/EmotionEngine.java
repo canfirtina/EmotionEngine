@@ -1,12 +1,10 @@
 package emotionlearner.engine;
 import communicator.Communicator;
 import emotionlearner.classifier.ClassifierObserver;
+import emotionlearner.feature.FeatureExtractorGSR;
 import sensormanager.data.SlidingWindowDataEpocher;
 import sensormanager.data.TimestampedRawData;
-import sensormanager.listener.SensorObserver;
-import sensormanager.listener.SensorListener;
-import sensormanager.listener.SensorListenerEEG;
-import sensormanager.listener.SensorFactory;
+import sensormanager.listener.*;
 import emotionlearner.feature.FeatureExtractor;
 import sensormanager.data.DataEpocher;
 import emotionlearner.feature.FeatureExtractorEEG;
@@ -285,7 +283,6 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	
 	/**
 	 * Cancels a training session
-	 * @param emotion
 	 */
 	public void cancelTrainingSession(){
 		synchronized (executorLocker) {
@@ -404,6 +401,8 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					
 					if(sensorType.equals(SensorListenerEEG.class))
 						listener = new SensorListenerEEG(comPort);
+					else if (sensorType.equals(SensorListenerGSR.class))
+						listener = new SensorListenerGSR(comPort);
 					
 					listener.registerObserver(engine);
 					
@@ -520,6 +519,9 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 					DataEpocher epocher = null;
 					if(sensor.getClass().equals( SensorListenerEEG.class)){
 						extractor = new FeatureExtractorEEG();
+						epocher = new SlidingWindowDataEpocher(4000,1000);
+					} else if(sensor.getClass().equals(SensorListenerGSR.class)) {
+						extractor = new FeatureExtractorGSR();
 						epocher = new SlidingWindowDataEpocher(4000,1000);
 					}
 					
