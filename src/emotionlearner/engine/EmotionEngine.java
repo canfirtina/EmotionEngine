@@ -113,8 +113,10 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 	 * @return
 	 */
 	public static EmotionEngine sharedInstance(DataManager persistentDataManager){
-		if(engine==null)
+		if(engine==null){
 			engine = new EmotionEngine();
+			engine.startEngine();
+		}
 		
 		return engine;
 	}
@@ -137,8 +139,14 @@ public class EmotionEngine implements SensorObserver,SensorFactory, DataManagerO
 		
         this.sessionEmotion = null;
 		
-		persistentDataManager = DataManager.getInstance();		
 		
+	}
+	
+	/**
+	 * starts engine and call related components
+	 */
+	private void startEngine(){
+		persistentDataManager = DataManager.getInstance();		
 		Communicator.startServer();
 		Communicator.waitClient();
 	}
