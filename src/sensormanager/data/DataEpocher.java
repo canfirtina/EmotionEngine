@@ -56,4 +56,11 @@ public abstract class DataEpocher {
 		allData = new ArrayList<TimestampedRawData>();
 	}
 	
+	/**
+	 * Is constraint is suitable for new data
+	 * @param data
+	 * @return
+	 */
+	public abstract boolean isNewDataSuitable(TimestampedRawData data);
+	
 }
