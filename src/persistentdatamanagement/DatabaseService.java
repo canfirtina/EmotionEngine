@@ -99,9 +99,9 @@ public class DatabaseService {
                  while (rs.next()) {
                  currUser.enableSensor(rs.getString("sensor"));
                  }*/
-                rs = st.executeQuery("select * from games_played where email = '" + currentUser + "';");
+                rs = st.executeQuery("select * from software_used where email = '" + currentUser + "';");
                 while (rs.next()) {
-                    currUser.playedGame(rs.getString("game"), rs.getInt("time"));
+                    currUser.usedSoftware(rs.getString("software"), rs.getInt("time"));
                 }
 
                 rs = st.executeQuery("select * from play_count where email = '" + currentUser + "';");
@@ -135,9 +135,9 @@ public class DatabaseService {
                  while (rs.next()) {
                  currUser.enableSensor(rs.getString("sensor"));
                  }*/
-                rs = st.executeQuery("select * from games_played where email = '" + currentUser + "';");
+                rs = st.executeQuery("select * from software_used where email = '" + currentUser + "';");
                 while (rs.next()) {
-                    currUser.playedGame(rs.getString("game"), rs.getInt("time"));
+                    currUser.usedSoftware(rs.getString("software"), rs.getInt("time"));
                 }
 
                 rs = st.executeQuery("select * from play_count where email = '" + currentUser + "';");
@@ -289,10 +289,10 @@ public class DatabaseService {
              st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','0');");
              }
              }*/
-            if (!u.getGamesPlayed().isEmpty()) {
-                st.executeUpdate("DELETE FROM `emotion_db`.`games_played` WHERE email = '" + u.getName() + "';");
-                for (String key : u.getGamesPlayed().keySet()) {
-                    st.executeUpdate("INSERT INTO `emotion_db`.`games_played` VALUES('" + u.getName() + "','" + key + "'," + u.getGamesPlayed().get(key) + ");");
+            if (!u.getSoftwareUser().isEmpty()) {
+                st.executeUpdate("DELETE FROM `emotion_db`.`software_used` WHERE email = '" + u.getName() + "';");
+                for (String key : u.getSoftwareUser().keySet()) {
+                    st.executeUpdate("INSERT INTO `emotion_db`.`software_used` VALUES('" + u.getName() + "','" + key + "'," + u.getSoftwareUser().get(key) + ");");
                 }
             }
 
