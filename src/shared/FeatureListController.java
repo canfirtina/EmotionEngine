@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Date;
+
+import sensormanager.data.LBSlidingWindowDataEpocher;
+import sensormanager.data.LengthBasedDataEpocher;
 import sensormanager.listener.SensorListener;
 
 /**
@@ -46,7 +49,7 @@ public class FeatureListController {
 	 */
 	public FeatureListController(long timeLimit){
 		this();
-		this.timeLimit = timeLimit;
+		this.timeLimit = timeLimit;//TODO
 	}
 	
 	/**
@@ -102,7 +105,7 @@ public class FeatureListController {
 		listenerFeatures.add(list);
 		//if there is a time limit than delete some of them
 		if(timeLimit !=-1){
-			while(list.getTimestamp().getTime() - listenerFeatures.peekFirst().getTimestamp().getTime() > timeLimit)
+			while(list.getTime() - listenerFeatures.peekFirst().getTime() > timeLimit)
 				listenerFeatures.removeFirst();
 		}
 		
@@ -132,11 +135,17 @@ public class FeatureListController {
 	 */
 	public List<FeatureList> getLastFeatureListsInMilliseconds(SensorListener listener, long timeDifference){
 		//if there is no such sensor then ignore it
+
 		if(!sensorListeners.contains(listener))
 			return null;
-		
-		LinkedList<FeatureList> listenerFeatures = listOfFeatureLists.get(sensorListeners.indexOf(listener));
-		return lastFeatureListsInMilliseconds(listenerFeatures, timeDifference);
+
+		if (listener.getDataEpocher() instanceof LengthBasedDataEpocher) {
+			return getLastNFeatureList(listener, (int)(timeDifference/1000/( listener.getDataEpocher().getConstraint()/listener.getFrequency())));
+		} else {
+
+			LinkedList<FeatureList> listenerFeatures = listOfFeatureLists.get(sensorListeners.indexOf(listener));
+			return lastFeatureListsInMilliseconds(listenerFeatures, timeDifference);
+		}
 	}
 	
 	/**
@@ -167,9 +176,14 @@ public class FeatureListController {
 		listenerFeatures = (LinkedList<FeatureList>)listenerFeatures.clone();
 		if(timeDiff == -1)
 			return listenerFeatures;
-		long now = new Date().getTime();
-		while(listenerFeatures.peekFirst()!=null && now - listenerFeatures.peekFirst().getTimestamp().getTime() > timeDiff)
+		long now = System.nanoTime()/1000000;
+		for (FeatureList tf : listenerFeatures) {
+			System.out.println(tf.getTime());
+		}
+		System.out.println(now);
+		while(listenerFeatures.peekFirst()!=null && now - listenerFeatures.peekFirst().getTime() > timeDiff)
 			listenerFeatures.removeFirst();
+		System.out.println("listenerFeatures.size(): " + listenerFeatures.size());
 		return listenerFeatures;
 	}
 	

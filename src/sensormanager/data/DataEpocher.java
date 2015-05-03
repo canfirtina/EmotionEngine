@@ -1,6 +1,7 @@
 package sensormanager.data;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -18,20 +19,20 @@ public abstract class DataEpocher {
 	/**
 	 * raw data 
 	 */
-	protected List<TimestampedRawData> allData;
+	protected LinkedList<TimestampedRawData> allData;
 	
 	/**
 	 * Creates Epocher with raw data window with constraint
-	 * @param epochLength
+	 * @param constraint
 	 */
 	public DataEpocher(long constraint){
 		this.constraint = constraint;
-		allData = new ArrayList<TimestampedRawData>();
+		allData = new LinkedList<TimestampedRawData>();
 	}
 	
 	/**
 	 * Creates Epocher with raw data window w
-	 * @param epochLength
+	 * @param rawData
 	 */
 	public abstract boolean addData(TimestampedRawData rawData);
 	
@@ -46,14 +47,14 @@ public abstract class DataEpocher {
 	 * @return
 	 */
 	public List<TimestampedRawData> getEpoch(){
-		return allData;
+		return (List<TimestampedRawData>)allData.clone();
 	}
 	
 	/**
 	 * reset data for reuse
 	 */
 	public void reset(){
-		allData = new ArrayList<TimestampedRawData>();
+		allData = new LinkedList<TimestampedRawData>();
 	}
 	
 	/**
@@ -62,5 +63,9 @@ public abstract class DataEpocher {
 	 * @return
 	 */
 	public abstract boolean isNewDataSuitable(TimestampedRawData data);
+
+	public long getConstraint() {
+		return constraint;
+	}
 	
 }

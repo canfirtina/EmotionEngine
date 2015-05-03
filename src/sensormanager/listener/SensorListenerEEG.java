@@ -29,7 +29,7 @@ public class SensorListenerEEG extends SensorListener {
     private static final byte CODE_CHANNEL_OFF[] = {'1', '2', '3', '4', '5', '6', '7', '8', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i'};
     private static final byte CODE_STOP_STREAMING = 's';
     private static final byte CODE_QUERY = '?';
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 825;
     private static final int CHANNEL_LENGTH = 8; //8 or 16
     private static final int MESSAGE_LENGTH = 33;
     private static final long CONSECUTIVE_COMMAND_DELAY = 100;
@@ -107,8 +107,8 @@ public class SensorListenerEEG extends SensorListener {
         synchronized (lockStreaming) {
             dataEpocher.reset();
             streamingOn = true;
-            writeBytes(CODE_START_STREAMING);
             executorReader.submit(new DataInterpreter());
+            writeBytes(CODE_START_STREAMING);
         }
     }
 
@@ -254,6 +254,11 @@ public class SensorListenerEEG extends SensorListener {
     }
 
     @Override
+    public int getFrequency() {
+        return 250;
+    }
+
+    @Override
     public String toString(){
         return "OpenBCI EEG";
     }
@@ -276,7 +281,8 @@ public class SensorListenerEEG extends SensorListener {
                 byte[] rawdata = new byte[MESSAGE_LENGTH-2];
                 int index = 0;
                 int len;
-
+/*                long[] tss = new long[825];
+                int c = 0;*/
                 while ((len = inputStream.read(buffer)) > -1) {
 
                     if(len == 0)
@@ -299,19 +305,23 @@ public class SensorListenerEEG extends SensorListener {
                                 Filter.bandpass1_50(dat);
 */
                                 TimestampedRawData tsrd = new TimestampedRawData(dat);
-
-                                if(dataEpocher.isNewDataSuitable(tsrd))
-                                    dataEpocher.addData(tsrd);
-                                else {
-                                    if(dataEpocher.readyForEpoch()) {
-                                        lastEpoch = dataEpocher.getEpoch();
-                                        System.out.println(lastEpoch.size());
-                                        dataEpocher.reset();
-                                        notifyObservers();
+/*                                tss[((int) c)] = tsrd.getTime();
+                                c = (c+1)%25;
+                                if(c==0){
+                                    for(int x=0;x<10;x++) {
+                                        System.out.print(tss[x] + " ");
                                     }
-
-                                    dataEpocher.addData(tsrd);
+                                    System.out.println();
+                                }*/
+                                if(dataEpocher.readyForEpoch()) {
+                                    lastEpoch = dataEpocher.getEpoch();
+                                    System.out.println(lastEpoch.size());
+                                    dataEpocher.reset();
+                                    notifyObservers();
                                 }
+
+                                dataEpocher.addData(tsrd);
+
 
                             }
                             index = 0;
@@ -460,6 +470,7 @@ public class SensorListenerEEG extends SensorListener {
             return null;
         }
     }
+
 
 
 

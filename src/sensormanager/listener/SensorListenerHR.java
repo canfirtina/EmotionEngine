@@ -73,6 +73,11 @@ public class SensorListenerHR extends SensorListener {
         return "Heart Rate";
     }
 
+    @Override
+    public int getFrequency() {
+        return 0;
+    }
+
 	@Override
 	public double weight() {
 		return 0.0;

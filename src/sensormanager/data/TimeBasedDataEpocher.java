@@ -29,15 +29,15 @@ public class TimeBasedDataEpocher extends DataEpocher{
 	public boolean isNewDataSuitable(TimestampedRawData data){
 		if(allData.size() == 0)
 			return true;
-		if(data.getTimestamp().getTime() - allData.get(0).getTimestamp().getTime()>= constraint)
+		if(data.getTime() - allData.get(0).getTime()>= constraint)
 			return false;
 		return true;
 	}
 
 	public boolean readyForEpoch() {
 		if(allData.size() == 0)
-			return  false;
-		return System.currentTimeMillis() - allData.get(0).getTimestamp().getTime() >= constraint;
+			return false;
+		return System.nanoTime()/1000000 - allData.get(0).getTime() >= constraint;
 	}
 
 }
