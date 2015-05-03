@@ -3,6 +3,7 @@ package persistentdatamanagement;
 import emotionlearner.feature.FeatureExtractorGSR;
 import emotionlearner.feature.FeatureExtractorProperties;
 import emotionlearner.feature.FeatureExtractorEEG;
+import java.awt.Image;
 import sensormanager.listener.SensorListener;
 import java.awt.image.BufferedImage;
 
@@ -10,6 +11,7 @@ import sensormanager.listener.SensorListenerGSR;
 import user.manager.User;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -56,8 +58,6 @@ public class DataManager {
         }
 
         executorService = Executors.newSingleThreadExecutor();
-        System.out.println("current=" + getCurrentUser().getName());
-
     }
 
     /**
@@ -82,13 +82,14 @@ public class DataManager {
         // If user directory doesn't exist, create it
         if (!dir.exists()) {
             dir.mkdir();
-            BufferedImage img = null;
+            //BufferedImage img = null;
             try {
-                img = ImageIO.read(new File("icon-user-default.png"));
+                //img = ImageIO.read(new File("icon-user-default.png"));
+                //URL url = new URL("http://104.131.97.74/tutorials/profile.png");
+                //Image image = ImageIO.read(url);
                 File outputfile = new File(dir.getAbsolutePath() + "/profile.png");
-                ImageIO.write(img, "png", outputfile);
+                ImageIO.write(ImageIO.read(new URL("http://104.131.97.74/tutorials/profile.png")), "png", outputfile);
             } catch (IOException e) {
-                e.printStackTrace();
                 System.out.println("Couldn't save profile image");
             }
         }
@@ -168,7 +169,7 @@ public class DataManager {
         if (!new File(fileName).exists()) {
             return featureLabelPairs;
         }
-        
+
         try {
             lines = Files.readAllLines(Paths.get(fileName), Charset.defaultCharset());
         } catch (FileNotFoundException ex) {
@@ -300,13 +301,13 @@ public class DataManager {
         DatabaseService ds = DatabaseService.sharedInstance();
         return ds.getUserRating(user, tutorial);
     }
-    
-    public ArrayList<TutorialInfo> getAllTutorials(){
+
+    public ArrayList<TutorialInfo> getAllTutorials() {
         DatabaseService ds = DatabaseService.sharedInstance();
         return ds.getAllTutorials();
     }
-    
-    public TutorialInfo getTutorial(String tutorialName){
+
+    public TutorialInfo getTutorial(String tutorialName) {
         DatabaseService ds = DatabaseService.sharedInstance();
         return ds.getTutorial(tutorialName);
     }
