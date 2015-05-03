@@ -31,6 +31,7 @@ import shared.FeatureList;
  * Responsible for providing other packages with file input output operations.
  */
 public class DataManager {
+
     private static final String GAME_RECORDS_DIRECTORY = "User Data";
     private static final String PROFILE_PIC = "profile_picture";
 
@@ -69,6 +70,7 @@ public class DataManager {
      * @return
      */
     public String getUserDirectory(String username) {
+        addUserDirectory(username);
         return GAME_RECORDS_DIRECTORY + "/" + username;
     }
 
@@ -130,18 +132,18 @@ public class DataManager {
      * @param sensor
      */
     public void saveMultipleSamples(List<FeatureList> list_of_lists, SensorListener sensor) {
-		executorService.submit(new Callable() {
+        executorService.submit(new Callable() {
             public Object call() {
                 String fileName = getUserDirectory(getCurrentUser().getName()) + "/" + sensor.toString() + "_features.ftr";
-				
+
                 try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)))) {
-					for (FeatureList list : list_of_lists) {
-						out.print(list.getEmotion().toString() + ",");
-						for (int i = 0; i < list.size() - 1; ++i) {
-							out.print(list.get(i) + ",");
-						}
-						out.println(list.get(list.size() - 1));
-					}
+                    for (FeatureList list : list_of_lists) {
+                        out.print(list.getEmotion().toString() + ",");
+                        for (int i = 0; i < list.size() - 1; ++i) {
+                            out.print(list.get(i) + ",");
+                        }
+                        out.println(list.get(list.size() - 1));
+                    }
                     out.flush();
                     out.close();
                 } catch (IOException e) {
@@ -162,16 +164,19 @@ public class DataManager {
     public ArrayList<FeatureList> getGameData(SensorListener sensor) {
         ArrayList<FeatureList> featureLabelPairs = new ArrayList<FeatureList>();
         String fileName = getUserDirectory(getCurrentUser().getName()) + "/" + sensor.toString() + "_features.ftr";
-		System.out.println("fileName:" + fileName);
+        System.out.println("getting game data from:" + fileName);
+
         List<String> lines = new ArrayList<>();
 
+        if (!new File(fileName).exists()) {
+            return featureLabelPairs;
+        }
+        
         try {
             lines = Files.readAllLines(Paths.get(fileName), Charset.defaultCharset());
         } catch (FileNotFoundException ex) {
-            //Logger.getLogger(DataManager.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Couldnt find file: " + fileName);
         } catch (IOException ex) {
-            //Logger.getLogger(DataManager.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("IOException while reading: " + fileName);
         }
 
@@ -183,12 +188,13 @@ public class DataManager {
                 features[i - 1] = Double.parseDouble(current[i]);
             }
 
-			FeatureExtractorProperties props=null;
-			if(sensor.getClass() == SensorListenerEEG.class)
-				props = FeatureExtractorEEG.getProperties();
-            else if (sensor.getClass() == SensorListenerGSR.class)
+            FeatureExtractorProperties props = null;
+            if (sensor.getClass() == SensorListenerEEG.class) {
+                props = FeatureExtractorEEG.getProperties();
+            } else if (sensor.getClass() == SensorListenerGSR.class) {
                 props = FeatureExtractorGSR.getProperties();
-			
+            }
+
             featureLabelPairs.add(new FeatureList(features, props.getFeatureAttributes(), label));
         }
         return featureLabelPairs;
@@ -212,15 +218,15 @@ public class DataManager {
      */
     public ArrayList<User> getAllUsers() {
         /*File file = new File(GAME_RECORDS_DIRECTORY);
-        String[] names = file.list();
-        ArrayList<User> users = new ArrayList<User>();
+         String[] names = file.list();
+         ArrayList<User> users = new ArrayList<User>();
 
-        for (String name : names) {
-            if (new File(GAME_RECORDS_DIRECTORY + "/" + name).isDirectory()) {
-                users.add(getUser(name));
-            }
-        }*/
-        
+         for (String name : names) {
+         if (new File(GAME_RECORDS_DIRECTORY + "/" + name).isDirectory()) {
+         users.add(getUser(name));
+         }
+         }*/
+
         DatabaseService ds = DatabaseService.sharedInstance();
         return ds.getAllUsers();
     }
@@ -243,7 +249,7 @@ public class DataManager {
     public User getUser(String userName) {
         DatabaseService ds = DatabaseService.sharedInstance();
         User u = ds.getUser(userName);
-        if(u != null){
+        if (u != null) {
             addUserDirectory(userName);
         }
         return u;
@@ -256,11 +262,11 @@ public class DataManager {
      */
     public boolean setCurrentUser(String userName) {
         DatabaseService ds = DatabaseService.sharedInstance();
-        if(ds.setCurrentUser(userName)){
+        if (ds.setCurrentUser(userName)) {
             addUserDirectory(userName);
             return true;
         }
-        
+
         return false;
     }
 
@@ -269,11 +275,11 @@ public class DataManager {
      *
      * @return user
      */
-    public User getCurrentUser() {    
+    public User getCurrentUser() {
         DatabaseService ds = DatabaseService.sharedInstance();
         User u = ds.getCurrentUser();
-        if(u!= null){
-            addUserDirectory(u.getName());            
+        if (u != null) {
+            addUserDirectory(u.getName());
         }
         return u;
     }
@@ -282,7 +288,7 @@ public class DataManager {
         DatabaseService ds = DatabaseService.sharedInstance();
         return ds.rateTutorial(currentUser, tutorial, rating);
     }
-    
+
     public boolean updateRating(String currentUser, String tutorial, int rating) {
         DatabaseService ds = DatabaseService.sharedInstance();
         return ds.updateRating(currentUser, tutorial, rating);
