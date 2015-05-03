@@ -17,29 +17,18 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ListView.EditEvent;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.cell.ComboBoxListCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import persistentdatamanagement.DataManager;
 import sensormanager.listener.SensorListener;
@@ -95,12 +84,12 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     private HashMap<String, Class> sensorsOnSerialPorts;
     private ArrayList<String> availableSerialPorts;
     private ArrayList<TutorialItem> tutorialItems;
-    private ArrayList<ToggleButton> serialSerialButtons;
+    private ArrayList<ToggleButton> serialButtons;
 
     private final String NOSENSORLIST = "Cancel";
     private final String CONNECT = "Connect";
     private final String DISCONNECT = "Disconnect";
-    
+
     /**
      * Initializes the controller class.
      */
@@ -111,9 +100,10 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         //TODO by hand for now
         tutorialItems = new ArrayList<TutorialItem>();
         ArrayList<TutorialInfo> tutorialInfoDb = DataManager.getInstance().getAllTutorials();
-        for( TutorialInfo info : tutorialInfoDb)
-            tutorialItems.add( new TutorialItem(info.getName(), info.getImagePath(), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
-        
+        for (TutorialInfo info : tutorialInfoDb) {
+            tutorialItems.add(new TutorialItem(info.getName(), info.getImagePath(), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
+        }
+
         ObservableList<TutorialItem> tutorials = FXCollections.observableArrayList(tutorialItems);
 
         tutorialList.setItems(tutorials);
@@ -138,24 +128,24 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
         //User Panel
         userEMail.setText(UserManager.getInstance().getCurrentUser().getName());
-        File profilePic = new File("icon-user-default.png");
+        File profilePic = new File("User Data/" + UserManager.getInstance().getCurrentUser().getName() + "/profile.png");
         profileImage.setImage(new Image(profilePic.toURI().toString()));
         //---------
 
         //Serial Ports List
         serialPortsPane.getChildren().clear();
 
-        serialSerialButtons = new ArrayList<ToggleButton>();
-        serialSerialButtons.add(sensorButton1);
-        serialSerialButtons.add(sensorButton2);
-        serialSerialButtons.add(sensorButton3);
-        serialSerialButtons.add(sensorButton4);
-        serialSerialButtons.add(new ToggleButton("No Ports Available"));
+        serialButtons = new ArrayList<ToggleButton>();
+        serialButtons.add(sensorButton1);
+        serialButtons.add(sensorButton2);
+        serialButtons.add(sensorButton3);
+        serialButtons.add(sensorButton4);
+        serialButtons.add(new ToggleButton("No Ports Available"));
 
-        serialSerialButtons.get(serialSerialButtons.size() - 1).setMaxHeight(10000);
-        serialSerialButtons.get(serialSerialButtons.size() - 1).setMaxWidth(10000);
+        serialButtons.get(serialButtons.size() - 1).setMaxHeight(10000);
+        serialButtons.get(serialButtons.size() - 1).setMaxWidth(10000);
 
-        serialPortsPane.add(serialSerialButtons.get(serialSerialButtons.size() - 1), 0, 0, 2, 2);
+        serialPortsPane.add(serialButtons.get(serialButtons.size() - 1), 0, 0, 2, 2);
         serialPortsPane.setDisable(true);
         //----------------
 
@@ -165,7 +155,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         hrButton.setText(new SensorListenerHR(null).toString());
         sensorsButtonBox.setDisable(true);
         //--------------
-        
+
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
         engine.registerObserver(this);
     }
@@ -179,15 +169,18 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @FXML
     private void refreshButtonPressed(ActionEvent event) {
 
-        sensorsOnSerialPorts = new HashMap<String, Class>();
+        sensorsButtonBox.setDisable(true);
+        connectButton.setDisable(true);
+        
         serialPortsPane.getChildren().clear();
+        
+        sensorsOnSerialPorts = new HashMap<String, Class>();
 
         availableSerialPorts = new ArrayList<String>();
         availableSerialPorts.addAll(Arrays.asList(sensormanager.util.SerialPortUtilities.getConnectedPorts()));
 
-        for (int i = 0; i < availableSerialPorts.size(); i++) {
-            serialSerialButtons.get(i).setText(availableSerialPorts.get(i));
-        }
+        for (int i = 0; i < availableSerialPorts.size(); i++)
+            serialButtons.get(i).setText(availableSerialPorts.get(i));
 
         if (availableSerialPorts.size() > 0) {
 
@@ -195,13 +188,14 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
             int rowSpan = availableSerialPorts.size() > 1 ? 1 : 2;
 
             for (int i = 0; i < availableSerialPorts.size(); i++) {
-                serialPortsPane.add(serialSerialButtons.get(i), i * columnSpan % 2, i * rowSpan % 2, columnSpan, rowSpan);
+                serialButtons.get(i).setSelected(false);
+                serialPortsPane.add(serialButtons.get(i), i * columnSpan % 2, i * rowSpan % 2, columnSpan, rowSpan);
             }
 
             serialPortsPane.setDisable(false);
         } else {
 
-            serialPortsPane.add(serialSerialButtons.get(serialSerialButtons.size() - 1), 0, 0, 2, 2);
+            serialPortsPane.add(serialButtons.get(serialButtons.size() - 1), 0, 0, 2, 2);
             serialPortsPane.setDisable(true);
         }
     }
@@ -209,71 +203,85 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @FXML
     private void connectButtonPressed(ActionEvent event) {
 
-        if( connectButton.getText().equalsIgnoreCase(CONNECT))
+        for( Node toggleButton : serialPortsPane.getChildren())
+            ((ToggleButton)toggleButton).setSelected(false);
+        
+        sensorsButtonBox.setDisable(true);
+        
+        if (connectButton.getText().equalsIgnoreCase(CONNECT))
             updateSensorList();
-        //else
-            //TODO disconnect selected port
+        else{
+            EmotionEngine.sharedInstance(null).stopEngine();
+            connectButton.setText(CONNECT);
+            connectButton.setDisable(true);
+        }
     }
 
     @FXML
     private void serialPortSelected(ActionEvent event) {
-        
-        if( serialPortsPane.getChildren().contains(event.getSource())){
-            
-            ToggleButton selectedToggle = (ToggleButton)event.getSource();
-            if( selectedToggle.isSelected()){
-                
-                for( Node child : serialPortsPane.getChildren())
-                    ((ToggleButton)child).setSelected(false);
-                
+
+        if (serialPortsPane.getChildren().contains(event.getSource())) {
+
+            ToggleButton selectedToggle = (ToggleButton) event.getSource();
+            if (selectedToggle.isSelected()) {
+
+                for (Node child : serialPortsPane.getChildren()) {
+                    ((ToggleButton) child).setSelected(false);
+                }
+
                 selectedToggle.setSelected(true);
                 sensorsButtonBox.setDisable(false);
-                
+
                 String comPort = availableSerialPorts.get(serialPortsPane.getChildren().indexOf(selectedToggle));
-                
+
                 connectButton.setText(CONNECT);
-                if( connectedSensors != null)
-                    for( SensorListener sensor : connectedSensors)
-                        if( sensor.getSerialPort().equalsIgnoreCase(comPort))
+                if (connectedSensors != null) {
+                    for (SensorListener sensor : connectedSensors) {
+                        if (sensor.getSerialPort().equalsIgnoreCase(comPort)) {
+                            sensorsButtonBox.setDisable(true);
                             connectButton.setText(DISCONNECT);
-            }else{
+                            connectButton.setDisable(false);
+                        }
+                    }
+                }
+            } else {
                 sensorsButtonBox.setDisable(true);
                 connectButton.setText(CONNECT);
             }
         }
     }
-    
+
     @FXML
-    private void sensorTypeSelected( ActionEvent event){
-        
+    private void sensorTypeSelected(ActionEvent event) {
+
         ToggleButton selectedPort = null;
-        
-        for( Node child : serialPortsPane.getChildren())
-            if( ((ToggleButton)child).isSelected())
-                selectedPort = (ToggleButton)child;
-        
-        Button selectedSensor = (Button)event.getSource();
+
+        for (Node child : serialPortsPane.getChildren()) {
+            if (((ToggleButton) child).isSelected()) {
+                selectedPort = (ToggleButton) child;
+            }
+        }
+
+        Button selectedSensor = (Button) event.getSource();
         String comPort = availableSerialPorts.get(serialPortsPane.getChildren().indexOf(selectedPort));
-        
-        if( selectedSensor.getText().equalsIgnoreCase(new SensorListenerEEG(null).toString())){
-            
+
+        if (selectedSensor.getText().equalsIgnoreCase(new SensorListenerEEG(null).toString())) {
+
             sensorsOnSerialPorts.put(comPort, SensorListenerEEG.class);
             selectedPort.setText(comPort + " - " + selectedSensor.getText());
-        }else if( selectedSensor.getText().equalsIgnoreCase(new SensorListenerGSR(null).toString())){
-            
+        } else if (selectedSensor.getText().equalsIgnoreCase(new SensorListenerGSR(null).toString())) {
+
             sensorsOnSerialPorts.put(comPort, SensorListenerGSR.class);
             selectedPort.setText(comPort + " - " + selectedSensor.getText());
-        }else if( selectedSensor.getText().equalsIgnoreCase(new SensorListenerHR(null).toString())){
-            
+        } else if (selectedSensor.getText().equalsIgnoreCase(new SensorListenerHR(null).toString())) {
+
             sensorsOnSerialPorts.put(comPort, SensorListenerHR.class);
             selectedPort.setText(comPort + " - " + selectedSensor.getText());
-        }else{
+        } else {
             sensorsOnSerialPorts.remove(comPort);
             selectedPort.setText(comPort);
         }
-        
-        selectedPort.setSelected(false);
-        
+
         if (sensorsOnSerialPorts.size() > 0) {
             connectButton.setDisable(false);
         } else {
@@ -287,18 +295,23 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
         connectedSensors = engine.getConnectedSensors();
         pendingSensors = engine.getPendingSensors();
-        
-        for( SensorListener sensor : connectedSensors)
-            for( int i = 0; i < availableSerialPorts.size(); i++)
-                if( availableSerialPorts.get(i).equalsIgnoreCase(sensor.getSerialPort()))
-                    serialPortsPane.getChildren().get(i).setDisable(false);
-        
-        for( SensorListener sensor : pendingSensors)
-            for( int i = 0; i < availableSerialPorts.size(); i++)
-                if( availableSerialPorts.get(i).equalsIgnoreCase(sensor.getSerialPort()))
-                    serialPortsPane.getChildren().get(i).setDisable(true);
 
-        //sensorList.setItems(sensors);
+        for (SensorListener sensor : connectedSensors) {
+            for (int i = 0; i < availableSerialPorts.size(); i++) {
+                if (availableSerialPorts.get(i).equalsIgnoreCase(sensor.getSerialPort())) {
+                    serialPortsPane.getChildren().get(i).setDisable(false);
+                }
+            }
+        }
+
+        for (SensorListener sensor : pendingSensors) {
+            for (int i = 0; i < availableSerialPorts.size(); i++) {
+                if (availableSerialPorts.get(i).equalsIgnoreCase(sensor.getSerialPort())) {
+                    serialPortsPane.getChildren().get(i).setDisable(true);
+                }
+            }
+        }
+
         for (String key : sensorsOnSerialPorts.keySet()) {
             boolean found = false;
             for (SensorListener l : connectedSensors) {

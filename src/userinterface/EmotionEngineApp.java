@@ -11,6 +11,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import emotionlearner.engine.*;
 
 /**
  *
@@ -38,6 +39,7 @@ public class EmotionEngineApp extends Application {
             @Override
             public void handle(WindowEvent we) {
                 
+                EmotionEngine.sharedInstance(null).stopEngine();
                 System.exit(0);
             }
         });
@@ -51,5 +53,6 @@ public class EmotionEngineApp extends Application {
     public static void main(String[] args) {
 
         launch(args);
+        EmotionEngine.sharedInstance(null).stopEngine();
     }
 }
