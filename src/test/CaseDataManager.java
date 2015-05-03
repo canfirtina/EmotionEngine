@@ -48,9 +48,9 @@ public class CaseDataManager {
         if(dm.getUserRating(u.getName(), "asd")==3)
             System.out.println("getUserRating works");
         
-        u.playedGame("Call of Duty", 456);
+        u.usedSoftware("Call of Duty", 456);
         dm.saveUser(u);
-        if(dm.getCurrentUser().getGamesPlayed().containsKey("Call of Duty"))
+        if(dm.getCurrentUser().getSoftwareUsed().containsKey("Call of Duty"))
             System.out.println("save user works");
         
         u = dm.getUser("can@can.com");

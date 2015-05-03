@@ -289,10 +289,10 @@ public class DatabaseService {
              st.executeUpdate("INSERT INTO `emotion_db`.`enabled_sensors` VALUES ('" + u.getName() + "','" + key + "','0');");
              }
              }*/
-            if (!u.getSoftwareUser().isEmpty()) {
+            if (!u.getSoftwareUsed().isEmpty()) {
                 st.executeUpdate("DELETE FROM `emotion_db`.`software_used` WHERE email = '" + u.getName() + "';");
-                for (String key : u.getSoftwareUser().keySet()) {
-                    st.executeUpdate("INSERT INTO `emotion_db`.`software_used` VALUES('" + u.getName() + "','" + key + "'," + u.getSoftwareUser().get(key) + ");");
+                for (String key : u.getSoftwareUsed().keySet()) {
+                    st.executeUpdate("INSERT INTO `emotion_db`.`software_used` VALUES('" + u.getName() + "','" + key + "'," + u.getSoftwareUsed().get(key) + ");");
                 }
             }
 

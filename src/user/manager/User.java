@@ -146,7 +146,7 @@ public class User implements Serializable {
         return playCount;
     }
 
-    public HashMap<String, Integer> getSoftwareUser() {
+    public HashMap<String, Integer> getSoftwareUsed() {
         return softwaresUsed;
     }
 }
