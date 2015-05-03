@@ -1,5 +1,7 @@
 package sensormanager.data;
 
+import java.util.Date;
+
 public class TimeBasedDataEpocher extends DataEpocher{
 
 	/**
@@ -32,11 +34,10 @@ public class TimeBasedDataEpocher extends DataEpocher{
 		return true;
 	}
 
-	/**
-	 * Returns false because time based epocher cannot decide without new data
-	 */
 	public boolean readyForEpoch() {
-		return false;
+		if(allData.size() == 0)
+			return  false;
+		return System.currentTimeMillis() - allData.get(0).getTimestamp().getTime() >= constraint;
 	}
 
 }

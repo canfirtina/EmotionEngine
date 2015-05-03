@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import persistentdatamanagement.DataManager;
+import shared.TutorialInfo;
 import user.manager.User;
 import user.manager.UserManager;
 
@@ -38,9 +39,19 @@ public class CaseDataManager {
         User u = dm.getCurrentUser();
         if(u.getName().equals("ali@ali.com"))
             System.out.println("Set current user and get current user works.");
-        u.playedGame("Call of Duty", 456);
+        
+        dm.rateTutorial(u.getName(), "asd", 3);
+        dm.rateTutorial("can@can.com", "asd", 4);
+        if(dm.getAverageRating("asd") == 3.5){
+            System.out.println("rateTutorial works");
+        }
+        
+        if(dm.getUserRating(u.getName(), "asd")==3)
+            System.out.println("getUserRating works");
+        
+        u.usedSoftware("Call of Duty", 456);
         dm.saveUser(u);
-        if(dm.getCurrentUser().getGamesPlayed().containsKey("Call of Duty"))
+        if(dm.getCurrentUser().getSoftwareUsed().containsKey("Call of Duty"))
             System.out.println("save user works");
         
         u = dm.getUser("can@can.com");
@@ -52,5 +63,12 @@ public class CaseDataManager {
             System.out.println("check user exists works");
         }
         
+        ArrayList<TutorialInfo> at = dm.getAllTutorials();
+        for(TutorialInfo t : at){
+            if (t.getName().equalsIgnoreCase("boring1"))
+                System.out.println("getAllTutorials works");
+        }
+        
+            System.out.println("getTutorial works if happy -> " + dm.getTutorial("happy1").getLink());
     }
 }

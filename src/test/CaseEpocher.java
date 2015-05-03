@@ -28,5 +28,9 @@ public class CaseEpocher {
 				
 		}
 	}
+	
+	public static void main(String[] args){
+		new CaseEpocher().runSlidingWindowDataEpocherTest();
+	}
 
 }

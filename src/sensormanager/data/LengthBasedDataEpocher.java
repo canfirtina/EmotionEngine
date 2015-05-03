@@ -32,4 +32,9 @@ public class LengthBasedDataEpocher extends DataEpocher{
 			return true;
 		return false;
 	}
+
+	@Override
+	public boolean isNewDataSuitable(TimestampedRawData data) {
+		return !readyForEpoch();
+	}
 }

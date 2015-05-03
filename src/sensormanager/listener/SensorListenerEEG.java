@@ -258,6 +258,11 @@ public class SensorListenerEEG extends SensorListener {
         return "OpenBCI EEG";
     }
 
+	@Override
+	public double weight() {
+		return 1.0;
+	}
+
     /**
      * DataInterpreter interprets raw OpenBCI data packets.
      */
@@ -295,14 +300,19 @@ public class SensorListenerEEG extends SensorListener {
 */
                                 TimestampedRawData tsrd = new TimestampedRawData(dat);
 
-                                if (dataEpocher.addData(tsrd) == false) {
-                                    lastEpoch = dataEpocher.getEpoch();
-                                    System.out.println(lastEpoch.size());
-                                    dataEpocher.reset();
+                                if(dataEpocher.isNewDataSuitable(tsrd))
                                     dataEpocher.addData(tsrd);
-                                    notifyObservers();
+                                else {
+                                    if(dataEpocher.readyForEpoch()) {
+                                        lastEpoch = dataEpocher.getEpoch();
+                                        System.out.println(lastEpoch.size());
+                                        dataEpocher.reset();
+                                        notifyObservers();
+                                    }
 
+                                    dataEpocher.addData(tsrd);
                                 }
+
                             }
                             index = 0;
                         }

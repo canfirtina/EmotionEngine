@@ -97,7 +97,6 @@ public class SensorListenerGSR extends SensorListener {
 
     @Override
     protected void notifyObservers() {
-        threadsActive = false;
         for (SensorObserver observer : observerCollection) {
             observer.dataArrived(this);
         }
@@ -134,6 +133,11 @@ public class SensorListenerGSR extends SensorListener {
             observer.connectionError(this);
         }
     }
+
+	@Override
+	public double weight() {
+		return 0.1;
+	}
 
     private class SerialReader implements Runnable {
 
@@ -173,14 +177,18 @@ public class SensorListenerGSR extends SensorListener {
                             if (buffer[i] == 10) {
                                 double rd[] = new double[1];
                                 rd[0] = (double) val;
-                                System.out.println(val);
                                 TimestampedRawData rawData = new TimestampedRawData(rd);
-                                if (dataEpocher.addData(rawData) == false) {
-                                    lastEpoch = dataEpocher.getEpoch();
-                                    dataEpocher.reset();
+                                if(dataEpocher.isNewDataSuitable(rawData))
                                     dataEpocher.addData(rawData);
-                                    notifyObservers();
+                                else {
+                                    if(dataEpocher.readyForEpoch()) {
+                                        lastEpoch = dataEpocher.getEpoch();
+                                        System.out.println(lastEpoch.size());
+                                        dataEpocher.reset();
+                                        notifyObservers();
+                                    }
 
+                                    dataEpocher.addData(rawData);
                                 }
                                 val = 0;
                             } else {

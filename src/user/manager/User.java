@@ -15,7 +15,7 @@ public class User implements Serializable {
     private String password;
     private HashMap<String, Boolean> enabledSensors;
     private HashMap<Pair<String, String>, Integer> playCount;
-    private HashMap<String, Integer> gamesPlayed;
+    private HashMap<String, Integer> softwaresUsed;
 
     /**
      * Constructor for User class that takes userName and password.
@@ -28,7 +28,7 @@ public class User implements Serializable {
         this.password = password;
         enabledSensors = new HashMap<>();
         playCount = new HashMap<Pair<String, String>, Integer>();
-        gamesPlayed = new HashMap<>();
+        softwaresUsed = new HashMap<>();
     }
 
     /**
@@ -117,20 +117,20 @@ public class User implements Serializable {
         return playCount.get(sen_tut);
     }
 
-    public void playedGame(String game, int minutes) {
-        if (gamesPlayed.containsKey(game)) {
-            gamesPlayed.replace(game, minutes + gamesPlayed.get(game));
+    public void usedSoftware(String software, int minutes) {
+        if (softwaresUsed.containsKey(software)) {
+            softwaresUsed.replace(software, minutes + softwaresUsed.get(software));
         } else {
-            gamesPlayed.put(game, minutes);
+            softwaresUsed.put(software, minutes);
         }
     }
 
-    public String getGameplayTime(String game) {
+    public String getSoftwareUsageTime(String software) {
         int hours, minutes;
 
-        if (gamesPlayed.containsKey(game)) {
-            hours = (int) TimeUnit.HOURS.convert(gamesPlayed.get(game), TimeUnit.MINUTES);
-            minutes = gamesPlayed.get(game) - hours * 60;
+        if (softwaresUsed.containsKey(software)) {
+            hours = (int) TimeUnit.HOURS.convert(softwaresUsed.get(software), TimeUnit.MINUTES);
+            minutes = softwaresUsed.get(software) - hours * 60;
         } else {
             return "N/A";
         }
@@ -146,7 +146,7 @@ public class User implements Serializable {
         return playCount;
     }
 
-    public HashMap<String, Integer> getGamesPlayed() {
-        return gamesPlayed;
+    public HashMap<String, Integer> getSoftwareUsed() {
+        return softwaresUsed;
     }
 }

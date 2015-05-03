@@ -102,5 +102,11 @@ public abstract class SensorListener {
             
             return serialPortString;
         }
+	
+	/**
+	 * returns weight of a sensor
+	 * @return 
+	 */
+	public abstract double weight();
         
 }
