@@ -10,11 +10,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" stylesheets="@JMetroLightTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.ProfileScreenController">
+<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" style="-fx-background-color: rgba(0, 100, 100, 0.1);" stylesheets="@JMetroLightTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.ProfileScreenController">
    <children>
       <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <Pane minHeight="100.0" prefHeight="100.0" VBox.vgrow="SOMETIMES">
+            <Pane minHeight="100.0" prefHeight="100.0" style="-fx-background-color: rgba(0, 0, 0, 0.1);" VBox.vgrow="SOMETIMES">
                <children>
                   <ImageView fx:id="profileImage" fitHeight="100.0" fitWidth="100.0" layoutX="8.0" pickOnBounds="true" preserveRatio="true">
                      <viewport>
