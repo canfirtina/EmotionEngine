@@ -110,8 +110,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         //Tutorial List
         //TODO by hand for now
         tutorialItems = new ArrayList<TutorialItem>();
-//        tutorialItems.add(new TutorialItem("Baby plays with the dog", "tutorials/happy1/happy1.jpg", "tutorials/happy1/happy1.mp4", "tutorials/happy1/explanation.txt", Emotion.JOY));
-//        tutorialItems.add(new TutorialItem("Watching the water", "tutorials/boring1/boring1.jpg", "tutorials/boring1/boring1.mp4", "tutorials/boring1/explanation.txt", Emotion.BORED));
         ArrayList<TutorialInfo> tutorialInfoDb = DataManager.getInstance().getAllTutorials();
         for( TutorialInfo info : tutorialInfoDb)
             tutorialItems.add( new TutorialItem(info.getName(), info.getImagePath(), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
@@ -145,7 +143,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         //---------
 
         //Serial Ports List
-        //serialPortsPane.getChildren().clear();
+        serialPortsPane.getChildren().clear();
 
         serialSerialButtons = new ArrayList<ToggleButton>();
         serialSerialButtons.add(sensorButton1);
@@ -157,8 +155,8 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         serialSerialButtons.get(serialSerialButtons.size() - 1).setMaxHeight(10000);
         serialSerialButtons.get(serialSerialButtons.size() - 1).setMaxWidth(10000);
 
-        //serialPortsPane.add(serialSerialButtons.get(serialSerialButtons.size() - 1), 0, 0, 2, 2);
-        //serialPortsPane.setDisable(true);
+        serialPortsPane.add(serialSerialButtons.get(serialSerialButtons.size() - 1), 0, 0, 2, 2);
+        serialPortsPane.setDisable(true);
         //----------------
 
         //sensor buttons
