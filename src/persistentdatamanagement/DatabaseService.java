@@ -321,7 +321,7 @@ public class DatabaseService {
             st = getStatement();
 
             rs = st.executeQuery("SELECT * FROM `emotion_db`.`tutorials`;");
-            if (rs.next()) {
+            while (rs.next()) {
                 listOfTutorials.add(new TutorialInfo(rs.getString("tutorial_name"), rs.getString("tutorial_description"), rs.getString("tutorial_link"), rs.getString("image_path")));
             }
             return listOfTutorials;

@@ -64,5 +64,11 @@ public class CaseDataManager {
         }
         
         ArrayList<TutorialInfo> at = dm.getAllTutorials();
+        for(TutorialInfo t : at){
+            if (t.getName().equalsIgnoreCase("boring1"))
+                System.out.println("getAllTutorials works");
+        }
+        
+            System.out.println("getTutorial works if happy -> " + dm.getTutorial("happy1").getLink());
     }
 }
