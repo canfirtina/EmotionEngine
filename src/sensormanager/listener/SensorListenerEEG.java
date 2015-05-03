@@ -168,6 +168,10 @@ public class SensorListenerEEG extends SensorListener {
     public boolean disconnect() {
         executorWriter.shutdownNow();
         executorReader.shutdownNow();
+        try {
+            outputStream.write(new byte[]{CODE_STOP_STREAMING});
+        } catch (IOException e) {
+        }
         serialPort.close();
         connectionEstablished = false;
         return true;
