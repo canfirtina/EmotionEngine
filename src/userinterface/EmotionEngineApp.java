@@ -12,12 +12,18 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import emotionlearner.engine.*;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.stage.StageStyle;
 
 /**
  *
  * @author CanFirtina
  */
 public class EmotionEngineApp extends Application {
+
+    private double xOffset = 0;
+    private double yOffset = 0;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -33,16 +39,34 @@ public class EmotionEngineApp extends Application {
         Group root = new Group();
         root.getChildren().addAll(mainContainer);
         Scene scene = new Scene(root, 750, 480);
+                
         stage.setResizable(false);
         stage.setScene(scene);
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent we) {
-                
+
                 EmotionEngine.sharedInstance(null).stopEngine();
                 System.exit(0);
             }
         });
+        stage.initStyle(StageStyle.TRANSPARENT);
+
+        root.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                xOffset = event.getSceneX();
+                yOffset = event.getSceneY();
+            }
+        });
+        root.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                stage.setX(event.getScreenX() - xOffset);
+                stage.setY(event.getScreenY() - yOffset);
+            }
+        });
+        
         
         stage.show();
     }

@@ -349,4 +349,12 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
             }
         });
     }
+
+    @Override
+    public void notifyError(EmotionEngine engine, SensorListener sensor) {
+        
+        for( int i = 0; i < availableSerialPorts.size(); i++)
+            if( availableSerialPorts.get(i).equalsIgnoreCase(sensor.getSerialPort()))
+                serialPortsPane.getChildren().get(i).setDisable(true);
+    }
 }
