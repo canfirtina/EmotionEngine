@@ -83,7 +83,7 @@
                                                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
                                              </VBox.margin>
                                           </Button>
-                                          <Button mnemonicParsing="false" onAction="#sensorTypeSelected" prefWidth="148.0" styleClass="choice-button" text="Heart Rate">
+                                          <Button fx:id="hrButton" mnemonicParsing="false" onAction="#sensorTypeSelected" prefWidth="148.0" styleClass="choice-button" text="Heart Rate">
                                              <VBox.margin>
                                                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
                                              </VBox.margin>
