@@ -13,30 +13,21 @@ public class TimestampedRawData {
 	/**
 	 * Time of the raw data taken from sensor
 	 */
-	private Timestamp time;
+	private long time;
 	
 	/**
 	 * Raw row data coming from sensor
 	 */
 	private double[] rawData;
-	
-	/**
-	 * Initialized with raw data and time
-	 * @param rawData
-	 * @param time
-	 */
-	public TimestampedRawData(double[] rawData, Timestamp timeStamp){
-		this.rawData = rawData;
-		this.time = timeStamp;
-	}
-	
+
 	/**
 	 * Initialized with raw data and milliseconds
 	 * @param rawData
 	 * @param time
 	 */
 	public TimestampedRawData(double[] rawData, long milliSeconds){
-		this(rawData, new Timestamp(milliSeconds));
+		this.rawData = rawData;
+		this.time = milliSeconds;
 	}
 	
 	/**
@@ -44,14 +35,14 @@ public class TimestampedRawData {
 	 * @param rawData
 	 */
 	public TimestampedRawData(double[] rawData){
-		this(rawData, new Timestamp(java.lang.System.currentTimeMillis()));
+		this(rawData, java.lang.System.nanoTime()/1000000);
 	}
 	
 	/**
 	 * get the time of raw data
 	 * @return
 	 */
-	public Timestamp getTimestamp(){
+	public long getTime(){
 		return time;
 	}
 	

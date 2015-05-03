@@ -36,7 +36,7 @@ public abstract class SensorListener {
 	 */
 	protected int freq;
         
-        protected String serialPortString;
+	protected String serialPortString;
         
 	/**
 	 * Tries to connect with the sensor
@@ -98,15 +98,27 @@ public abstract class SensorListener {
 		this.dataEpocher = dataEpocher;
 	}
         
-        public String getSerialPort(){
+	public String getSerialPort(){
             
-            return serialPortString;
-        }
+		return serialPortString;
+	}
+
+	public DataEpocher getDataEpocher() {
+		return this.dataEpocher;
+	}
 	
 	/**
 	 * returns weight of a sensor
 	 * @return 
 	 */
 	public abstract double weight();
+
+
+	/**
+	 * Frequnct of the sensor
+	 * @return
+	 */
+	public abstract int getFrequency();
+
         
 }

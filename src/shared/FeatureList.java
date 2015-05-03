@@ -26,7 +26,9 @@ public class FeatureList {
 	/**
 	 * timestamp when feature list is extracted
 	 */
-	private Timestamp timestamp;
+	private long time;
+
+	private boolean isSetTime;
     
 	/**
 	 * feature attributes information
@@ -45,19 +47,20 @@ public class FeatureList {
     	for(int i=0;i<featuresArray.length;++i)
 			features.setValue(i, featuresArray[i]);
 		this.featureAttributes = featureAttributes;
-		
-		this.timestamp = new Timestamp(0);
+
+
     }
 	
 	/**
 	 * Create FeatureList object from double features array and a timestamp
 	 * @param featuresArray
 	 * @param featureAttributes
-	 * @param timestamp 
+	 * @param time
 	 */
-	public FeatureList(double[] featuresArray, FastVector featureAttributes, Timestamp timestamp){
+	public FeatureList(double[] featuresArray, FastVector featureAttributes, long time){
 		this(featuresArray, featureAttributes);
-		this.timestamp = timestamp;
+		this.time = time;
+		this.isSetTime = true;
 	}
     
 	/**
@@ -95,12 +98,13 @@ public class FeatureList {
     	return emotion;
     }
 	
-	public void setTimestamp(Timestamp timestamp){
-		this.timestamp = timestamp;
+	public void setTime(long time){
+		this.time = time;
+		this.isSetTime = true;
 	}
 	
-	public Timestamp getTimestamp(){
-		return timestamp;
+	public long getTime(){
+		return time;
 	}
 	
 	public FastVector getFeatureAttributes(){
@@ -110,9 +114,9 @@ public class FeatureList {
 	@Override
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
-		if(timestamp!=null){
+		if(isSetTime){
 			builder.append("Time:");
-			builder.append(timestamp);
+			builder.append(time);
 		}
 		if(emotion!=null){
 			builder.append(" Emotion:");

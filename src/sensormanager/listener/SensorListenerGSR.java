@@ -178,18 +178,16 @@ public class SensorListenerGSR extends SensorListener {
                                 double rd[] = new double[1];
                                 rd[0] = (double) val;
                                 TimestampedRawData rawData = new TimestampedRawData(rd);
-                                if(dataEpocher.isNewDataSuitable(rawData))
-                                    dataEpocher.addData(rawData);
-                                else {
-                                    if(dataEpocher.readyForEpoch()) {
-                                        lastEpoch = dataEpocher.getEpoch();
-                                        System.out.println(lastEpoch.size());
-                                        dataEpocher.reset();
-                                        notifyObservers();
-                                    }
 
-                                    dataEpocher.addData(rawData);
+
+                                if(dataEpocher.readyForEpoch()) {
+                                    lastEpoch = dataEpocher.getEpoch();
+                                    System.out.println(lastEpoch.size());
+                                    dataEpocher.reset();
+                                    notifyObservers();
                                 }
+
+                                dataEpocher.addData(rawData);
                                 val = 0;
                             } else {
                                 val = val * 10 + (buffer[i]) - '0';
@@ -203,6 +201,12 @@ public class SensorListenerGSR extends SensorListener {
             }
         }
 
+    }
+
+    @Override
+    public int getFrequency() {
+        //TODO
+        return 20;
     }
     
     @Override

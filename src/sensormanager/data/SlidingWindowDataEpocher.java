@@ -17,7 +17,9 @@ public class SlidingWindowDataEpocher extends DataEpocher {
 	/**
 	 * last epoch timestamp for sliding
 	 */
-	private Timestamp lastEpochTimestamp;
+	private long lastEpochTime;
+
+	private boolean isSetTime;
 	
 	public SlidingWindowDataEpocher(long interval, long period ){
 		this(interval);
@@ -33,13 +35,15 @@ public class SlidingWindowDataEpocher extends DataEpocher {
 		super(constraint);
 		this.allData = new LinkedList<TimestampedRawData>();
 		this.period = 1000;
-		this.lastEpochTimestamp = null;
+
 	}
 
 	@Override
 	public boolean addData(TimestampedRawData rawData) {
-		if(this.lastEpochTimestamp == null)
-			this.lastEpochTimestamp = rawData.getTimestamp();
+		if(this.isSetTime == false) {
+			this.lastEpochTime = rawData.getTime();
+			this.isSetTime = true;
+		}
 		
 		LinkedList<TimestampedRawData> list = (LinkedList<TimestampedRawData>)this.allData;
 		while(!isNewDataSuitable(rawData))
@@ -57,7 +61,7 @@ public class SlidingWindowDataEpocher extends DataEpocher {
 	public boolean isNewDataSuitable(TimestampedRawData data){
 		if(allData.size() == 0)
 			return true;
-		if(data.getTimestamp().getTime() - allData.get(0).getTimestamp().getTime()>= constraint)
+		if(data.getTime() - allData.get(0).getTime()>= constraint)
 			return false;
 		return true;
 	}
@@ -70,14 +74,15 @@ public class SlidingWindowDataEpocher extends DataEpocher {
 		LinkedList<TimestampedRawData> list = (LinkedList<TimestampedRawData>)this.allData;
 		
 		
-		if(list.getLast().getTimestamp().getTime() - lastEpochTimestamp.getTime() >= this.period)
+		if(list.getLast().getTime() - lastEpochTime >= this.period)
 			return true;
 		return false;
 	}
 	
 	@Override
 	public List<TimestampedRawData> getEpoch() {
-		this.lastEpochTimestamp = new Timestamp(new Date().getTime());
+		this.lastEpochTime = allData.getLast().getTime();
+		this.isSetTime = true;
 		return super.getEpoch();
 	}
 	

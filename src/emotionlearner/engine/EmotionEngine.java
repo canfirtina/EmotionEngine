@@ -3,14 +3,12 @@ package emotionlearner.engine;
 import communicator.Communicator;
 import emotionlearner.classifier.ClassifierObserver;
 import emotionlearner.feature.FeatureExtractorGSR;
-import sensormanager.data.SlidingWindowDataEpocher;
-import sensormanager.data.TimestampedRawData;
+import sensormanager.data.*;
 import sensormanager.listener.*;
 import emotionlearner.feature.FeatureExtractor;
-import sensormanager.data.DataEpocher;
 import emotionlearner.feature.FeatureExtractorEEG;
 import emotionlearner.classifier.EnsembleClassifier;
-import sensormanager.data.TimeBasedDataEpocher;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -146,6 +144,7 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
         this.emotionClassifier.registerObserver(this);
 
         this.sessionEmotion = null;
+
         this.testFeatures = new FeatureListController(50000);
 
     }
@@ -168,9 +167,6 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
                 l.stopStreaming();
                 l.disconnect();
             }
-
-            sensorListeners = new ArrayList<>();
-            
         }
     }
 
@@ -198,7 +194,10 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
                         }
 
                         for (SensorListener listener : testFeatures.getSensorListeners()) {
-                            List<FeatureList> lists = testFeatures.getLastFeatureListsInMilliseconds(listener, time);
+                            List<FeatureList> lists;
+                            lists = testFeatures.getLastFeatureListsInMilliseconds(listener, time);
+
+                            System.out.println("lists : " + lists.size());
                             if (lists != null) {
                                 for (FeatureList list : lists) {
                                     list.setEmotion(emotion);
@@ -470,8 +469,8 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
 
                         //get list and add it to test feature list controller
                         FeatureList list = extractor.getFeatures();
-                        list.setTimestamp(new Timestamp(new Date().getTime()));
-
+                        //list.setTimestamp(new Timestamp(new Date().getTime()));
+                        list.setTime(rawDataArray.get(rawDataArray.size() - 1).getTime());
                         if (sessionTrainingFeatures != null) {
                             System.out.println("train");
                             list.setEmotion(sessionEmotion);
@@ -552,9 +551,12 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
                     if (sensor.getClass().equals(SensorListenerEEG.class)) {
                         extractor = new FeatureExtractorEEG();
                         epocher = new SlidingWindowDataEpocher(4000, 1000);
+                        epocher = new LengthBasedDataEpocher(1000);
+                        epocher = new LBSlidingWindowDataEpocher(250, 1000);
                     } else if (sensor.getClass().equals(SensorListenerGSR.class)) {
                         extractor = new FeatureExtractorGSR();
                         epocher = new SlidingWindowDataEpocher(4000, 1000);
+                        epocher = new LBSlidingWindowDataEpocher(40, 100);
                     }
 
                     sensor.setDataEpocher(epocher);
@@ -691,5 +693,4 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
     @Override
     public void trainNotification(final EnsembleClassifier classifier) {
     }
-
 }
