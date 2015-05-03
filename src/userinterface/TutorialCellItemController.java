@@ -6,6 +6,7 @@
 package userinterface;
 
 import com.sun.javafx.scene.control.skin.FXVK;
+import emotionlearner.engine.EmotionEngine;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -25,7 +26,20 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.TextFlow;
 import java.text.*;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.ListView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import shared.Emotion;
 
 /**
  * FXML Controller class
@@ -42,6 +56,8 @@ public class TutorialCellItemController implements Initializable {
     private Hyperlink hyperLink;
     @FXML
     private TextFlow textFlow;
+    
+    private TutorialItem item;
     
     
     public TutorialCellItemController(){
@@ -75,14 +91,81 @@ public class TutorialCellItemController implements Initializable {
     public void setInfo( TutorialItem info){
          
         hyperLink.setText( info.getLabel());
-        File imageFile = new File( info.getImagePath());
-        try {
-            
-            textFlow.getChildren().add(new Text(readFile(info.getExplanationPath(), Charset.defaultCharset())));
-            imageView.setImage(new Image(imageFile.toURI().toString()));
-        } catch (IOException ex) {
-            Logger.getLogger(TutorialCellItemController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        hyperLink.setOnMouseClicked(new EventHandler<MouseEvent>(){
+
+            @Override
+            public void handle(MouseEvent event) {
+                tutorialEditTriggered();
+            }
+        });
+        
+        textFlow.getChildren().add(new Text(info.getExplanationPath()));
+        System.out.println(info.getImagePath());
+        imageView.setImage(new Image(info.getImagePath()));
+        item = info;
+    }
+    
+        @FXML
+        private void tutorialEditTriggered() {
+
+        final MediaPlayer video = new MediaPlayer(new Media(item.getMediaPath()));
+
+        EmotionEngine engine = EmotionEngine.sharedInstance(null);
+        final Emotion label = item.getEmotion();
+
+        MediaView vidView = new MediaView(video);
+        vidView.setFitWidth(750);
+        vidView.setFitHeight(480);
+
+        Stage stage = new Stage();
+        stage.setTitle(item.getLabel());
+        stage.setScene(new Scene(new Group(vidView), vidView.getFitWidth(), vidView.getFitHeight(), Color.BLACK));
+        stage.setResizable(false);
+        stage.show();
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent we) {
+                video.stop();
+                engine.closeTrainingSession();
+            }
+        });
+
+        video.setOnReady(new Runnable() {
+
+            @Override
+            public void run() {
+
+                video.play();
+            }
+        });
+
+        video.setOnPlaying(new Runnable() {
+
+            @Override
+            public void run() {
+
+                engine.openTrainingSession(label);
+            }
+        });
+
+        video.setOnPaused(new Runnable() {
+
+            @Override
+            public void run() {
+
+                engine.closeTrainingSession();
+            }
+        });
+
+        video.setOnEndOfMedia(new Runnable() {
+
+            @Override
+            public void run() {
+
+                engine.closeTrainingSession();
+                stage.close();
+            }
+        });
     }
     
     public HBox getCellData(){

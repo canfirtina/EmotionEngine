@@ -42,4 +42,23 @@ public enum Emotion {
 	public static Emotion emotionWithValue(int value){
 		return Emotion.valueOf((String)labels.elementAt(value));
 	}
+        
+        public static Emotion emotionForValue( int value){
+            
+            switch( value){
+                
+                case 0:
+                    return Emotion.JOY;
+                case 1:
+                    return Emotion.BORED;
+                case 2:
+                    return Emotion.PEACEFUL;
+                case 3:
+                    return Emotion.FRUSTRATED;
+                case 4:
+                    return Emotion.DISGUST;
+            }
+            
+            return null;
+        }
 }

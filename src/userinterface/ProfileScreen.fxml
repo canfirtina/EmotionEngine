@@ -34,7 +34,7 @@
                <children>
                   <ScrollPane fitToWidth="true" pannable="true" prefWidth="400.0">
                      <content>
-                        <ListView fx:id="tutorialList" onEditStart="#tutorialEditTriggered">
+                        <ListView fx:id="tutorialList">
                            <padding>
                               <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
                            </padding></ListView>
