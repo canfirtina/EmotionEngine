@@ -236,6 +236,17 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
 
         trainAll(fc);
     }
+	
+	/**
+     * gets saved features from data manager and train them
+     */
+    private void trainFromDataManager(SensorListener newSensorListener) {
+		ArrayList<FeatureList> lists = persistentDataManager.getGameData(newSensorListener);
+		for (FeatureList list : lists) 
+			 trainingFeatures.addFeatureList(newSensorListener, list);
+        
+        emotionClassifier.trainOfSensor(trainingFeatures, newSensorListener);
+    }
 
     /**
      * train whole feature list set
@@ -520,7 +531,7 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
                         sessionTrainingFeatures.unregisterSensorListener(sensor);
                     }
 
-                    trainFromDataManager();
+                    emotionClassifier.removeClassifierOfSensor(sensor);
 
                     notifyEngineObservers();
 
@@ -571,11 +582,13 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
                     if (testFeatures != null) {
                         testFeatures.registerSensorListener(sensor);
                     }
-                    trainFromDataManager();
-
+                    
                     if (sessionTrainingFeatures != null) {
                         sessionTrainingFeatures.registerSensorListener(sensor);
                     }
+					
+					trainFromDataManager(sensor);
+					
 
                     notifyEngineObservers();
                     sensor.startStreaming();
