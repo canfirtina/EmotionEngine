@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="180.0" prefWidth="400.0" styleClass="background" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <stylesheets>
+        <URL value="@JMetroLightTheme.css" />
+    </stylesheets>
+   <children>
+      <HBox fx:id="mainHBox" prefHeight="160.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+         <children>
+            <ImageView fx:id="imageView" fitHeight="140.0" fitWidth="140.0" pickOnBounds="true" preserveRatio="true">
+               <viewport>
+                  <Rectangle2D />
+               </viewport>
+               <HBox.margin>
+                  <Insets top="10.0" />
+               </HBox.margin>
+            </ImageView>
+            <VBox HBox.hgrow="ALWAYS">
+               <children>
+                  <Hyperlink fx:id="hyperLink" prefHeight="24.0" text="Hyperlink" VBox.vgrow="NEVER" />
+                  <TextFlow fx:id="textFlow" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="NEVER" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>

@@ -2,7 +2,6 @@ package persistentdatamanagement;
 
 import emotionlearner.feature.FeatureExtractorGSR;
 import emotionlearner.feature.FeatureExtractorProperties;
-import emotionlearner.feature.FeatureExtractor;
 import emotionlearner.feature.FeatureExtractorEEG;
 import sensormanager.listener.SensorListener;
 import java.awt.image.BufferedImage;
@@ -13,19 +12,17 @@ import user.manager.User;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import sensormanager.listener.SensorListenerEEG;
 import shared.Emotion;
 import shared.FeatureList;
+import shared.TutorialInfo;
 
 /**
  * Responsible for providing other packages with file input output operations.
@@ -302,5 +299,15 @@ public class DataManager {
     public double getUserRating(String user, String tutorial) {
         DatabaseService ds = DatabaseService.sharedInstance();
         return ds.getUserRating(user, tutorial);
+    }
+    
+    public ArrayList<TutorialInfo> getAllTutorials(){
+        DatabaseService ds = DatabaseService.sharedInstance();
+        return ds.getAllTutorials();
+    }
+    
+    public TutorialInfo getTutorial(String tutorialName){
+        DatabaseService ds = DatabaseService.sharedInstance();
+        return ds.getTutorial(tutorialName);
     }
 }

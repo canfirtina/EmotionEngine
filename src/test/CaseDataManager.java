@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import persistentdatamanagement.DataManager;
+import shared.TutorialInfo;
 import user.manager.User;
 import user.manager.UserManager;
 
@@ -62,5 +63,12 @@ public class CaseDataManager {
             System.out.println("check user exists works");
         }
         
+        ArrayList<TutorialInfo> at = dm.getAllTutorials();
+        for(TutorialInfo t : at){
+            if (t.getName().equalsIgnoreCase("boring1"))
+                System.out.println("getAllTutorials works");
+        }
+        
+            System.out.println("getTutorial works if happy -> " + dm.getTutorial("happy1").getLink());
     }
 }
