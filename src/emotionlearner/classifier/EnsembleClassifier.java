@@ -219,7 +219,7 @@ public class EnsembleClassifier {
 						//no features exists of sensor
 						if(features.isEmpty())
 							return;
-
+						System.out.println(">>>>>>>>>>>>>>>"+features.size());
 						//create weka Instances
 						Instances instances = new Instances("instances "+sensorListener.toString(), features.get(0).getFeatureAttributes(), features.size());
 						instances.setClassIndex(instances.numAttributes()-1);
