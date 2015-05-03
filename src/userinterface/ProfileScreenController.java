@@ -41,11 +41,13 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
+import persistentdatamanagement.DataManager;
 import sensormanager.listener.SensorListener;
 import sensormanager.listener.SensorListenerEEG;
 import sensormanager.listener.SensorListenerGSR;
 import sensormanager.listener.SensorListenerHR;
 import shared.Emotion;
+import shared.TutorialInfo;
 import user.manager.UserManager;
 
 /**
@@ -108,8 +110,12 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         //Tutorial List
         //TODO by hand for now
         tutorialItems = new ArrayList<TutorialItem>();
-        tutorialItems.add(new TutorialItem("Baby plays with the dog", "tutorials/happy1/happy1.jpg", "tutorials/happy1/happy1.mp4", "tutorials/happy1/explanation.txt", Emotion.JOY));
-        tutorialItems.add(new TutorialItem("Watching the water", "tutorials/boring1/boring1.jpg", "tutorials/boring1/boring1.mp4", "tutorials/boring1/explanation.txt", Emotion.BORED));
+//        tutorialItems.add(new TutorialItem("Baby plays with the dog", "tutorials/happy1/happy1.jpg", "tutorials/happy1/happy1.mp4", "tutorials/happy1/explanation.txt", Emotion.JOY));
+//        tutorialItems.add(new TutorialItem("Watching the water", "tutorials/boring1/boring1.jpg", "tutorials/boring1/boring1.mp4", "tutorials/boring1/explanation.txt", Emotion.BORED));
+        ArrayList<TutorialInfo> tutorialInfoDb = DataManager.getInstance().getAllTutorials();
+        for( TutorialInfo info : tutorialInfoDb)
+            tutorialItems.add( new TutorialItem(info.getName(), info.getImagePath(), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
+        
         ObservableList<TutorialItem> tutorials = FXCollections.observableArrayList(tutorialItems);
 
         tutorialList.setItems(tutorials);
@@ -212,78 +218,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     }
 
     @FXML
-    private void tutorialEditTriggered(EditEvent event) {
-
-        TutorialItem tutorialItem = tutorialList.getItems().get(event.getIndex());
-
-        File videoFile = new File(tutorialItem.getMediaPath());
-
-        if (!videoFile.exists()) {
-            System.err.println("no such video file");
-            return;
-        }
-
-        final MediaPlayer video = new MediaPlayer(new Media(videoFile.toURI().toString()));
-
-        EmotionEngine engine = EmotionEngine.sharedInstance(null);
-        final Emotion label = tutorialItem.getEmotion();
-
-        MediaView vidView = new MediaView(video);
-        vidView.setFitWidth(750);
-        vidView.setFitHeight(480);
-
-        Stage stage = new Stage();
-        stage.setTitle(tutorialItem.getLabel());
-        stage.setScene(new Scene(new Group(vidView), vidView.getFitWidth(), vidView.getFitHeight(), Color.BLACK));
-        stage.setResizable(false);
-        stage.show();
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent we) {
-                video.stop();
-                engine.closeTrainingSession();
-            }
-        });
-
-        video.setOnReady(new Runnable() {
-
-            @Override
-            public void run() {
-
-                video.play();
-            }
-        });
-
-        video.setOnPlaying(new Runnable() {
-
-            @Override
-            public void run() {
-
-                engine.openTrainingSession(label);
-            }
-        });
-
-        video.setOnPaused(new Runnable() {
-
-            @Override
-            public void run() {
-
-                engine.closeTrainingSession();
-            }
-        });
-
-        video.setOnEndOfMedia(new Runnable() {
-
-            @Override
-            public void run() {
-
-                engine.closeTrainingSession();
-                stage.close();
-            }
-        });
-    }
-
-    @FXML
     private void serialPortSelected(ActionEvent event) {
         
         if( serialPortsPane.getChildren().contains(event.getSource())){
@@ -300,9 +234,10 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
                 String comPort = availableSerialPorts.get(serialPortsPane.getChildren().indexOf(selectedToggle));
                 
                 connectButton.setText(CONNECT);
-                for( SensorListener sensor : connectedSensors)
-                    if( sensor.getSerialPort().equalsIgnoreCase(comPort))
-                        connectButton.setText(DISCONNECT);
+                if( connectedSensors != null)
+                    for( SensorListener sensor : connectedSensors)
+                        if( sensor.getSerialPort().equalsIgnoreCase(comPort))
+                            connectButton.setText(DISCONNECT);
             }else{
                 sensorsButtonBox.setDisable(true);
                 connectButton.setText(CONNECT);
