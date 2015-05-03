@@ -14,12 +14,14 @@ public class TutorialInfo {
     private String description;
     private String link;
     private String imagePath;
+    private int emotion;
     
-    public TutorialInfo(String name,String description, String link, String imagePath){
+    public TutorialInfo(String name,String description, String link, String imagePath, int emotion){
         this.name=name;
         this.description=description;
         this.link=link;
         this.imagePath=imagePath;
+        this.emotion=emotion;
     }
 
     public String getName() {
@@ -37,6 +39,9 @@ public class TutorialInfo {
     public String getImagePath() {
         return imagePath;
     }
-    
+
+    public int getEmotion() {
+        return emotion;
+    }
     
 }

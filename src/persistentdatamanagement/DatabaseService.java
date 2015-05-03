@@ -15,6 +15,7 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
+import shared.Emotion;
 import shared.TutorialInfo;
 import user.manager.User;
 
@@ -322,7 +323,7 @@ public class DatabaseService {
 
             rs = st.executeQuery("SELECT * FROM `emotion_db`.`tutorials`;");
             while (rs.next()) {
-                listOfTutorials.add(new TutorialInfo(rs.getString("tutorial_name"), rs.getString("tutorial_description"), rs.getString("tutorial_link"), rs.getString("image_path")));
+                listOfTutorials.add(new TutorialInfo(rs.getString("tutorial_name"), rs.getString("tutorial_description"), rs.getString("tutorial_link"), rs.getString("image_path"), rs.getInt("emotion")));
             }
             return listOfTutorials;
         } catch (SQLException ex) {
@@ -339,7 +340,7 @@ public class DatabaseService {
 
             rs = st.executeQuery("SELECT * FROM `emotion_db`.`tutorials` WHERE `tutorial_name` = '" + tutorialName + "';");
             if (rs.next()) {
-                return new TutorialInfo(rs.getString("tutorial_name"), rs.getString("tutorial_description"), rs.getString("tutorial_link"), rs.getString("image_path"));
+                return new TutorialInfo(rs.getString("tutorial_name"), rs.getString("tutorial_description"), rs.getString("tutorial_link"), rs.getString("image_path"), rs.getInt("emotion") );
             }
         } catch (SQLException ex) {
             System.out.println(ex.toString());
@@ -353,7 +354,7 @@ public class DatabaseService {
         try {
             st = getStatement();
 
-            st.executeUpdate("INSERT INTO `emotion_db`.`tutorials` VALUES('" + tutorial.getName() + "','" + tutorial.getDescription() + "','" + tutorial.getLink()+ "','" + tutorial.getImagePath() + "');");
+            st.executeUpdate("INSERT INTO `emotion_db`.`tutorials` VALUES('" + tutorial.getName() + "','" + tutorial.getDescription() + "','" + tutorial.getLink()+ "','" + tutorial.getImagePath() + "','" + tutorial.getEmotion() + "');");
             return true;
         } catch (SQLException ex) {
             System.out.println(ex.toString());
