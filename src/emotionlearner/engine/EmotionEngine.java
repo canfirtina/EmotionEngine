@@ -533,7 +533,8 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
 
                     emotionClassifier.removeClassifierOfSensor(sensor);
 
-                    notifyEngineObservers();
+                    for(EmotionEngineObserver observer : engineObservers)
+						observer.notifyError(engine, sensor);
 
                     return null;
                 }
