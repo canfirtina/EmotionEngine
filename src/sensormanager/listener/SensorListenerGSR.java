@@ -169,31 +169,31 @@ public class SensorListenerGSR extends SensorListener {
                         notifyObserversConnectionEstablished();
                     }
 
-                    if (streamingOn) {
-                        for (int i = 0; i < len; i++) {
-                            if (buffer[i] == 13) {
-                                continue;
-                            }
-                            if (buffer[i] == 10) {
-                                double rd[] = new double[1];
-                                rd[0] = (double) val;
-                                TimestampedRawData rawData = new TimestampedRawData(rd);
-
-
-                                if(dataEpocher.readyForEpoch()) {
-                                    lastEpoch = dataEpocher.getEpoch();
-                                    System.out.println(lastEpoch.size());
-                                    dataEpocher.reset();
-                                    notifyObservers();
-                                }
-
-                                dataEpocher.addData(rawData);
-                                val = 0;
-                            } else {
-                                val = val * 10 + (buffer[i]) - '0';
-                            }
-
+                }
+                if (streamingOn) {
+                    for (int i = 0; i < len; i++) {
+                        if (buffer[i] == 13) {
+                            continue;
                         }
+                        if (buffer[i] == 10) {
+                            double rd[] = new double[1];
+                            rd[0] = (double) val;
+                            TimestampedRawData rawData = new TimestampedRawData(rd);
+
+
+                            if(dataEpocher.readyForEpoch()) {
+                                lastEpoch = dataEpocher.getEpoch();
+                                System.out.println(lastEpoch.size());
+                                dataEpocher.reset();
+                                notifyObservers();
+                            }
+
+                            dataEpocher.addData(rawData);
+                            val = 0;
+                        } else {
+                            val = val * 10 + (buffer[i]) - '0';
+                        }
+
                     }
                 }
             } catch (IOException e) {

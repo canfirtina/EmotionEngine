@@ -166,12 +166,14 @@ public class SensorListenerEEG extends SensorListener {
 
     @Override
     public boolean disconnect() {
-        executorWriter.shutdownNow();
-        executorReader.shutdownNow();
-        try {
-            outputStream.write(new byte[]{CODE_STOP_STREAMING});
-        } catch (IOException e) {
+        System.out.println("disconnnneeeeeeeeeeeect");
+        synchronized (lockStreaming) {
+            streamingOn = false;
         }
+        executorReader.shutdownNow();
+        writeBytes(CODE_STOP_STREAMING);
+        executorWriter.shutdown();
+
         serialPort.close();
         connectionEstablished = false;
         return true;
@@ -295,6 +297,8 @@ public class SensorListenerEEG extends SensorListener {
                     //Read raw packet header from thread safe queue
                     for (int i = 0; i < len; i++) {
                         packet[index++] = buffer[i];
+                        if(streamingOn == false)
+                            break;
 
                         if(index==MESSAGE_LENGTH) {
 
