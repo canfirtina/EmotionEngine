@@ -8,7 +8,7 @@ import weka.core.FastVector;
  * Data structure to keep predetermined emotional state labels.
  */
 public enum Emotion {
-    JOY(0), BORED(1), PEACEFUL(2), FRUSTRATED(3), DISGUST(4);
+    JOY(0), BORED(3), PEACEFUL(2), FRUSTRATED(4), DISGUST(1);
 	private final int value;
 	
 	
@@ -42,23 +42,23 @@ public enum Emotion {
 	public static Emotion emotionWithValue(int value){
 		return Emotion.valueOf((String)labels.elementAt(value));
 	}
-        
+
         public static Emotion emotionForValue( int value){
-            
+
             switch( value){
-                
+
                 case 0:
                     return Emotion.JOY;
-                case 1:
+                case 3:
                     return Emotion.BORED;
                 case 2:
                     return Emotion.PEACEFUL;
-                case 3:
-                    return Emotion.FRUSTRATED;
                 case 4:
+                    return Emotion.FRUSTRATED;
+                case 1:
                     return Emotion.DISGUST;
             }
-            
+
             return null;
         }
 }
