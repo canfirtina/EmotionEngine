@@ -1,11 +1,8 @@
 package emotionlearner.classifier;
 
 import emotionlearner.feature.FeatureExtractorEEG;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -137,12 +134,14 @@ public class EnsembleClassifier {
 
 					if(resDist != null){
 						int maxInd = 0;
+						System.out.println(Arrays.toString(resDist));
 						for(int i=1;i<resDist.length;++i)
-							if(resDist[i] > maxInd)
+							if(resDist[i] > resDist[maxInd])
 								maxInd = i;
 						synchronized(lastEmotionLocker){
-							lastEmotion = Emotion.emotionWithValue(maxInd);
+							lastEmotion = Emotion.emotionForValue(maxInd);
 						}
+						System.out.println(lastEmotion.name());
 						for(ClassifierObserver o : observers)
 							o.classifyNotification(that);
 					}
@@ -232,6 +231,7 @@ public class EnsembleClassifier {
 							Instance instance = features.get(i).getInstance();
 							instance.setDataset(instances);
 							FastVector attributes = features.get(0).getFeatureAttributes();
+							System.out.println("name >> EnsembleClassifier: " + features.get(i).getEmotion().name());
 							instance.setValue((Attribute)attributes.elementAt(attributes.size()-1), features.get(i).getEmotion().name());
 							instances.add(instance);
 						}

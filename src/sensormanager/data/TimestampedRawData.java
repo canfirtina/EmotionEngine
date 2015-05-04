@@ -26,7 +26,7 @@ public class TimestampedRawData {
 	 * @param time
 	 */
 	public TimestampedRawData(double[] rawData, long milliSeconds){
-		this.rawData = rawData;
+		this.rawData = rawData.clone();
 		this.time = milliSeconds;
 	}
 	

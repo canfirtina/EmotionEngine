@@ -90,8 +90,6 @@ public class TutorialCellItemController implements Initializable {
         textFlow.getChildren().add(new Text(info.getExplanationPath()));
         imageView.setImage(new Image(info.getImagePath()));
         item = info;
-        
-        System.out.println(info.getEmotion().getValue());
     }
 
     @FXML

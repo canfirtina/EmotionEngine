@@ -194,7 +194,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
             serialPortsPane.setDisable(false);
         } else {
-
+            
             serialPortsPane.add(serialButtons.get(serialButtons.size() - 1), 0, 0, 2, 2);
             serialPortsPane.setDisable(true);
         }

@@ -7,6 +7,7 @@ import sensormanager.util.Filter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -371,7 +372,7 @@ public class SensorListenerEEG extends SensorListener {
             }
             double[] doubleData = new double[CHANNEL_LENGTH];
             for (int i = 0; i < CHANNEL_LENGTH; i++) {
-                doubleData[i] = ((double) integerData[i] * (4.5 / EEG_GAIN / (2 << 23 - 1)));
+                doubleData[i] = (int)((double) integerData[i] * (4.5 / EEG_GAIN / (2 << 23 - 1)) * 1000000);
             }
             return doubleData;
         }
