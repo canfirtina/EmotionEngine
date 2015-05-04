@@ -25,6 +25,8 @@
                      </image>
                   </ImageView>
                   <Label fx:id="userEMail" layoutX="115.0" layoutY="14.0" />
+                  <Button fx:id="closeButton" layoutX="715.0" layoutY="7.0" mnemonicParsing="false" styleClass="window-button" text="x" />
+                  <Button fx:id="minimizeButton" layoutX="695.0" layoutY="7.0" mnemonicParsing="false" styleClass="window-button" text="-" />
                </children>
                <VBox.margin>
                   <Insets />

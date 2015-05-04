@@ -31,6 +31,7 @@ public class EmotionEngineApp extends Application {
     public void start(Stage stage) throws Exception {
 
         EmotionEngineController mainContainer = new EmotionEngineController();
+        mainContainer.setStage(stage);
         mainContainer.addScreen(ScreenInfo.LoginScreen.screenId(), ScreenInfo.LoginScreen.screenFileName());
         mainContainer.addScreen(ScreenInfo.SignUpScreen.screenId(), ScreenInfo.SignUpScreen.screenFileName());
         mainContainer.addScreen(ScreenInfo.ForgotPasswordScreen.screenId(), ScreenInfo.ForgotPasswordScreen.screenFileName());

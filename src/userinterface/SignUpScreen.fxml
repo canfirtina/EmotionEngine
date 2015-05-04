@@ -7,7 +7,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" styleClass="background" stylesheets="@JMetroLightTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.SignUpScreenController">
+<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" styleClass="root" stylesheets="@JMetroLightTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.SignUpScreenController">
    <children>
       <TextField fx:id="emailField" layoutX="285.0" layoutY="180.0" prefHeight="30.0" prefWidth="180.0" promptText="E-mail Address">
          <font>
@@ -38,5 +38,7 @@
             <Font name="Segoe UI" size="30.0" />
          </font>
       </Label>
+      <Button fx:id="closeButton" layoutX="715.0" layoutY="7.0" mnemonicParsing="false" styleClass="window-button" text="x" />
+      <Button fx:id="minimizeButton" layoutX="695.0" layoutY="7.0" mnemonicParsing="false" styleClass="window-button" text="-" />
    </children>
 </AnchorPane>

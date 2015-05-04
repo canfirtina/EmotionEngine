@@ -8,6 +8,7 @@ package userinterface;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -36,49 +37,69 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     private TextField emailField;
     @FXML
     private TextField passwordField;
-    
+    @FXML
+    private Button closeButton;
+    @FXML
+    private Button minimizeButton;
+
     PresentingController presentingController;
-    
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-    }    
+
+        closeButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            public void handle(ActionEvent event) {
+                System.exit(0);
+                
+            }
+        });
+
+        minimizeButton.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                presentingController.getStage().setIconified(true);
+            }
+        });
+    }
 
     @Override
     public void setPresentingScreen(PresentingController presentingController) {
-        
+
         this.presentingController = presentingController;
     }
-    
+
     @FXML
-    private void loginPressed( ActionEvent event){
-        
+    private void loginPressed(ActionEvent event) {
+
         warningLabel.setText("");
-        
-        if( SecurityControl.isValidEmailAddress( emailField.getText())){
-            
-            if(passwordField.getText().length() > 0 && UserManager.getInstance().login( emailField.getText(), SecurityControl.getCipherText(passwordField.getText()))){
+
+        if (SecurityControl.isValidEmailAddress(emailField.getText())) {
+
+            if (passwordField.getText().length() > 0 && UserManager.getInstance().login(emailField.getText(), SecurityControl.getCipherText(passwordField.getText()))) {
                 emailField.clear();
                 passwordField.clear();
                 warningLabel.setText("");
                 presentingController.displayScreen(ScreenInfo.ProfileScreen.screenId());
-            }else
+            } else {
                 warningLabel.setText("Username or password is wrong");
-        }else
+            }
+        } else {
             warningLabel.setText("Please enter a valid e-mail address");
+        }
     }
-    
+
     @FXML
-    private void signUpPressed( ActionEvent event){
-        
+    private void signUpPressed(ActionEvent event) {
+
         presentingController.displayScreen(ScreenInfo.SignUpScreen.screenId());
     }
-    
+
     @FXML
-    private void forgotPasswordPressed( ActionEvent event){
-        
+    private void forgotPasswordPressed(ActionEvent event) {
+
         presentingController.displayScreen(ScreenInfo.ForgotPasswordScreen.screenId());
     }
 }

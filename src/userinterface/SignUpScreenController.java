@@ -8,6 +8,7 @@ package userinterface;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -22,57 +23,75 @@ import user.manager.UserManager;
  * @author CanFirtina
  */
 public class SignUpScreenController implements Initializable, PresentedScreen {
-    
+
     @FXML
     private TextField emailField;
     @FXML
     private TextField passwordField;
     @FXML
     private Label warningLabel;
-    
+    @FXML
+    private Button closeButton;
+    @FXML
+    private Button minimizeButton;
+
     PresentingController presentingController;
-    
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-    }    
+        closeButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            public void handle(ActionEvent event) {
+                System.exit(0);
+            }
+        });
+
+        minimizeButton.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                presentingController.getStage().setIconified(true);
+            }
+        });
+    }
 
     @Override
     public void setPresentingScreen(PresentingController presentingController) {
-        
+
         this.presentingController = presentingController;
     }
-    
+
     @FXML
-    private void signUpPressed( ActionEvent event){
-        
-        if( SecurityControl.isValidEmailAddress(emailField.getText())){
-            
-            if( passwordField.getText().length() >= 8){
-                
-                if( UserManager.getInstance().newUser( emailField.getText(), SecurityControl.getCipherText(passwordField.getText()))){
+    private void signUpPressed(ActionEvent event) {
+
+        if (SecurityControl.isValidEmailAddress(emailField.getText())) {
+
+            if (passwordField.getText().length() >= 8) {
+
+                if (UserManager.getInstance().newUser(emailField.getText(), SecurityControl.getCipherText(passwordField.getText()))) {
                     emailField.clear();
                     passwordField.clear();
                     warningLabel.setText("");
-                }else
+                } else {
                     warningLabel.setText("Something went wrong");
-            }else
+                }
+            } else {
                 warningLabel.setText("Password length must be at least 8 characters");
-        }else
+            }
+        } else {
             warningLabel.setText("Invalid email");
+        }
         presentingController.displayScreen(ScreenInfo.LoginScreen.screenId());
     }
-    
+
     @FXML
-    private void cancelButtonPressed( ActionEvent event){
-        
+    private void cancelButtonPressed(ActionEvent event) {
+
         emailField.clear();
         passwordField.clear();
         warningLabel.setText("");
-        
-        presentingController.displayScreen( ScreenInfo.LoginScreen.screenId());
+
+        presentingController.displayScreen(ScreenInfo.LoginScreen.screenId());
     }
 }

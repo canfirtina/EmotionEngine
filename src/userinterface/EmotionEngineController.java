@@ -13,6 +13,7 @@ import javafx.scene.Parent;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
@@ -22,7 +23,7 @@ import javafx.util.Duration;
 public class EmotionEngineController extends StackPane implements PresentingController{
 	
     private HashMap<String, Node> screenCollection = new HashMap<>();
-    
+    private Stage stage;
     /**
      * Create EmotionEngineController
      */
@@ -101,5 +102,16 @@ public class EmotionEngineController extends StackPane implements PresentingCont
         }
         
         return true;
+    }
+
+    @Override
+    public Stage getStage() {
+        
+        return stage;
+    }
+    
+    public void setStage( Stage stage){
+        
+        this.stage = stage;
     }
 }

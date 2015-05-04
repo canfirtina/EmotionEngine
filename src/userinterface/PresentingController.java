@@ -5,6 +5,8 @@
  */
 package userinterface;
 
+import javafx.stage.Stage;
+
 /**
  *
  * @author CanFirtina
@@ -35,4 +37,6 @@ public interface PresentingController {
      * @return true if removal is successful.
      */
     public boolean removeScreen( String screenName);
+    
+    public Stage getStage();
 }

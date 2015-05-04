@@ -17,6 +17,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -76,6 +77,10 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     private Button gsrButton;
     @FXML
     private Button hrButton;
+    @FXML
+    private Button closeButton;
+    @FXML
+    private Button minimizeButton;
 
     PresentingController presentingController;
 
@@ -96,6 +101,18 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
+        closeButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            public void handle(ActionEvent event) {
+                System.exit(0);
+            }
+        });
+
+        minimizeButton.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                presentingController.getStage().setIconified(true);
+            }
+        });
         //Tutorial List
         //TODO by hand for now
         tutorialItems = new ArrayList<TutorialItem>();
@@ -171,16 +188,17 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
         sensorsButtonBox.setDisable(true);
         connectButton.setDisable(true);
-        
+
         serialPortsPane.getChildren().clear();
-        
+
         sensorsOnSerialPorts = new HashMap<String, Class>();
 
         availableSerialPorts = new ArrayList<String>();
         availableSerialPorts.addAll(Arrays.asList(sensormanager.util.SerialPortUtilities.getConnectedPorts()));
 
-        for (int i = 0; i < availableSerialPorts.size(); i++)
+        for (int i = 0; i < availableSerialPorts.size(); i++) {
             serialButtons.get(i).setText(availableSerialPorts.get(i));
+        }
 
         if (availableSerialPorts.size() > 0) {
 
@@ -194,7 +212,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
             serialPortsPane.setDisable(false);
         } else {
-            
+
             serialPortsPane.add(serialButtons.get(serialButtons.size() - 1), 0, 0, 2, 2);
             serialPortsPane.setDisable(true);
         }
@@ -203,14 +221,15 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @FXML
     private void connectButtonPressed(ActionEvent event) {
 
-        for( Node toggleButton : serialPortsPane.getChildren())
-            ((ToggleButton)toggleButton).setSelected(false);
-        
+        for (Node toggleButton : serialPortsPane.getChildren()) {
+            ((ToggleButton) toggleButton).setSelected(false);
+        }
+
         sensorsButtonBox.setDisable(true);
-        
-        if (connectButton.getText().equalsIgnoreCase(CONNECT))
+
+        if (connectButton.getText().equalsIgnoreCase(CONNECT)) {
             updateSensorList();
-        else{
+        } else {
             EmotionEngine.sharedInstance(null).stopEngine();
             connectButton.setText(CONNECT);
             connectButton.setDisable(true);
@@ -352,9 +371,11 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
     @Override
     public void notifyError(EmotionEngine engine, SensorListener sensor) {
-        
-        for( int i = 0; i < availableSerialPorts.size(); i++)
-            if( availableSerialPorts.get(i).equalsIgnoreCase(sensor.getSerialPort()))
+
+        for (int i = 0; i < availableSerialPorts.size(); i++) {
+            if (availableSerialPorts.get(i).equalsIgnoreCase(sensor.getSerialPort())) {
                 serialPortsPane.getChildren().get(i).setDisable(true);
+            }
+        }
     }
 }
