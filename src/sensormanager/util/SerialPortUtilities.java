@@ -30,6 +30,11 @@ public class SerialPortUtilities {
                 serialPortList.add(port.getName());
             }
         }
-        return serialPortList.toArray(new String[serialPortList.size()]);
+        
+        if( serialPortList != null)
+            return serialPortList.toArray(new String[serialPortList.size()]);
+        
+        serialPortList = new ArrayList<String>();
+        return (String[]) serialPortList.toArray();
     }
 }
