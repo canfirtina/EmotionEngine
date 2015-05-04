@@ -452,6 +452,14 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
             });
         }
     }
+	
+	/**
+	 * disconnects sensor 
+	 * @param listener 
+	 */
+	public void disconnect(SensorListener listener){
+		connectionError(listener);
+	}
 
     /**
      * Called when new data is ready to use of the sensor
@@ -533,7 +541,8 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
 
                     emotionClassifier.removeClassifierOfSensor(sensor);
 
-                    notifyEngineObservers();
+                    for(EmotionEngineObserver observer : engineObservers)
+						observer.notifyError(engine, sensor);
 
                     return null;
                 }
