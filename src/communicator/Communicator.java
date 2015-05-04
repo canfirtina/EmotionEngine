@@ -161,7 +161,7 @@ public class Communicator {
                 } else if (request[0].equals("startclassification")) {
                     ee.openClassifySession();
                 } else if (request[0].equals("stopclassification")) {
-                    ee.stopClassifySession();
+                    ee.closeClassifySession();
                 } else if (request[0].equals("type")) {
                     //TODO there is no method provided in emotion engine for this
                 }
@@ -195,7 +195,7 @@ public class Communicator {
      * Makes thread wait for another client
      */
     private static void onClientDisconnected() {
-        ee.stopClassifySession();
+        ee.closeClassifySession();
         ee.closeTrainingSession();
         waitClient();
     }

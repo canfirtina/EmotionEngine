@@ -342,6 +342,8 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
                 @Override
                 public Void call() {
                     synchronized (trainSessionLocker) {
+						if(sessionTrainingFeatures == null)
+							return null;
                         for (SensorListener listener : sessionTrainingFeatures.getSensorListeners()) {
                             persistentDataManager.saveMultipleSamples(sessionTrainingFeatures.getLastNFeatureList(listener, -1), listener);
                         }
@@ -384,7 +386,7 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
      * @return
      * @deprecated
      */
-    public void stopClassifySession() {
+    public void closeClassifySession() {
         synchronized (executorLocker) {
             executorService.submit(new Callable<Void>() {
                 @Override

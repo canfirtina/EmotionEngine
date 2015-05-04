@@ -231,6 +231,7 @@ public class EnsembleClassifier {
 							Instance instance = features.get(i).getInstance();
 							instance.setDataset(instances);
 							FastVector attributes = features.get(0).getFeatureAttributes();
+							System.out.println("name >> EnsembleClassifier: " + features.get(i).getEmotion().name());
 							instance.setValue((Attribute)attributes.elementAt(attributes.size()-1), features.get(i).getEmotion().name());
 							instances.add(instance);
 						}
