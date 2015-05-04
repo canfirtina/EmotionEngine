@@ -10,18 +10,18 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" stylesheets="@JMetroLightTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.ProfileScreenController">
+<AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" styleClass="root" stylesheets="@JMetroLightTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.ProfileScreenController">
    <children>
       <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <Pane minHeight="100.0" prefHeight="100.0" VBox.vgrow="SOMETIMES">
+            <Pane maxHeight="100.0" minHeight="100.0" prefHeight="100.0" VBox.vgrow="SOMETIMES">
                <children>
-                  <ImageView fx:id="profileImage" fitHeight="100.0" fitWidth="100.0" layoutX="8.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="profileImage" fitHeight="85.0" fitWidth="85.0" layoutX="14.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true">
                      <viewport>
                         <Rectangle2D />
                      </viewport>
                      <image>
-                        <Image url="@../../icon-user-default.png" />
+                        <Image url="@../../User%20Data/can@can.com/profile.png" />
                      </image>
                   </ImageView>
                   <Label fx:id="userEMail" layoutX="115.0" layoutY="14.0" />
