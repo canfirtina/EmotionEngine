@@ -6,15 +6,17 @@
         Light Metro style sheet for use in JavaFX applications
 */
 
-.rootPane{
+.root{
 
-  -fx-border-insets: 23;
+  -fx-background-color: white;
+    
+  -fx-border-insets: 1;
 
-  -fx-background-insets: 23;
+  -fx-background-insets: 5;
 
-  -fx-background-radius: 6;
+  -fx-background-radius: 5;
 
-  -fx-border-radius: 6;
+  -fx-border-radius: 5;
 
   -fx-border-color: gray;
 

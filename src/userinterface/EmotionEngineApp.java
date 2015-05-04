@@ -12,8 +12,10 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import emotionlearner.engine.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.StageStyle;
 
 /**
@@ -33,13 +35,12 @@ public class EmotionEngineApp extends Application {
         mainContainer.addScreen(ScreenInfo.SignUpScreen.screenId(), ScreenInfo.SignUpScreen.screenFileName());
         mainContainer.addScreen(ScreenInfo.ForgotPasswordScreen.screenId(), ScreenInfo.ForgotPasswordScreen.screenFileName());
         mainContainer.addScreen(ScreenInfo.ProfileScreen.screenId(), ScreenInfo.ProfileScreen.screenFileName());
-
         mainContainer.displayScreen(ScreenInfo.LoginScreen.screenId());
 
         Group root = new Group();
         root.getChildren().addAll(mainContainer);
         Scene scene = new Scene(root, 750, 480);
-                
+
         stage.setResizable(false);
         stage.setScene(scene);
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -66,7 +67,6 @@ public class EmotionEngineApp extends Application {
                 stage.setY(event.getScreenY() - yOffset);
             }
         });
-        
         
         stage.show();
     }
