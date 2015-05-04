@@ -195,7 +195,7 @@ public class Communicator {
      * Makes thread wait for another client
      */
     private static void onClientDisconnected() {
-        ee.stopClassifySession();
+        ee.closeClassifySession();
         ee.closeTrainingSession();
         waitClient();
     }
