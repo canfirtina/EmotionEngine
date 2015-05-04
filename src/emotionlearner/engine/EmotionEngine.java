@@ -570,8 +570,8 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
                     DataEpocher epocher = null;
                     if (sensor.getClass().equals(SensorListenerEEG.class)) {
                         extractor = new FeatureExtractorEEG();
-                        epocher = new SlidingWindowDataEpocher(4000, 1000);
-                        epocher = new LengthBasedDataEpocher(1000);
+                        //epocher = new SlidingWindowDataEpocher(4000, 1000);
+                        epocher = new LengthBasedDataEpocher(1024);
                         //epocher = new LBSlidingWindowDataEpocher(250, 1000);
                     } else if (sensor.getClass().equals(SensorListenerGSR.class)) {
                         extractor = new FeatureExtractorGSR();
