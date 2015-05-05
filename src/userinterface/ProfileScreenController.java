@@ -86,6 +86,8 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     private Button minimizeButton;
     @FXML
     private ProgressIndicator tutorialListProgress;
+    @FXML
+    private Label activityLabel;
 
     PresentingController presentingController;
 
