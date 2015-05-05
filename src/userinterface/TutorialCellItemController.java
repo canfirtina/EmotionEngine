@@ -90,7 +90,8 @@ public class TutorialCellItemController implements Initializable {
         });
 
         textFlow.getChildren().add(new Text(info.getExplanationPath()));
-        imageView.setImage(new Image(info.getImagePath()));
+        File imageFile = new File(info.getImagePath());
+        imageView.setImage(new Image(imageFile.toURI().toString()));
         imageView.setFitWidth(100);
         item = info;
     }
