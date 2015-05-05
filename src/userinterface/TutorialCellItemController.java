@@ -89,6 +89,7 @@ public class TutorialCellItemController implements Initializable {
 
         textFlow.getChildren().add(new Text(info.getExplanationPath()));
         imageView.setImage(new Image(info.getImagePath()));
+        imageView.setFitWidth(100);
         item = info;
     }
 
@@ -102,8 +103,8 @@ public class TutorialCellItemController implements Initializable {
         final Emotion label = item.getEmotion();
 
         MediaView vidView = new MediaView(video);
-        vidView.setFitWidth(750);
-        vidView.setFitHeight(480);
+        vidView.setFitWidth(1024);
+        vidView.setFitHeight(768);
 
         Stage stage = new Stage();
         stage.setTitle(item.getLabel());

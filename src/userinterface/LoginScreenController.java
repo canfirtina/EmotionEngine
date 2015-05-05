@@ -5,6 +5,7 @@
  */
 package userinterface;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -19,6 +20,8 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import user.util.SecurityControl;
 import user.manager.UserManager;
 
@@ -47,6 +50,8 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     private Button minimizeButton;
     @FXML
     private ProgressIndicator progressIndicator;
+    @FXML
+    private ImageView logoImageView;
 
     private PresentingController presentingController;
 
@@ -71,7 +76,11 @@ public class LoginScreenController implements Initializable, PresentedScreen {
                 presentingController.getStage().setIconified(true);
             }
         });
-        
+        File logoImageFile = new File("image/logo_full_small.png");
+        if( logoImageFile.exists())
+            logoImageView.setImage(new Image(logoImageFile.toURI().toString()));
+        logoImageView.setFitWidth(200);
+        logoImageView.setFitHeight(150);
         progressIndicator.setVisible(false);
         executorService = Executors.newSingleThreadExecutor();
     }

@@ -107,7 +107,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
-        System.out.println("exece before");
         executorService = Executors.newSingleThreadExecutor();
         tutorialListProgress.setVisible(false);
 
@@ -125,17 +124,14 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         });
 
         //tutorial list
-        tutorialList.setDisable(true);
+        //tutorialList.setDisable(true);
         tutorialListProgress.setVisible(true);
-        System.out.println("exece before2");
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                System.out.println("exece before3");
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        System.out.println("exece before4");
                         //User Panel
                         String userName = UserManager.getInstance().getCurrentUser().getName();
                         userEMail.setText(userName);
