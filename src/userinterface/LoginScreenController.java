@@ -103,6 +103,7 @@ public class LoginScreenController implements Initializable, PresentedScreen {
                                     passwordField.clear();
                                     warningLabel.setText("");
                                     presentingController.displayScreen(ScreenInfo.ProfileScreen.screenId());
+                                    executorService.shutdown();
                                 }
                             });
                         } else {
@@ -111,7 +112,7 @@ public class LoginScreenController implements Initializable, PresentedScreen {
                         
                         progressIndicator.setVisible(false);
                         loginButton.setDisable(false);
-                        executorService.shutdown();
+                        //executorService.shutdown();
                     }
 
                 });

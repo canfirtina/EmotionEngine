@@ -107,9 +107,10 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
+        System.out.println("exece before");
         executorService = Executors.newSingleThreadExecutor();
         tutorialListProgress.setVisible(false);
-        
+
         closeButton.setOnAction(new EventHandler<ActionEvent>() {
 
             public void handle(ActionEvent event) {
@@ -126,29 +127,36 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         //tutorial list
         tutorialList.setDisable(true);
         tutorialListProgress.setVisible(true);
+        System.out.println("exece before2");
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                
-                //User Panel
-                String userName = UserManager.getInstance().getCurrentUser().getName();
-                userEMail.setText(userName);
-                File profilePic = new File("User Data/" + userName + "/profile.png");
-                profileImage.setImage(new Image(profilePic.toURI().toString()));
-                //---------
-                
-                tutorialItems = new ArrayList<TutorialItem>();
-                ArrayList<TutorialInfo> tutorialInfoDb = DataManager.getInstance().getAllTutorials();
-                for (TutorialInfo info : tutorialInfoDb) {
-                    tutorialItems.add(new TutorialItem(info.getName(), info.getImagePath(), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
-                }
+                System.out.println("exece before3");
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("exece before4");
+                        //User Panel
+                        String userName = UserManager.getInstance().getCurrentUser().getName();
+                        userEMail.setText(userName);
+                        File profilePic = new File("User Data/" + userName + "/profile.png");
+                        profileImage.setImage(new Image(profilePic.toURI().toString()));
+                        //---------
 
-                ObservableList<TutorialItem> tutorials = FXCollections.observableArrayList(tutorialItems);
+                        tutorialItems = new ArrayList<TutorialItem>();
+                        ArrayList<TutorialInfo> tutorialInfoDb = DataManager.getInstance().getAllTutorials();
+                        for (TutorialInfo info : tutorialInfoDb) {
+                            tutorialItems.add(new TutorialItem(info.getName(), info.getImagePath(), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
+                        }
 
-                tutorialListProgress.setVisible(false);
-                tutorialList.setItems(tutorials);
+                        ObservableList<TutorialItem> tutorials = FXCollections.observableArrayList(tutorialItems);
 
-                executorService.shutdown();
+                        tutorialListProgress.setVisible(false);
+                        tutorialList.setItems(tutorials);
+                        System.out.println("exece before5");
+                        executorService.shutdown();
+                    }
+                });
             }
         });
 
@@ -160,7 +168,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         });
 
         //------------
-
         //Activity List
         ObservableList<String> activities = FXCollections.observableArrayList("");
         activityList.setItems(activities);
