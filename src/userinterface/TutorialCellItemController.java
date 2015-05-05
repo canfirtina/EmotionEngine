@@ -6,6 +6,8 @@
 package userinterface;
 
 import emotionlearner.engine.EmotionEngine;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -96,7 +98,7 @@ public class TutorialCellItemController implements Initializable {
     @FXML
     private void tutorialEditTriggered() {
 
-        final MediaPlayer video = new MediaPlayer(new Media(item.getMediaPath()));
+        final MediaPlayer video = new MediaPlayer(new Media(new File(item.getMediaPath()).toURI().toString()));
 
             EmotionEngine engine = EmotionEngine.sharedInstance(null);
 
