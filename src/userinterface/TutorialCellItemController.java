@@ -6,6 +6,8 @@
 package userinterface;
 
 import emotionlearner.engine.EmotionEngine;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -88,46 +90,48 @@ public class TutorialCellItemController implements Initializable {
         });
 
         textFlow.getChildren().add(new Text(info.getExplanationPath()));
-        imageView.setImage(new Image(info.getImagePath()));
+        File imageFile = new File(info.getImagePath());
+        imageView.setImage(new Image(imageFile.toURI().toString()));
+        imageView.setFitWidth(100);
         item = info;
     }
 
     @FXML
     private void tutorialEditTriggered() {
 
-        final MediaPlayer video = new MediaPlayer(new Media(item.getMediaPath()));
+        final MediaPlayer video = new MediaPlayer(new Media(new File(item.getMediaPath()).toURI().toString()));
 
-        EmotionEngine engine = EmotionEngine.sharedInstance(null);
-        
-        final Emotion label = item.getEmotion();
+            EmotionEngine engine = EmotionEngine.sharedInstance(null);
 
-        MediaView vidView = new MediaView(video);
-        vidView.setFitWidth(750);
-        vidView.setFitHeight(480);
+            final Emotion label = item.getEmotion();
 
-        Stage stage = new Stage();
-        stage.setTitle(item.getLabel());
-        stage.setScene(new Scene(new Group(vidView), vidView.getFitWidth(), vidView.getFitHeight(), Color.BLACK));
-        stage.setResizable(false);
-        stage.show();
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent we) {
-                video.stop();
-                engine.closeTrainingSession();
-            }
-        });
+            MediaView vidView = new MediaView(video);
+            vidView.setFitWidth(1024);
+            vidView.setFitHeight(768);
 
-        video.setOnReady(new Runnable() {
+            Stage stage = new Stage();
+            stage.setTitle(item.getLabel());
+            stage.setScene(new Scene(new Group(vidView), vidView.getFitWidth(), vidView.getFitHeight(), Color.BLACK));
+            stage.setResizable(false);
+            stage.show();
+            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent we) {
+                    video.stop();
+                    engine.closeTrainingSession();
+                }
+            });
 
-            @Override
-            public void run() {
+            video.setOnReady(new Runnable() {
 
-                video.play();
-            }
-        });
+                @Override
+                public void run() {
 
-        video.setOnPlaying(new Runnable() {
+                    video.play();
+                }
+            });
+
+            video.setOnPlaying(new Runnable() {
 
             @Override
             public void run() {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.paint.*?>
 <?import java.lang.*?>
@@ -10,37 +11,38 @@
 
 <AnchorPane id="AnchorPane" prefHeight="480.0" prefWidth="750.0" styleClass="root" stylesheets="@JMetroLightTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="userinterface.LoginScreenController">
    <children>
-      <Label fx:id="warningLabel" alignment="CENTER" layoutX="149.0" layoutY="155.0" prefHeight="15.0" prefWidth="450.0" textAlignment="CENTER" textFill="RED" AnchorPane.topAnchor="155.0">
+      <Label fx:id="warningLabel" alignment="CENTER" layoutX="149.0" layoutY="173.0" prefHeight="15.0" prefWidth="450.0" textAlignment="CENTER" textFill="RED" AnchorPane.topAnchor="173.0">
          <font>
             <Font size="12.0" />
          </font></Label>
-      <TextField fx:id="emailField" layoutX="285.0" layoutY="180.0" prefHeight="30.0" prefWidth="180.0" promptText="E-mail address" stylesheets="@JMetroLightTheme.css">
+      <TextField fx:id="emailField" layoutX="285.0" layoutY="196.0" prefHeight="30.0" prefWidth="180.0" promptText="E-mail address" stylesheets="@JMetroLightTheme.css">
          <font>
             <Font size="14.0" />
          </font></TextField>
-      <PasswordField fx:id="passwordField" layoutX="285.0" layoutY="215.0" prefHeight="30.0" prefWidth="180.0" promptText="Password" stylesheets="@JMetroLightTheme.css">
+      <PasswordField fx:id="passwordField" layoutX="285.0" layoutY="231.0" prefHeight="30.0" prefWidth="180.0" promptText="Password" stylesheets="@JMetroLightTheme.css">
          <font>
             <Font size="14.0" />
          </font></PasswordField>
-      <Button fx:id="loginButton" alignment="CENTER" defaultButton="true" layoutX="285.0" layoutY="250.0" mnemonicParsing="false" onAction="#loginPressed" prefHeight="30.0" prefWidth="180.0" stylesheets="@JMetroLightTheme.css" text="Login">
+      <Button fx:id="loginButton" alignment="CENTER" defaultButton="true" layoutX="285.0" layoutY="266.0" mnemonicParsing="false" onAction="#loginPressed" prefHeight="30.0" prefWidth="180.0" stylesheets="@JMetroLightTheme.css" text="Login">
          <font>
             <Font size="12.0" />
          </font></Button>
-      <Label layoutX="40.0" layoutY="40.0" styleClass="header" stylesheets="@JMetroLightTheme.css" text="Emotion Engine">
-         <font>
-            <Font name="Segoe UI" size="30.0" />
-         </font>
-      </Label>
-      <Button fx:id="signUpButton" alignment="CENTER" layoutX="285.0" layoutY="290.0" mnemonicParsing="false" onAction="#signUpPressed" prefHeight="30.0" prefWidth="89.0" style="-fx-font-size: 11;" text="Sign Up">
+      <Button fx:id="signUpButton" alignment="CENTER" layoutX="285.0" layoutY="306.0" mnemonicParsing="false" onAction="#signUpPressed" prefHeight="30.0" prefWidth="89.0" style="-fx-font-size: 11;" text="Sign Up">
          <font>
             <Font size="11.0" />
          </font>
       </Button>
-      <Button fx:id="forgotPasswordButton" alignment="CENTER" layoutX="375.0" layoutY="290.0" mnemonicParsing="false" onAction="#forgotPasswordPressed" prefHeight="30.0" prefWidth="89.0" style="-fx-font-size: 11;" text="Forgot?">
+      <Button fx:id="forgotPasswordButton" alignment="CENTER" layoutX="375.0" layoutY="306.0" mnemonicParsing="false" onAction="#forgotPasswordPressed" prefHeight="30.0" prefWidth="89.0" style="-fx-font-size: 11;" text="Forgot?">
          <font>
             <Font size="11.0" />
          </font></Button>
       <Button fx:id="closeButton" layoutX="715.0" layoutY="7.0" mnemonicParsing="false" styleClass="window-button" text="x" />
       <Button fx:id="minimizeButton" layoutX="695.0" layoutY="7.0" mnemonicParsing="false" styleClass="window-button" text="-" />
+      <ProgressIndicator fx:id="progressIndicator" layoutX="465.0" layoutY="267.0" prefHeight="30.0" prefWidth="20.0" />
+      <ImageView fx:id="logoImageView" fitHeight="150.0" fitWidth="200.0" layoutX="327.0" layoutY="23.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../image/logo_full_small.png" />
+         </image>
+      </ImageView>
    </children>
 </AnchorPane>

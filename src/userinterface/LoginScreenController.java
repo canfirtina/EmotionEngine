@@ -5,6 +5,7 @@
  */
 package userinterface;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -15,12 +16,13 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
-import user.util.SecurityControl;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import user.manager.UserManager;
+import user.util.SecurityControl;
 
 /**
  * FXML Controller class
@@ -45,8 +47,10 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     private Button closeButton;
     @FXML
     private Button minimizeButton;
-    //@FXML
-    //private ProgressIndicator progressIndicator;
+    @FXML
+    private ProgressIndicator progressIndicator;
+    @FXML
+    private ImageView logoImageView;
 
     private PresentingController presentingController;
 
@@ -57,8 +61,7 @@ public class LoginScreenController implements Initializable, PresentedScreen {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
-        System.out.println("aklsdklaskd");
+
         closeButton.setOnAction(new EventHandler<ActionEvent>() {
 
             public void handle(ActionEvent event) {
@@ -72,10 +75,14 @@ public class LoginScreenController implements Initializable, PresentedScreen {
                 presentingController.getStage().setIconified(true);
             }
         });
-        
-        System.out.println("lasdlasd");
+        File logoImageFile = new File("image/logo_full_small.png");
+        if (logoImageFile.exists()) {
+            logoImageView.setImage(new Image(logoImageFile.toURI().toString()));
+        }
+        logoImageView.setFitWidth(200);
+        logoImageView.setFitHeight(150);
+        progressIndicator.setVisible(false);
         executorService = Executors.newSingleThreadExecutor();
-        System.out.println("21931239");
     }
 
     @Override
@@ -91,7 +98,8 @@ public class LoginScreenController implements Initializable, PresentedScreen {
 
         if (SecurityControl.isValidEmailAddress(emailField.getText())) {
             if (passwordField.getText().length() > 0) {
-                //progressIndicator.setVisible(true);
+                progressIndicator.setVisible(true);
+                loginButton.setDisable(true);
                 executorService.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -100,17 +108,30 @@ public class LoginScreenController implements Initializable, PresentedScreen {
                             Platform.runLater(new Runnable() {
                                 @Override
                                 public void run() {
-                                    //progressIndicator.setVisible(false);
                                     emailField.clear();
                                     passwordField.clear();
                                     warningLabel.setText("");
                                     presentingController.displayScreen(ScreenInfo.ProfileScreen.screenId());
-                                    executorService.shutdown();
+                                    //executorService.shutdown();
                                 }
                             });
                         } else {
-                            warningLabel.setText("Username or password is wrong");
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    warningLabel.setText("Username or password is wrong");
+                                }
+                            });
                         }
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressIndicator.setVisible(false);
+                                loginButton.setDisable(false);
+                            }
+                        });
+
+                        //executorService.shutdown();
                     }
 
                 });
@@ -132,5 +153,10 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     private void forgotPasswordPressed(ActionEvent event) {
 
         presentingController.displayScreen(ScreenInfo.ForgotPasswordScreen.screenId());
+    }
+
+    @Override
+    public void willPresented() {
+
     }
 }

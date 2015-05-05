@@ -5,6 +5,7 @@
  */
 package userinterface;
 
+import javafx.scene.image.Image;
 import shared.Emotion;
 
 /**
