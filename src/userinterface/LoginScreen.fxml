@@ -42,5 +42,6 @@
          </font></Button>
       <Button fx:id="closeButton" layoutX="715.0" layoutY="7.0" mnemonicParsing="false" styleClass="window-button" text="x" />
       <Button fx:id="minimizeButton" layoutX="695.0" layoutY="7.0" mnemonicParsing="false" styleClass="window-button" text="-" />
+      <ProgressIndicator fx:id="progressIndicator" layoutX="465.0" layoutY="251.0" prefHeight="30.0" prefWidth="20.0" />
    </children>
 </AnchorPane>

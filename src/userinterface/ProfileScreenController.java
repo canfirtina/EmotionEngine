@@ -113,8 +113,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
                 presentingController.getStage().setIconified(true);
             }
         });
-        //Tutorial List
-        //TODO by hand for now
+        
         tutorialItems = new ArrayList<TutorialItem>();
         ArrayList<TutorialInfo> tutorialInfoDb = DataManager.getInstance().getAllTutorials();
         for (TutorialInfo info : tutorialInfoDb) {

@@ -45,8 +45,8 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     private Button closeButton;
     @FXML
     private Button minimizeButton;
-    //@FXML
-    //private ProgressIndicator progressIndicator;
+    @FXML
+    private ProgressIndicator progressIndicator;
 
     private PresentingController presentingController;
 
@@ -58,7 +58,6 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-        System.out.println("aklsdklaskd");
         closeButton.setOnAction(new EventHandler<ActionEvent>() {
 
             public void handle(ActionEvent event) {
@@ -73,9 +72,8 @@ public class LoginScreenController implements Initializable, PresentedScreen {
             }
         });
         
-        System.out.println("lasdlasd");
+        progressIndicator.setVisible(false);
         executorService = Executors.newSingleThreadExecutor();
-        System.out.println("21931239");
     }
 
     @Override
@@ -91,7 +89,8 @@ public class LoginScreenController implements Initializable, PresentedScreen {
 
         if (SecurityControl.isValidEmailAddress(emailField.getText())) {
             if (passwordField.getText().length() > 0) {
-                //progressIndicator.setVisible(true);
+                progressIndicator.setVisible(true);
+                loginButton.setDisable(true);
                 executorService.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -100,7 +99,6 @@ public class LoginScreenController implements Initializable, PresentedScreen {
                             Platform.runLater(new Runnable() {
                                 @Override
                                 public void run() {
-                                    //progressIndicator.setVisible(false);
                                     emailField.clear();
                                     passwordField.clear();
                                     warningLabel.setText("");
@@ -111,6 +109,9 @@ public class LoginScreenController implements Initializable, PresentedScreen {
                         } else {
                             warningLabel.setText("Username or password is wrong");
                         }
+                        
+                        progressIndicator.setVisible(false);
+                        loginButton.setDisable(false);
                     }
 
                 });
