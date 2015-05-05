@@ -72,4 +72,9 @@ public class ForgotPasswordScreenController implements Initializable, PresentedS
 
         presentingController.displayScreen(ScreenInfo.LoginScreen.screenId());
     }
+
+    @Override
+    public void willPresented(){
+
+    }
 }

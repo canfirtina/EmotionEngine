@@ -21,14 +21,15 @@ import javafx.util.Duration;
  *
  */
 public class EmotionEngineController extends StackPane implements PresentingController{
-	
+
     private HashMap<String, Node> screenCollection = new HashMap<>();
+    private HashMap<String, PresentedScreen> controllers = new HashMap<>();
     private Stage stage;
     /**
      * Create EmotionEngineController
      */
     public EmotionEngineController(){
-        
+
         super();
     }
 
@@ -43,7 +44,7 @@ public class EmotionEngineController extends StackPane implements PresentingCont
 
     @Override
     public boolean displayScreen(final String screenName) {
-        
+
         if ( screenCollection.get( screenName) != null) {   //screen loaded
             final DoubleProperty opacity = opacityProperty();
 
@@ -57,7 +58,13 @@ public class EmotionEngineController extends StackPane implements PresentingCont
                         getChildren().add(0, screenCollection.get(screenName)); //add the screen
                         Timeline fadeIn = new Timeline(
                                 new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
-                                new KeyFrame(new Duration(800), new KeyValue(opacity, 1.0)));
+                                new KeyFrame(new Duration(800), new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent t) {
+                                        PresentedScreen screen = controllers.get(screenName);
+                                        screen.willPresented();
+                                    }
+                                },new KeyValue(opacity, 1.0)));
                         fadeIn.play();
                     }
                 }, new KeyValue(opacity, 0.0)));
@@ -86,6 +93,7 @@ public class EmotionEngineController extends StackPane implements PresentingCont
             PresentedScreen presentedScreenController = ((PresentedScreen)screenLoader.getController());
             presentedScreenController.setPresentingScreen(this);
             screenCollection.put(screenName, loadedScreen);
+            controllers.put(screenName, presentedScreenController);
             return true;
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -95,23 +103,24 @@ public class EmotionEngineController extends StackPane implements PresentingCont
 
     @Override
     public boolean removeScreen( String screenName) {
-        
+
         if( screenCollection.remove( screenName) == null) {
             System.err.println("Screen with name " + screenName + " does not exist. Cannot remove it");
+            controllers.remove(screenName);
             return false;
         }
-        
+
         return true;
     }
 
     @Override
     public Stage getStage() {
-        
+
         return stage;
     }
-    
+
     public void setStage( Stage stage){
-        
+
         this.stage = stage;
     }
 }

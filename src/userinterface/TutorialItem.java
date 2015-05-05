@@ -5,6 +5,7 @@
  */
 package userinterface;
 
+import javafx.scene.image.Image;
 import shared.Emotion;
 
 /**
@@ -14,7 +15,7 @@ import shared.Emotion;
 public class TutorialItem {
     
     private String label;
-    private String imagePath;
+    private Image image;
     private String mediaPath;
     private String explanationPath;
     private Emotion emotion;
@@ -22,16 +23,16 @@ public class TutorialItem {
     public TutorialItem(){
         
         this.label = "No Item";
-        this.imagePath = "";
+        this.image = null;
         this.mediaPath = "";
         this.explanationPath = "";
         this.emotion = Emotion.BORED;
     }
     
-    public TutorialItem( String label, String imagePath, String mediaPath, String explanationPath, Emotion emotion){
+    public TutorialItem( String label, Image image, String mediaPath, String explanationPath, Emotion emotion){
         
         this.label = label;
-        this.imagePath = imagePath;
+        this.image = image;
         this.mediaPath = mediaPath;
         this.explanationPath = explanationPath;
         this.emotion = emotion;
@@ -42,9 +43,9 @@ public class TutorialItem {
         return label;
     }
     
-    public String getImagePath(){
+    public Image getImagePath(){
         
-        return imagePath;
+        return image;
     }
     
     public String getMediaPath(){

@@ -17,4 +17,9 @@ public interface PresentedScreen {
      * @param presentingController is responsible for displaying this screen
      */
     void setPresentingScreen( PresentingController presentingController);
+
+    /**
+     *
+     */
+    void willPresented();
 }

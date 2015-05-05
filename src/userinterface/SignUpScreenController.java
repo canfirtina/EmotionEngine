@@ -94,4 +94,9 @@ public class SignUpScreenController implements Initializable, PresentedScreen {
 
         presentingController.displayScreen(ScreenInfo.LoginScreen.screenId());
     }
+
+    @Override
+    public void willPresented(){
+
+    }
 }
