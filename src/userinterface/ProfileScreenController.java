@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,6 +27,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -81,6 +84,8 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     private Button closeButton;
     @FXML
     private Button minimizeButton;
+    @FXML
+    private ProgressIndicator tutorialListProgress;
 
     PresentingController presentingController;
 
@@ -90,6 +95,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     private ArrayList<String> availableSerialPorts;
     private ArrayList<TutorialItem> tutorialItems;
     private ArrayList<ToggleButton> serialButtons;
+    private ExecutorService executorService;
 
     private final String NOSENSORLIST = "Cancel";
     private final String CONNECT = "Connect";
@@ -101,6 +107,9 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
+        executorService = Executors.newSingleThreadExecutor();
+        tutorialListProgress.setVisible(false);
+        
         closeButton.setOnAction(new EventHandler<ActionEvent>() {
 
             public void handle(ActionEvent event) {
@@ -113,16 +122,36 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
                 presentingController.getStage().setIconified(true);
             }
         });
-        
-        tutorialItems = new ArrayList<TutorialItem>();
-        ArrayList<TutorialInfo> tutorialInfoDb = DataManager.getInstance().getAllTutorials();
-        for (TutorialInfo info : tutorialInfoDb) {
-            tutorialItems.add(new TutorialItem(info.getName(), info.getImagePath(), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
-        }
 
-        ObservableList<TutorialItem> tutorials = FXCollections.observableArrayList(tutorialItems);
+        //tutorial list
+        tutorialList.setDisable(true);
+        tutorialListProgress.setVisible(true);
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                
+                //User Panel
+                String userName = UserManager.getInstance().getCurrentUser().getName();
+                userEMail.setText(userName);
+                File profilePic = new File("User Data/" + userName + "/profile.png");
+                profileImage.setImage(new Image(profilePic.toURI().toString()));
+                //---------
+                
+                tutorialItems = new ArrayList<TutorialItem>();
+                ArrayList<TutorialInfo> tutorialInfoDb = DataManager.getInstance().getAllTutorials();
+                for (TutorialInfo info : tutorialInfoDb) {
+                    tutorialItems.add(new TutorialItem(info.getName(), info.getImagePath(), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
+                }
 
-        tutorialList.setItems(tutorials);
+                ObservableList<TutorialItem> tutorials = FXCollections.observableArrayList(tutorialItems);
+
+                tutorialListProgress.setVisible(false);
+                tutorialList.setItems(tutorials);
+
+                executorService.shutdown();
+            }
+        });
+
         tutorialList.setCellFactory(new Callback<ListView<TutorialItem>, javafx.scene.control.ListCell<TutorialItem>>() {
             @Override
             public ListCell<TutorialItem> call(ListView<TutorialItem> listView) {
@@ -130,7 +159,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
             }
         });
 
-        tutorialList.setDisable(true);
         //------------
 
         //Activity List
@@ -141,12 +169,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         //Connect button
         connectButton.setDisable(true);
         //-------------
-
-        //User Panel
-        userEMail.setText(UserManager.getInstance().getCurrentUser().getName());
-        File profilePic = new File("User Data/" + UserManager.getInstance().getCurrentUser().getName() + "/profile.png");
-        profileImage.setImage(new Image(profilePic.toURI().toString()));
-        //---------
 
         //Serial Ports List
         serialPortsPane.getChildren().clear();

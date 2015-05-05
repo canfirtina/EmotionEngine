@@ -123,5 +123,6 @@
             </HBox>
          </children>
       </VBox>
+      <ProgressIndicator fx:id="tutorialListProgress" layoutX="170.0" layoutY="250.0" />
    </children>
 </AnchorPane>
