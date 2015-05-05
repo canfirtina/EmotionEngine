@@ -16,14 +16,13 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import user.util.SecurityControl;
 import user.manager.UserManager;
+import user.util.SecurityControl;
 
 /**
  * FXML Controller class
@@ -62,7 +61,7 @@ public class LoginScreenController implements Initializable, PresentedScreen {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+
         closeButton.setOnAction(new EventHandler<ActionEvent>() {
 
             public void handle(ActionEvent event) {
@@ -77,8 +76,9 @@ public class LoginScreenController implements Initializable, PresentedScreen {
             }
         });
         File logoImageFile = new File("image/logo_full_small.png");
-        if( logoImageFile.exists())
+        if (logoImageFile.exists()) {
             logoImageView.setImage(new Image(logoImageFile.toURI().toString()));
+        }
         logoImageView.setFitWidth(200);
         logoImageView.setFitHeight(150);
         progressIndicator.setVisible(false);
@@ -112,11 +112,16 @@ public class LoginScreenController implements Initializable, PresentedScreen {
                                     passwordField.clear();
                                     warningLabel.setText("");
                                     presentingController.displayScreen(ScreenInfo.ProfileScreen.screenId());
-                                    executorService.shutdown();
+                                    //executorService.shutdown();
                                 }
                             });
                         } else {
-                            warningLabel.setText("Username or password is wrong");
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    warningLabel.setText("Username or password is wrong");
+                                }
+                            });
                         }
                         Platform.runLater(new Runnable() {
                             @Override
@@ -151,7 +156,7 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     }
 
     @Override
-    public void willPresented(){
+    public void willPresented() {
 
     }
 }
