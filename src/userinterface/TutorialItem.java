@@ -15,7 +15,7 @@ import shared.Emotion;
 public class TutorialItem {
     
     private String label;
-    private Image image;
+    private String imagePath;
     private String mediaPath;
     private String explanationPath;
     private Emotion emotion;
@@ -23,16 +23,16 @@ public class TutorialItem {
     public TutorialItem(){
         
         this.label = "No Item";
-        this.image = null;
+        this.imagePath = "";
         this.mediaPath = "";
         this.explanationPath = "";
         this.emotion = Emotion.BORED;
     }
     
-    public TutorialItem( String label, Image image, String mediaPath, String explanationPath, Emotion emotion){
+    public TutorialItem( String label, String imagePath, String mediaPath, String explanationPath, Emotion emotion){
         
         this.label = label;
-        this.image = image;
+        this.imagePath = imagePath;
         this.mediaPath = mediaPath;
         this.explanationPath = explanationPath;
         this.emotion = emotion;
@@ -43,9 +43,9 @@ public class TutorialItem {
         return label;
     }
     
-    public Image getImagePath(){
+    public String getImagePath(){
         
-        return image;
+        return imagePath;
     }
     
     public String getMediaPath(){

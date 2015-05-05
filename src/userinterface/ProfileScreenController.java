@@ -123,10 +123,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
             }
         });
 
-        //tutorial list
-        //tutorialList.setDisable(true);
-        tutorialListProgress.setVisible(true);
-
         tutorialList.setCellFactory(new Callback<ListView<TutorialItem>, javafx.scene.control.ListCell<TutorialItem>>() {
             @Override
             public ListCell<TutorialItem> call(ListView<TutorialItem> listView) {
@@ -140,13 +136,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         activityList.setItems(activities);
         //------------
 
-        //Connect button
-        connectButton.setDisable(true);
-        //-------------
-
-        //Serial Ports List
-        serialPortsPane.getChildren().clear();
-
         serialButtons = new ArrayList<ToggleButton>();
         serialButtons.add(sensorButton1);
         serialButtons.add(sensorButton2);
@@ -156,17 +145,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
         serialButtons.get(serialButtons.size() - 1).setMaxHeight(10000);
         serialButtons.get(serialButtons.size() - 1).setMaxWidth(10000);
-
-        serialPortsPane.add(serialButtons.get(serialButtons.size() - 1), 0, 0, 2, 2);
-        serialPortsPane.setDisable(true);
-        //----------------
-
-        //sensor buttons
-        openBCIButton.setText(new SensorListenerEEG(null).toString());
-        gsrButton.setText(new SensorListenerGSR(null).toString());
-        hrButton.setText(new SensorListenerHR(null).toString());
-        sensorsButtonBox.setDisable(true);
-        //--------------
 
         EmotionEngine engine = EmotionEngine.sharedInstance(null);
         engine.registerObserver(this);
@@ -352,6 +330,12 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
             connectButton.setDisable(true);
         }
     }
+    
+    @FXML
+    private void logoutPressed(ActionEvent event) {
+        
+        presentingController.displayScreen(ScreenInfo.LoginScreen.screenId());
+    }
 
     @Override
     public void notify(EmotionEngine engine) {
@@ -376,6 +360,29 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
     @Override
     public void willPresented(){
+        
+        //tutorial list
+        tutorialList.setDisable(true);
+        tutorialListProgress.setVisible(true);
+        
+        //Connect button
+        connectButton.setDisable(true);
+        //-------------
+
+        //Serial Ports List
+        serialPortsPane.getChildren().clear();
+        
+        serialPortsPane.add(serialButtons.get(serialButtons.size() - 1), 0, 0, 2, 2);
+        serialPortsPane.setDisable(true);
+        //----------------
+
+        //sensor buttons
+        openBCIButton.setText(new SensorListenerEEG(null).toString());
+        gsrButton.setText(new SensorListenerGSR(null).toString());
+        hrButton.setText(new SensorListenerHR(null).toString());
+        sensorsButtonBox.setDisable(true);
+        //--------------
+        
         executorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -386,7 +393,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
                 ArrayList<TutorialInfo> tutorialInfoDb = DataManager.getInstance().getAllTutorials();
                 tutorialItems = new ArrayList<TutorialItem>();
                 for (TutorialInfo info : tutorialInfoDb)
-                    tutorialItems.add(new TutorialItem(info.getName(), new Image(new File(info.getImagePath()).toURI().toString()), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
+                    tutorialItems.add(new TutorialItem(info.getName(), info.getImagePath(), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
 
                 Platform.runLater(new Runnable() {
                     @Override
