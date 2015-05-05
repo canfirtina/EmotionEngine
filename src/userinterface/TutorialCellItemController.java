@@ -88,7 +88,7 @@ public class TutorialCellItemController implements Initializable {
         });
 
         textFlow.getChildren().add(new Text(info.getExplanationPath()));
-        imageView.setImage(new Image(info.getImagePath()));
+        imageView.setImage(info.getImagePath());
         imageView.setFitWidth(100);
         item = info;
     }
@@ -98,37 +98,37 @@ public class TutorialCellItemController implements Initializable {
 
         final MediaPlayer video = new MediaPlayer(new Media(item.getMediaPath()));
 
-        EmotionEngine engine = EmotionEngine.sharedInstance(null);
-        
-        final Emotion label = item.getEmotion();
+            EmotionEngine engine = EmotionEngine.sharedInstance(null);
 
-        MediaView vidView = new MediaView(video);
-        vidView.setFitWidth(1024);
-        vidView.setFitHeight(768);
+            final Emotion label = item.getEmotion();
 
-        Stage stage = new Stage();
-        stage.setTitle(item.getLabel());
-        stage.setScene(new Scene(new Group(vidView), vidView.getFitWidth(), vidView.getFitHeight(), Color.BLACK));
-        stage.setResizable(false);
-        stage.show();
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent we) {
-                video.stop();
-                engine.closeTrainingSession();
-            }
-        });
+            MediaView vidView = new MediaView(video);
+            vidView.setFitWidth(1024);
+            vidView.setFitHeight(768);
 
-        video.setOnReady(new Runnable() {
+            Stage stage = new Stage();
+            stage.setTitle(item.getLabel());
+            stage.setScene(new Scene(new Group(vidView), vidView.getFitWidth(), vidView.getFitHeight(), Color.BLACK));
+            stage.setResizable(false);
+            stage.show();
+            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent we) {
+                    video.stop();
+                    engine.closeTrainingSession();
+                }
+            });
 
-            @Override
-            public void run() {
+            video.setOnReady(new Runnable() {
 
-                video.play();
-            }
-        });
+                @Override
+                public void run() {
 
-        video.setOnPlaying(new Runnable() {
+                    video.play();
+                }
+            });
+
+            video.setOnPlaying(new Runnable() {
 
             @Override
             public void run() {

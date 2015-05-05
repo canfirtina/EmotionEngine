@@ -118,9 +118,14 @@ public class LoginScreenController implements Initializable, PresentedScreen {
                         } else {
                             warningLabel.setText("Username or password is wrong");
                         }
-                        
-                        progressIndicator.setVisible(false);
-                        loginButton.setDisable(false);
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressIndicator.setVisible(false);
+                                loginButton.setDisable(false);
+                            }
+                        });
+
                         //executorService.shutdown();
                     }
 
@@ -143,5 +148,10 @@ public class LoginScreenController implements Initializable, PresentedScreen {
     private void forgotPasswordPressed(ActionEvent event) {
 
         presentingController.displayScreen(ScreenInfo.ForgotPasswordScreen.screenId());
+    }
+
+    @Override
+    public void willPresented(){
+
     }
 }

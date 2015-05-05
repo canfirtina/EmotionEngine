@@ -126,35 +126,7 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         //tutorial list
         //tutorialList.setDisable(true);
         tutorialListProgress.setVisible(true);
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        //User Panel
-                        String userName = UserManager.getInstance().getCurrentUser().getName();
-                        userEMail.setText(userName);
-                        File profilePic = new File("User Data/" + userName + "/profile.png");
-                        profileImage.setImage(new Image(profilePic.toURI().toString()));
-                        //---------
 
-                        tutorialItems = new ArrayList<TutorialItem>();
-                        ArrayList<TutorialInfo> tutorialInfoDb = DataManager.getInstance().getAllTutorials();
-                        for (TutorialInfo info : tutorialInfoDb) {
-                            tutorialItems.add(new TutorialItem(info.getName(), info.getImagePath(), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
-                        }
-
-                        ObservableList<TutorialItem> tutorials = FXCollections.observableArrayList(tutorialItems);
-
-                        tutorialListProgress.setVisible(false);
-                        tutorialList.setItems(tutorials);
-                        System.out.println("exece before5");
-                        executorService.shutdown();
-                    }
-                });
-            }
-        });
 
         tutorialList.setCellFactory(new Callback<ListView<TutorialItem>, javafx.scene.control.ListCell<TutorialItem>>() {
             @Override
@@ -401,5 +373,37 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
                 serialPortsPane.getChildren().get(i).setDisable(true);
             }
         }
+    }
+
+    @Override
+    public void willPresented(){
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                //User Panel
+                String userName = UserManager.getInstance().getCurrentUser().getName();
+                File profilePic = new File("User Data/" + userName + "/profile.png");
+                ArrayList<TutorialInfo> tutorialInfoDb = DataManager.getInstance().getAllTutorials();
+                tutorialItems = new ArrayList<TutorialItem>();
+                for (TutorialInfo info : tutorialInfoDb)
+                    tutorialItems.add(new TutorialItem(info.getName(), new Image(new File(info.getImagePath()).toURI().toString()), info.getLink(), info.getDescription(), Emotion.emotionForValue(info.getEmotion())));
+
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        userEMail.setText(userName);
+                        profileImage.setImage(new Image(profilePic.toURI().toString()));
+                        //---------
+
+                        ObservableList<TutorialItem> tutorials = FXCollections.observableArrayList(tutorialItems);
+
+                        tutorialList.setItems(tutorials);
+
+                        tutorialListProgress.setVisible(false);
+                    }
+                });
+            }
+        });
     }
 }
