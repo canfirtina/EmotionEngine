@@ -149,7 +149,6 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
 
                         tutorialListProgress.setVisible(false);
                         tutorialList.setItems(tutorials);
-                        System.out.println("exece before5");
                         executorService.shutdown();
                     }
                 });

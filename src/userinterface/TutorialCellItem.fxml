@@ -27,8 +27,11 @@
             </ImageView>
             <VBox HBox.hgrow="ALWAYS">
                <children>
-                  <Hyperlink fx:id="hyperLink" prefHeight="24.0" style="-fx-text-fill: #008287;" text="Hyperlink" underline="true" VBox.vgrow="NEVER" />
-                  <TextFlow fx:id="textFlow" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="NEVER" />
+                  <Hyperlink fx:id="hyperLink" alignment="TOP_LEFT" prefHeight="24.0" style="-fx-text-fill: #008287;" text="Hyperlink" underline="true" VBox.vgrow="NEVER" />
+                  <TextFlow fx:id="textFlow" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                     <VBox.margin>
+                        <Insets left="5.0" />
+                     </VBox.margin></TextFlow>
                </children>
             </VBox>
          </children>
