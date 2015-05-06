@@ -169,7 +169,7 @@ public class EnsembleClassifier {
 			
 			if(sensorListener.getClass() == SensorListenerEEG.class){
 				classifierClassPath = "weka.classifiers.functions.SMO";
-				options = new String[]{"-N", "2"};
+				options = new String[]{"-N", "2","-C","8", "-K","weka.classifiers.functions.supportVector.NormalizedPolyKernel -E 3"};
 			}
 			else if(sensorListener.getClass() == SensorListenerGSR.class){
 				//TODO

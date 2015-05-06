@@ -529,6 +529,8 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
 
                         featureExtractors.remove(sensorListeners.indexOf(sensor));
                         sensorListeners.remove(sensor);
+                        sensor.stopStreaming();
+                        sensor.disconnect();
                     }
 
                     //unregister sensor listener from both training and test feature list controllers
@@ -705,6 +707,8 @@ public class EmotionEngine implements SensorObserver, SensorFactory, DataManager
             executorService.submit(new Callable<Void>() {
                 @Override
                 public Void call() {
+                    for(EmotionEngineObserver o: engineObservers)
+                        o.emotionUpdated(engine);
                     if (isClassifySessionOpen) {
                         Communicator.provideEmotionalState(classifier.emotion());
                     }

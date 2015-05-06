@@ -50,7 +50,7 @@ public class DatabaseService {
         try {
             String url = "jdbc:mysql://127.0.0.1/emotion_db";
             String user = "root";
-            String password = "";
+            String password = "emotionengine";
             if (!(con != null && con.isValid(1))) {
                 con = DriverManager.getConnection(url, user, password);
             }

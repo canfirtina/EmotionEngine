@@ -24,4 +24,10 @@ public interface EmotionEngineObserver {
 	 * @param engine 
 	 */
 	public void notifyError(EmotionEngine engine, SensorListener sensor);	
+        
+        /**
+         * called when emotional status is updated
+         * @param engine 
+         */
+        public void emotionUpdated(EmotionEngine engine);
 }
