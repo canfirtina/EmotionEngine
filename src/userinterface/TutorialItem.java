@@ -19,7 +19,7 @@ public class TutorialItem {
     private String mediaPath;
     private String explanationPath;
     private Emotion emotion;
-    
+
     public TutorialItem(){
         
         this.label = "No Item";

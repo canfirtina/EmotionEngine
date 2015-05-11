@@ -134,13 +134,16 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
         tutorialList.setCellFactory(new Callback<ListView<TutorialItem>, javafx.scene.control.ListCell<TutorialItem>>() {
             @Override
             public ListCell<TutorialItem> call(ListView<TutorialItem> listView) {
+                
+                TutorialListCell cell = new TutorialListCell();
+                //cell.tutorialActivityObserver = this;
                 return new TutorialListCell();
             }
         });
 
         //------------
         //Activity List
-        ObservableList<String> activities = FXCollections.observableArrayList("");
+        ObservableList<String> activities = FXCollections.observableArrayList(UserManager.getInstance().getCurrentUser().getSoftwareUsed().keySet());
         activityList.setItems(activities);
         //------------
 
@@ -231,6 +234,14 @@ public class ProfileScreenController implements Initializable, PresentedScreen, 
             serialPortsPane.add(serialButtons.get(serialButtons.size() - 1), 0, 0, 2, 2);
             serialPortsPane.setDisable(true);
         }
+    }
+    
+    public void tutorialActivityObserved(){
+        
+        //Activity List
+        ObservableList<String> activities = FXCollections.observableArrayList(UserManager.getInstance().getCurrentUser().getSoftwareUsed().keySet());
+        activityList.setItems(activities);
+        //------------
     }
 
     @FXML
