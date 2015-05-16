@@ -181,7 +181,7 @@ public class Communicator {
             @Override
             public Void call() throws Exception {
                 sendMessage("emotion " + emotion.name());
-                return null;
+                   return null;
             }
         });
 
