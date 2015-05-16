@@ -34,6 +34,8 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import shared.Emotion;
+import user.manager.User;
+import user.manager.UserManager;
 
 /**
  * FXML Controller class
@@ -52,7 +54,7 @@ public class TutorialCellItemController implements Initializable {
     private TextFlow textFlow;
 
     private TutorialItem item;
-
+    
     public TutorialCellItemController() {
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("TutorialCellItem.fxml"));
@@ -104,11 +106,15 @@ public class TutorialCellItemController implements Initializable {
             EmotionEngine engine = EmotionEngine.sharedInstance(null);
 
             final Emotion label = item.getEmotion();
-
+            
             MediaView vidView = new MediaView(video);
             vidView.setFitWidth(1024);
             vidView.setFitHeight(768);
-
+            
+            User u = UserManager.getInstance().getCurrentUser();
+            u.usedSoftware("Tutorial: " + item.getMediaPath(), (int) video.getTotalDuration().toSeconds());
+            UserManager.getInstance().saveUser(u);
+            
             Stage stage = new Stage();
             stage.setTitle(item.getLabel());
             stage.setScene(new Scene(new Group(vidView), vidView.getFitWidth(), vidView.getFitHeight(), Color.BLACK));

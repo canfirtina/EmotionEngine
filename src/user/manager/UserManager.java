@@ -188,6 +188,11 @@ public class UserManager {
         getCurrentUser().playedTutorial(tutPair);
         DataManager.getInstance().saveUser(getCurrentUser());
     }
+    
+    public boolean saveUser( User user){
+        
+        return DataManager.getInstance().saveUser(user);
+    }
 
     /**
      * Gets how many times the user played the given tutorial for the given

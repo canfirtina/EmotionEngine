@@ -118,11 +118,8 @@ public class User implements Serializable {
     }
 
     public void usedSoftware(String software, int minutes) {
-        if (softwaresUsed.containsKey(software)) {
-            softwaresUsed.replace(software, minutes + softwaresUsed.get(software));
-        } else {
-            softwaresUsed.put(software, minutes);
-        }
+
+        softwaresUsed.put(software, minutes);
     }
 
     public String getSoftwareUsageTime(String software) {
